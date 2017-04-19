@@ -1,0 +1,465 @@
+---
+title: "Matching in Cluster Randomized Trials"
+author:
+- name: Ken Kleinman
+  affiliation: University of Massachusetts Amherst
+output: 
+    pdf_document:
+      citation_package: natbib
+      keep_tex: true
+      fig_caption: true
+      latex_engine: pdflatex
+bibliography: bibliography.bib
+documentclass: sagej
+abstract: "Matching in cluster-randomized trials (CRTs) is important, but there is no best practice. When baseline data is available, we suggest a technique which can be used to identify the best weighting of pertinent variables to enable more balance between treatment and control groups. This technique involves standardizing the variables, computing the Mahalanobis distance, use matching to find pairs, then randomizing and rerandomizing. For each randomiziation we compute the difference in the treatment and control arms for each variable and plot these on a parallel-coordinates plot. Investigators can compare plots to identify weighting for advantageous randomization schema."
+keywords: "cluster-randomized trials, matching"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+---
+
+## Introduction
+To determine the efficacy of a treatment, individually randomized trials (IRTS) are the gold standard. 
+
+**Scholarship: How are people matching CRTs? Read and find out.**
+
+## Methods
+
+To approach this complex topic of balancing randomization in CRTs we suggest a new approach. Our approach involves weighting variables of import, matching units using these weights, and randomizing many times to obtain a distribution of possiblities when official randomization occurs. Investigators assess these distributions to determine if possible randomizations are sufficiently balanced, if not, weighting is adjusted and the process begins again. The details follow.
+
+The initial step involves prioritizing variables $(1, 2,..., m)$ from units $(1, 2, ..., n)$ to be randomized. We have
+
+\begin{eqnarray*}
+ \overline{V_1} & = & (v_{11}, v_{12},..., v_{1n})\\
+ \overline{V_2} & = & (v_{21}, v_{22},..., v_{2n})\\
+ \vdots & = & \vdots\\    
+ \overline{V_m} & = & (v_{m1}, v_{m2},..., v_{mn}).\\
+ \end{eqnarray*}
+In addition, we use $\overline{w} = (w_{1}, w_{2},..., w_{m})$ to weight and standardize $(\overline{V_1}, \overline{V_2}, ..., \overline{V_m}).$ We have NOT SURE IF THIS IS RIGHT, THINK IT'S NOT!!!!!!!! something with ij is wrong.
+\begin{eqnarray*}
+v^{*}_{ii} = \frac{(v_{ii} - \frac{\sum _{j=1}^{n}v_{ij}}{n})*w_i}{sd(\overline{V_i})} 
+ \end{eqnarray*}
+where $sd(\overline{V_i})$ is the standard deviation of $\overline{V_i}.$ We now have
+\begin{eqnarray*}
+ \overline{V_1^*} & = & (v_{11}^*, v_{12}^*,..., v_{1n}^*)\\
+ \overline{V_2^*} & = & (v_{21}^*, v_{22}^*,..., v_{2n}^*)\\
+ \vdots & = & \vdots\\    
+ \overline{V_m^*} & = & (v_{m1}^*, v_{m2}^*,..., v_{mn}^*).\\
+ \end{eqnarray*}
+ which we use to compute the Mahalanobois Distance matrix, **D**. From here we use the \texttt{nmatch} function in the \texttt{designmatch} package in \texttt{R} to find $\frac{n}{2}$ pairs if $n$ is even. If $n$ is odd, the remainder can be randomized to treatment or control per the principal investigator. Without loss of generality, we assume $n$ is even for the remainder of this paper and note that to include an odd $n$ either treatment or control groups will include one more set of priority variables.
+ 
+Once the matching is completed and pairs found we return to using the raw data, as this will be used to assess the weighting scheme. We now have pairs $(\overline{V}_{11}, \overline{V}_{12}), (\overline{V}_{21}, \overline{V}_{22}), ..., (\overline{V}_{\frac{n}{2}1}, \overline{V}_{\frac{n}{2}2}).$ The first match in each pair will be randomized to either treatment or control using the \texttt{rbinom} function in \texttt{R}. Next, we subset $\overline{V}_1, \overline{V}_2, ..., \overline{V}_m$ into appropriate randomization subgroups: $\overline{V}_{1T}, \overline{V}_{1C}, \overline{V}_{2T}, \overline{V}_{2C},..., \overline{V}_{\frac{n}{2}T}, \overline{V}_{\frac{n}{2}C}$ where $\overline{V}_{iT} = (v_{i1}^T, v_{i2}^T,..., v_{in}^T),$ similarly for $\overline{V}_{iC}.$ Using these we find 
+\begin{eqnarray*}
+ k_j = | \sum_{i = 1}^{\frac{n}{2}}v_{ij}^T - \sum_{i = 1}^{\frac{n}{2}}v_{ij}^C | 
+\end{eqnarray*}
+THE ABOVE NEEDS A BETTER ABSOLUTE VALUE SYMBOL. for $j = 1, 2, ..., m.$ We randomize $N$ times and find $k_{lj}$ the difference in the two arms for the $j^{th}$ priority variable for each of the $l = 1, 2, ..., N$ re-randomizations. To assist analysis we draw a parallel coordinates plot where the $j^{th}$ axis plots $k_{lj}$ for $l = 1, 2, ..., N.$ If the principal investigator finds the possible differences too large for a priority variable $j$, increasing $w_j$ and re-running the above will update the matching to attain closer matches for this variable and lessen the differences. The penality in this process is that closer matches for variable $j$ are likely to imply reduced closeness in another variable, so compromises must be made.
+
+## Results
+To demonstrate the usefulness of this technique we present a brief summary of our randomization process using baseline data from the PROTECT trial (Project PROTECT: Protecting Nursing Homes From Infections and Hospitalization). In this trial, the investigators are studying whether bathing with chlorhexidine gluconate and iodophor nasal swabs "can reduce hospitalizations associated with infections, antibiotic utilization, and multi-drug resistant organism (MDRO) prevalence" versus regular bathing. Additional training is given to nursing homes in the treatment arm to ensure comprehension and adherence to trial protocol. 
+
+Prior randomize baseline data was collected for ?????? on the 29???? nursing homes. With this data, investigators met to prioritize variables into several categories: primary, secondary, tertiary, and not relevant. For this trial, the investigators decided that percentage discharges to hospital with infection based on primary and other diagnsoses, percentage discharge to hospital, percentages MDRO, and percentage usage of antibacterials started at nursing home were of primary importance. Of secondary importance were percentage of admissions with length of stay over 100 days, average daily census, and mean number of baths per resident per week. If they were able to include more variables without effecting the balance of the others they felt matching on AVERAGE DEPENDENT late LOSS activities of daily lives, and the Centers for Medicare and Medicaid Services (CMS) rating of eaching nursing home. To ease understanding, our initial discussion will involve 2 variables:  percentage discharges to hospital with infection based on primary and other diagnsoses, and average daily census.
+
+
+
+Primary import  | Secondary import | Tetiary import 
+--------------- | ---------------- | -------------- 
+% Inf | % Long Stay | Late ADLs
+% DC  | Avg Daily Census | CMS Star
+MDRO  | Baths/Week
+% Abx |
+
+Table: Abbreviations of variables used to randomize
+
+```{r setup, include=FALSE}
+setwd("/Users/gwynn/Documents/PostDocKleinmanLab/Bins/Shiny/Again")
+## install.packages("designmatch")
+library(designmatch)
+
+## The first is used for its parallelplot() function
+## The second to add limits to all y-axises, and helps
+## us make the final plot.
+library(lattice)
+library(grid)
+library(gridGraphics)
+
+## To add a table to the plot
+library(plotrix)
+
+## Used to read in the data
+## install.packages("readxl")
+library(readxl)
+library(shiny)
+
+## Used to get the right colors in
+library("RColorBrewer")
+mypalette<-brewer.pal(11, "RdBu")
+
+## Functions that are used to copy and paste the parallelplot
+## into soemthing that talks to viewports.
+latticeGrob <- function(p){
+  grob(p=p, cl="lattice")
+}
+
+drawDetails.lattice <- function(x, recording=FALSE){
+  lattice:::plot.trellis(x$p, newpage=FALSE)
+} 
+
+
+## Function that draws the plot and saves it in a file
+## Graphing Ks
+makePlot <- function(V, P, D, Tm, NVs){
+  ## When there are 2 variables to be plotted on 1 panel it is easier
+  ## to do this in layout then in coding below. Number of Panels
+  LV = length(V)
+  NP = 2 * ceiling(LV/2)
+  
+  ## No. of full panels is found this way.
+  NFP = ifelse(LV%/% 2 == 1, (LV - 3)/2, (LV - 2)/2)
+  
+  if(LV%/%2 == 1){
+    
+    layout(matrix(c(0, 1:NP, 0, rep(0, NP + 2)),
+                  byrow = TRUE, nrow = 2), 
+           widths = c(lcm(0.9), rep(1, NFP), rep(.5, 4), rep(1, NFP), lcm(0.9)),
+           heights = c(1, lcm(1)))
+  }else{
+    
+    layout(matrix(c(0, 1:NP, 0, rep(0, NP + 2)),
+                  byrow = TRUE, nrow = 2), 
+           widths = c(lcm(0.9), rep(1, NFP), rep(.5, 2), rep(1, NFP), lcm(0.9)),
+           heights = c(1, lcm(1)))
+  }
+  
+  print(layout.show(NP))
+  
+  BS = ifelse(LV %% 2 == 0, 2, 4) ## Even number of variables - 1 plot contains
+  ## 2 vertical histograms, if not 2 plots have 2 histograms
+  
+  S = c(rep("R", NFP), rep("B", BS), rep("L", NFP)) ## sequence to tell 
+  ## if it's LHS, or RHS plot. 
+  
+  ## Setting the margins to be 0
+  par(mar = rep(0,4))
+  
+  ## Making the first lot of vertical histograms
+  if(NFP > 0){
+    for(i in 1:NFP){
+      par(mar = rep(0,4))
+      
+      A = hist(D[,V[[i]][[1]]], plot = FALSE)
+      a = range(A$breaks)
+      plot(c(0, 1), a, type = "n",
+           ann = FALSE, axes = FALSE, xaxs = "i", yaxs = "i")
+      
+      VHV(fillCol = mypalette[5], lineCol = mypalette[4], xscale = .02,
+          xwidth = 1,  hist = A, Side = S[i])
+      m = range(A$mids)
+      axis(2, cex.axis = 0.7, las = 2, col = mypalette[4],
+           at = m, labels = as.character(m), tck = 0)
+      mtext(P[[2]][i, "L"], side = 1, col = "grey50", cex = 0.5, adj = 0)
+    }
+  }
+  
+  ## Making the smaller panels.
+  ## There are 2 panels if there are an odd number of variables
+  if(LV%/%2 == 1){
+    
+    ## The first thing on the first panel
+    j = floor(LV/2)
+    A = hist(D[,V[[j]][[1]]], plot = FALSE)
+    
+    ## This one gets plotted twice
+    k = ceiling(LV/2)
+    B = hist(D[,V[[k]][[1]]], plot = FALSE)
+    
+    ## This is the last thing on the last panel
+    l = ceiling(LV/2) + 1
+    C = hist(D[,V[[l]][[1]]], plot = FALSE)
+    
+    ## Plotting A first
+    a = range(A$breaks)
+    plot(c(0, 1), a, type = "n",
+         ann = FALSE, axes = FALSE, xaxs = "i", yaxs = "i")
+    VHV(fillCol = mypalette[5], lineCol = mypalette[4], xscale = .02/2,
+        xwidth = 1,  hist = A, Side = "R")
+    ## Plotting labels
+    m = range(A$mids)
+    axis(2, cex.axis = 0.7, las = 2, col = mypalette[4],
+         at = m, labels = as.character(m), tck = 0)
+    mtext(P[[2]][j, "L"], side = 1, col = "grey50", cex = 0.5, adj = 0)
+    
+    ## Plotting B second
+    b = range(B$breaks)
+    plot(c(0, 1), b, type = "n",
+         ann = FALSE, axes = FALSE, xaxs = "i", yaxs = "i")
+    VHV(fillCol = mypalette[5], lineCol = mypalette[4], xscale = .02/2,
+        xwidth = 1,  hist = B, Side = "L")
+    
+    ## Plotting labels
+    m1 = range(B$mids)
+    axis(4, cex.axis = 0.7, las = 2, col = mypalette[4],
+         at = m1, labels = as.character(m1), tck = 0)
+    mtext(P[[2]][k, "L"], side = 1, col = "grey50", cex = 0.5, adj = 1)
+    
+    ## Plotting B third
+    plot(c(0, 1), b, type = "n",
+         ann = FALSE, axes = FALSE, xaxs = "i", yaxs = "i")
+    VHV(fillCol = mypalette[5], lineCol = mypalette[4], xscale = .02/2,
+        xwidth = 1,  hist = B, Side = "R")
+    
+    ## Plotting labels
+    axis(2, cex.axis = 0.7, las = 2, col = mypalette[4],
+         at = m1, labels = as.character(m1), tck = 0)
+    mtext(P[[2]][k, "L"], side = 1, col = "grey50", cex = 0.5, adj = 0)
+    
+    ## Plotting C last
+    d = range(C$breaks)
+    plot(c(0, 1), d, type = "n",
+         ann = FALSE, axes = FALSE, xaxs = "i", yaxs = "i")
+    VHV(fillCol = mypalette[5], lineCol = mypalette[4], xscale = .02/2,
+        xwidth = 1,  hist = C,  Side = "L")
+    
+    ## Plotting labels
+    m1 = range(C$mids)
+    axis(4, cex.axis = 0.7, las = 2, col = mypalette[4],
+         at = m1, labels = as.character(m1), tck = 0)
+    mtext(P[[2]][l, "L"], side = 1, col = "grey50", cex = 0.5, adj = 1)
+    
+  }else{
+    
+    ## This will be plotted first
+    j = LV/2
+    A = hist(D[,V[[j]][[1]]], plot = FALSE)
+    
+    ## This will be plotted second
+    k = LV/2 +1
+    B = hist(D[,V[[k]][[1]]], plot = FALSE)
+    
+    ## Plotting A first
+    a = range(A$breaks)
+    plot(c(0, 1), a, type = "n",
+         ann = FALSE, axes = FALSE, xaxs = "i", yaxs = "i")
+    VHV(fillCol = mypalette[5], lineCol = mypalette[4], xscale = .02/2,
+        xwidth = 1,  hist = A, Side = "R")
+    
+    ## Adding labels
+    m = range(A$mids)
+    axis(2, cex.axis = 0.7, las = 2, col = mypalette[4],
+         at = m, labels = as.character(m), tck = 0)
+    mtext(P[[2]][j, "L"], side = 1, col = "grey50", cex = 0.5, adj = 0)
+    
+    ## Plotting B second
+    b = range(B$breaks)
+    plot(c(0, 1), b, type = "n",
+         ann = FALSE, axes = FALSE, xaxs = "i", yaxs = "i")
+    VHV(fillCol = mypalette[5], lineCol = mypalette[4], xscale = .02/2,
+        xwidth = 1,  hist = B, Side = "L")
+    
+    ## Adding labels
+    m1 = range(B$mids)
+    axis(4, cex.axis = 0.7, las = 2, col = mypalette[4],
+         at = m1, labels = as.character(m1), tck = 0)
+    mtext(P[[2]][k, "L"], side = 1, col = "grey50", cex = 0.5, adj = 1)
+  }
+  
+  
+  ## Making the last lot of histograms, the left ones 
+  if(NFP > 0){
+    Lt = which(S == "L")
+    for(i in 1:NFP){
+      j = Lt[i]
+      
+      A = hist(D[,V[[j]][[1]]], plot = FALSE)
+      a = range(A$breaks)
+      plot(c(0, 1), a, type = "n",
+           ann = FALSE, axes = FALSE, xaxs = "i", yaxs = "i")
+      
+      VHV(fillCol = mypalette[5], lineCol = mypalette[4], xscale = .02,
+          xwidth = 1,  hist = A, Side = S[j])
+      m = range(A$mids)
+      axis(4, cex.axis = 0.7, las = 2, col = mypalette[4],
+           at = m, labels = as.character(m), tck = 0)
+      mtext(P[[2]][j, "L"], side = 1, col = "grey50", cex = 0.5, adj = 1)
+    }
+  }
+  
+  grid.echo()
+  grid.grab() -> p2
+  
+  ## Including means of columns and indicator that tells
+  ## whether or not it is to be included in plot as mean (light blue)
+  ## or regular data point
+  CM = colMeans(P[[3]])
+  G = c(rep("A", Tm), "B")
+  P[[3]] = cbind(rbind(P[[3]], CM), G)
+  
+  ## Setting the upper values for the parallelplot
+  upper <- as.numeric(P[[2]][,"Maxs"])
+  
+  p1 = parallelplot(~P[[3]][1:NVs], P[[3]], groups = G, horizontal.axis = FALSE,
+                    scales = list(x = list(rot = 90),  draw = FALSE,
+                                  y = list(draw = FALSE)),
+                    col = c("grey50", mypalette[7]), lower = 0, upper = upper,
+                    par.settings = list(axis.line = list(col = 0)),
+                    panel = function(...) {
+                      panel.parallel(...)
+                      grid.text(upper,
+                                x=unit(1:11, "native"),
+                                y=unit(1, "npc") - unit(2, "mm"), 
+                                just="top",
+                                gp=gpar(col="grey", cex=.7))
+                      
+                    })
+  
+  A  = list()
+  A[[1]] = p2
+  A[[2]] = latticeGrob(p1)
+  
+  A 
+}
+
+## Function used to make vertical histograms that vary.
+VHV <- function(xscale = NULL, xwidth, hist, fillCol, lineCol, Side) {
+  
+  ## Right histograms - histograms that start at the LHS and branch out from the 
+  ## right
+  if(Side == "R"){
+    binWidth <- hist$breaks[2] - hist$breaks[1]
+    n <- length(hist$counts)
+    x.l <- rep(0, n)
+    x.r <- x.l + hist$counts * xscale
+    y.b <- hist$breaks[1:n]
+    y.t <- hist$breaks[2:(n + 1)]
+    rect(xleft = x.l, ybottom = y.b, xright = x.r, ytop = y.t,
+         col = fillCol, border = lineCol)
+  }
+  
+  ## Left histograms - histograms that start from the RHS and spread out left
+  if(Side == "L"){
+    binWidth <- hist$breaks[2] - hist$breaks[1]
+    n <- length(hist$counts)
+    x.r <- rep(1, n)
+    x.l <- x.r - hist$counts * xscale
+    y.b <- hist$breaks[1:n]
+    y.t <- hist$breaks[2:(n + 1)]
+    rect(xleft = x.l, ybottom = y.b, xright = x.r, ytop = y.t,
+         col = fillCol, border = lineCol)
+  }
+}
+
+
+## reading the data
+setwd("/Users/gwynn/Documents/PostDocKleinmanLab/Bins/Shiny/Again")
+D = read_excel("ArtData.xlsx", sheet=1,skip = 1)[1:29,]
+D = as.data.frame(D)
+
+## Removing all the \r\n so that selectInput will work
+colnames(D) <- labs <- gsub("\r\n"," ", colnames(D))
+
+## Numeric variables for default inputs
+nums = labs[which(sapply(D, is.numeric) == TRUE)]
+
+# Function that does the randomizations
+# M is the number of randomizations
+# vars is a list of parameters which includes
+# D is the data set from which the columns to be matched on are drawn
+# names is the file name
+# S is the optimisation method
+
+make.Ks = function(M, vars, D, Plot, S, ToC){
+  r.I = length(vars)
+  No.cols = length(vars[[1]])
+  I = matrix(NA, nrow = r.I, ncol = No.cols)
+  for(i in 1:r.I) I[i,] = unlist(vars[[i]])
+  
+  dimnames(I) = list(rep(NULL, r.I), c("cols", "w", "L", "Mins", "Maxs"))
+  
+  ## No. of participant hospitals
+  N = dim(D)[1]
+  
+  mymat = sdmat = matrix(NA, nrow = N, ncol = r.I)
+  
+  ## Combining columns
+  for(i in 1:r.I) mymat[,i] = D[,I[i,"cols"]]
+  
+  ## Standardising and adding weights
+  col.means = colMeans(mymat)
+  col.sds = apply(mymat, 2, sd)
+  w = as.numeric(I[,"w"])
+  for(i in 1:r.I) sdmat[,i] = 
+    w[i]*(mymat[,i] - col.means[i])/col.sds[i]
+  
+  ## Making the distance matrix
+  dist_mat_obj = dist(sdmat, diag = TRUE, upper = TRUE)
+  dist_mat = as.matrix(dist_mat_obj)
+  
+  ## Telling the computer wich method to use to solve
+  t_max = 60*5
+  solver = S
+  approximate = 0
+  solver = list(name = solver, t_max = t_max, approximate = approximate, 
+                round_cplex = 0, trace_cplex = 0)
+  
+  ## Solving
+  out = nmatch(dist_mat = dist_mat, total_pairs = floor(N/2), 
+               solver = solver, subset_weight = NULL)
+  
+  # These guys have the row numbers of the matched pairs
+  id_1 = out$id_1  
+  id_2 = out$id_2 
+  
+  ## If there are any leftovers they get assigned where
+  ## the user wants them assigned
+  X = dim(D)[1] %% 2 == 0
+  if(X == FALSE) {LO = sum(1:dim(D)[1]) - sum(id_1, id_2)}
+  
+  ## Will be used in the loop below - a place to put Ks, 
+  ## filled below, then graphed after using parallel coordinate plot
+  Ks = matrix(NA, nrow = M, ncol = r.I)
+  
+  ## Used to run the loop below
+  M.seq = seq_along(1:M)
+  
+  for(i in M.seq){
+    ## Randomising once - 0 ctl, 1 trt, (subtract one because when 
+    ## making Trt below the middle step has to identify the length of 
+    ## Trt or it gets fussy and won't add on the last value)
+    R = replicate(length(id_1), rbinom(1, size = 1, prob = 0.5))
+    S = 1 - R
+    
+    ## The 1 is for the leftover row that goes to the trt arm
+    Trt = c(R, S)
+    
+    ## Making the data, TA is included and goes to the trt arm
+    if (X == TRUE) {
+      Dt = data.frame(mymat[c(id_1, id_2),], Trt)
+    } else {
+      Dt = data.frame(mymat[c(id_1, id_2, LO),], c(Trt, (ToC - 1)))
+    }
+    
+    ## Picking out trt and ctl covariates
+    Trt.CV = Dt[which(Trt == 1), 1:r.I]
+    Ctl.CV = Dt[-which(Trt == 1), 1:r.I]
+    
+    Ks[i,] = abs((apply(Trt.CV, 2, sum) - 
+                    apply(Ctl.CV, 2, sum))/length(R))
+  }## ending for i in M.seq
+  
+  ## So the labels in parcoord come out nicely
+  ## NEW colnames here
+  colnames(Ks) = I[,'L']
+  
+  P = list()
+  P[[1]] = vars
+  P[[2]] = I
+  P[[3]] = as.data.frame(Ks)
+  
+  P
+} ## closing the function make.Ks
+
+```
+
+Prior to randomization, investigators 
+
+## Discussion
+
+Look how smart we are.
+
