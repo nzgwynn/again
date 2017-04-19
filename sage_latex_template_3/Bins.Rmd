@@ -71,7 +71,7 @@ MDRO  | Baths/Week
 Table: Abbreviations of variables used to randomize
 
 ```{r setup, include=FALSE}
-setwd("/Users/gwynn/Documents/PostDocKleinmanLab/Bins/Shiny/Again")
+## setwd(".")
 ## install.packages("designmatch")
 library(designmatch)
 
@@ -349,7 +349,7 @@ VHV <- function(xscale = NULL, xwidth, hist, fillCol, lineCol, Side) {
 
 
 ## reading the data
-setwd("/Users/gwynn/Documents/PostDocKleinmanLab/Bins/Shiny/Again")
+## setwd(".")
 D = read_excel("ArtData.xlsx", sheet=1,skip = 1)[1:29,]
 D = as.data.frame(D)
 
