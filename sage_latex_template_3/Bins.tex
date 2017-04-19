@@ -1,0 +1,238 @@
+\documentclass[]{sagej}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={Matching in Cluster Randomized Trials},
+            pdfkeywords={cluster-randomized trials, matching},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{natbib}
+\bibliographystyle{plainnat}
+\usepackage{longtable,booktabs}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+  \title{Matching in Cluster Randomized Trials}
+  \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+  \author{true}
+  \preauthor{\centering\large\emph}
+  \postauthor{\par}
+  \predate{\centering\large\emph}
+  \postdate{\par}
+  \date{April 18, 2017}
+
+
+\begin{document}
+\maketitle
+\begin{abstract}
+Matching in cluster-randomized trials (CRTs) is important, but there is
+no best practice. When baseline data is available, we suggest a
+technique which can be used to identify the best weighting of pertinent
+variables to enable more balance between treatment and control groups.
+This technique involves standardizing the variables, computing the
+Mahalanobis distance, use matching to find pairs, then randomizing and
+rerandomizing. For each randomiziation we compute the difference in the
+treatment and control arms for each variable and plot these on a
+parallel-coordinates plot. Investigators can compare plots to identify
+weighting for advantageous randomization schema.
+\end{abstract}
+
+\subsection{Introduction}\label{introduction}
+
+To determine the efficacy of a treatment, individually randomized trials
+(IRTS) are the gold standard.
+
+\textbf{Scholarship: How are people matching CRTs? Read and find out.}
+
+\subsection{Methods}\label{methods}
+
+To approach this complex topic of balancing randomization in CRTs we
+suggest a new approach. Our approach involves weighting variables of
+import, matching units using these weights, and randomizing many times
+to obtain a distribution of possiblities when official randomization
+occurs. Investigators assess these distributions to determine if
+possible randomizations are sufficiently balanced, if not, weighting is
+adjusted and the process begins again. The details follow.
+
+The initial step involves prioritizing variables \((1, 2,..., m)\) from
+units \((1, 2, ..., n)\) to be randomized. We have
+
+\begin{eqnarray*}
+ \overline{V_1} & = & (v_{11}, v_{12},..., v_{1n})\\
+ \overline{V_2} & = & (v_{21}, v_{22},..., v_{2n})\\
+ \vdots & = & \vdots\\    
+ \overline{V_m} & = & (v_{m1}, v_{m2},..., v_{mn}).\\
+ \end{eqnarray*}
+
+In addition, we use \(\overline{w} = (w_{1}, w_{2},..., w_{m})\) to
+weight and standardize
+\((\overline{V_1}, \overline{V_2}, ..., \overline{V_m}).\) We have NOT
+SURE IF THIS IS RIGHT, THINK IT'S NOT!!!!!!!! something with ij is
+wrong.
+
+\begin{eqnarray*}
+v^{*}_{ii} = \frac{(v_{ii} - \frac{\sum _{j=1}^{n}v_{ij}}{n})*w_i}{sd(\overline{V_i})} 
+ \end{eqnarray*}
+
+where \(sd(\overline{V_i})\) is the standard deviation of
+\(\overline{V_i}.\) We now have
+
+\begin{eqnarray*}
+ \overline{V_1^*} & = & (v_{11}^*, v_{12}^*,..., v_{1n}^*)\\
+ \overline{V_2^*} & = & (v_{21}^*, v_{22}^*,..., v_{2n}^*)\\
+ \vdots & = & \vdots\\    
+ \overline{V_m^*} & = & (v_{m1}^*, v_{m2}^*,..., v_{mn}^*).\\
+ \end{eqnarray*}
+
+which we use to compute the Mahalanobois Distance matrix, \textbf{D}.
+From here we use the \texttt{nmatch} function in the
+\texttt{designmatch} package in \texttt{R} to find \(\frac{n}{2}\) pairs
+if \(n\) is even. If \(n\) is odd, the remainder can be randomized to
+treatment or control per the principal investigator. Without loss of
+generality, we assume \(n\) is even for the remainder of this paper and
+note that to include an odd \(n\) either treatment or control groups
+will include one more set of priority variables.
+
+Once the matching is completed and pairs found we return to using the
+raw data, as this will be used to assess the weighting scheme. We now
+have pairs
+\((\overline{V}_{11}, \overline{V}_{12}), (\overline{V}_{21}, \overline{V}_{22}), ..., (\overline{V}_{\frac{n}{2}1}, \overline{V}_{\frac{n}{2}2}).\)
+The first match in each pair will be randomized to either treatment or
+control using the \texttt{rbinom} function in \texttt{R}. Next, we
+subset \(\overline{V}_1, \overline{V}_2, ..., \overline{V}_m\) into
+appropriate randomization subgroups:
+\(\overline{V}_{1T}, \overline{V}_{1C}, \overline{V}_{2T}, \overline{V}_{2C},..., \overline{V}_{\frac{n}{2}T}, \overline{V}_{\frac{n}{2}C}\)
+where \(\overline{V}_{iT} = (v_{i1}^T, v_{i2}^T,..., v_{in}^T),\)
+similarly for \(\overline{V}_{iC}.\) Using these we find
+
+\begin{eqnarray*}
+ k_j = | \sum_{i = 1}^{\frac{n}{2}}v_{ij}^T - \sum_{i = 1}^{\frac{n}{2}}v_{ij}^C | 
+\end{eqnarray*}
+
+THE ABOVE NEEDS A BETTER ABSOLUTE VALUE SYMBOL. for
+\(j = 1, 2, ..., m.\) We randomize \(N\) times and find \(k_{lj}\) the
+difference in the two arms for the \(j^{th}\) priority variable for each
+of the \(l = 1, 2, ..., N\) re-randomizations. To assist analysis we
+draw a parallel coordinates plot where the \(j^{th}\) axis plots
+\(k_{lj}\) for \(l = 1, 2, ..., N.\) If the principal investigator finds
+the possible differences too large for a priority variable \(j\),
+increasing \(w_j\) and re-running the above will update the matching to
+attain closer matches for this variable and lessen the differences. The
+penality in this process is that closer matches for variable \(j\) are
+likely to imply reduced closeness in another variable, so compromises
+must be made.
+
+\subsection{Results}\label{results}
+
+To demonstrate the usefulness of this technique we present a brief
+summary of our randomization process using baseline data from the
+PROTECT trial (Project PROTECT: Protecting Nursing Homes From Infections
+and Hospitalization). In this trial, the investigators are studying
+whether bathing with chlorhexidine gluconate and iodophor nasal swabs
+``can reduce hospitalizations associated with infections, antibiotic
+utilization, and multi-drug resistant organism (MDRO) prevalence''
+versus regular bathing. Additional training is given to nursing homes in
+the treatment arm to ensure comprehension and adherence to trial
+protocol.
+
+Prior randomize baseline data was collected for ?????? on the 29????
+nursing homes. With this data, investigators met to prioritize variables
+into several categories: primary, secondary, tertiary, and not relevant.
+For this trial, the investigators decided that percentage discharges to
+hospital with infection based on primary and other diagnsoses,
+percentage discharge to hospital, percentages MDRO, and percentage usage
+of antibacterials started at nursing home were of primary importance. Of
+secondary importance were percentage of admissions with length of stay
+over 100 days, average daily census, and mean number of baths per
+resident per week. If they were able to include more variables without
+effecting the balance of the others they felt matching on AVERAGE
+DEPENDENT late LOSS activities of daily lives, and the Centers for
+Medicare and Medicaid Services (CMS) rating of eaching nursing home.
+
+\begin{longtable}[]{@{}lll@{}}
+\toprule
+Primary import & Secondary import & Tetiary import\tabularnewline
+\midrule
+\endhead
+\% DC w/Inf & \% Long Stay & Late ADLs\tabularnewline
+\% DC & Avg Daily Census & CMS Star\tabularnewline
+MDRO & Baths/Week\tabularnewline
+\% Abx &\tabularnewline
+\bottomrule
+\end{longtable}
+
+Prior to randomization, investigators
+
+\subsection{Discussion}\label{discussion}
+
+Look how smart we are.
+
+\bibliography{bibliography.bib}
+
+
+\end{document}

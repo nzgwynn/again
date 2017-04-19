@@ -19,6 +19,8 @@ date: "`r format(Sys.time(), '%B %d, %Y')`"
 ## Introduction
 To determine the efficacy of a treatment, individually randomized trials (IRTS) are the gold standard. 
 
+blah
+
 **Scholarship: How are people matching CRTs? Read and find out.**
 
 ## Methods
