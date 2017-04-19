@@ -1,7 +1,7 @@
 ---
 title: "Matching in Cluster Randomized Trials"
 author:
-- name: Ken Kleinman
+- name: S. Gwynn Sturdevant, Ken Kleinman
   affiliation: University of Massachusetts Amherst
 output: 
     pdf_document:
@@ -18,8 +18,6 @@ date: "`r format(Sys.time(), '%B %d, %Y')`"
 
 ## Introduction
 To determine the efficacy of a treatment, individually randomized trials (IRTS) are the gold standard. 
-
-blah
 
 **Scholarship: How are people matching CRTs? Read and find out.**
 
