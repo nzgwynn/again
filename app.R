@@ -225,7 +225,7 @@ makePlot <- function(V, P, D, Tm, NVs){
   p1 = parallelplot(~P[[3]][1:NVs], P[[3]], groups = G, horizontal.axis = FALSE,
                     scales = list(x = list(rot = 90),  draw = FALSE,
                                   y = list(draw = FALSE)),
-                    col = c("grey50", mypalette[7]), lower = 0, upper = upper,
+                    col = c("grey50", "black"), lwd = c(1,3), lower = 0, upper = upper,
                     par.settings = list(axis.line = list(col = 0)),
                     panel = function(...) {
                       panel.parallel(...)
