@@ -1,0 +1,754 @@
+---
+title: "Suggested Weighting for Randomization"
+## author: "'r as.text(input$YN)`"
+date: "`r format(Sys.time(), '%B %d, %Y, %H:%M')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Weights
+
+Below are the weights "'r input$YN'" likes best and are used to make the graph.
+``` {r weights, echo=FALSE}
+    paste0(as.character(input$YN),"'s preferred weights.")
+    
+    library(knitr)  
+    K = input$NoVars
+    C = sapply(1:K, function(i){input[[paste0("cols",i)]]})
+    L = sapply(1:K, function(i){input[[paste0("label",i)]]})
+    W = sapply(1:K, function(i){input[[paste0("weight",i)]]})
+    S = sapply(1:K, function(i){input[[paste0("slider",i)]]})
+
+    Dt = data.frame(C,W,L,S)
+    colnames(Dt) = c("Column","Weight","Label","Maximum")
+    (kable(Dt))
+
+```
+
+## Plot
+
+```{r plots, echo=FALSE, verbose = FALSE}
+
+library(designmatch)
+
+nmatch <- function (dist_mat, subset_weight = NULL, total_pairs = NULL, 
+    mom = NULL, exact = NULL, near_exact = NULL, fine = NULL, 
+    near_fine = NULL, near = NULL, far = NULL, solver = NULL) 
+{
+    if (is.null(mom)) {
+        mom_covs = NULL
+        mom_tols = NULL
+        mom_targets = NULL
+    }
+    else {
+        mom_covs = mom$covs
+        mom_tols = mom$tols
+        mom_targets = mom$targets
+    }
+    if (is.null(exact)) {
+        exact_covs = NULL
+    }
+    else {
+        exact_covs = exact$covs
+    }
+    if (is.null(near_exact)) {
+        near_exact_covs = NULL
+        near_exact_devs = NULL
+    }
+    else {
+        near_exact_covs = near_exact$covs
+        near_exact_devs = near_exact$devs
+    }
+    if (is.null(fine)) {
+        fine_covs = NULL
+    }
+    else {
+        fine_covs = fine$covs
+    }
+    if (is.null(near_fine)) {
+        near_fine_covs = NULL
+        near_fine_devs = NULL
+    }
+    else {
+        near_fine_covs = near_fine$covs
+        near_fine_devs = near_fine$devs
+    }
+    if (is.null(near)) {
+        near_covs = NULL
+        near_pairs = NULL
+        near_groups = NULL
+    }
+    else {
+        near_covs = near$covs
+        near_pairs = near$pairs
+        near_groups = near$groups
+    }
+    if (is.null(far)) {
+        far_covs = NULL
+        far_pairs = NULL
+        far_groups = NULL
+    }
+    else {
+        far_covs = far$covs
+        far_pairs = far$pairs
+        far_groups = far$groups
+    }
+    if (is.null(solver)) {
+        solver = "glpk"
+        t_max = 60 * 15
+        approximate = 1
+    }
+    else {
+        t_max = solver$t_max
+        approximate = solver$approximate
+        trace = solver$trace
+        round_cplex = solver$round_cplex
+        solver = solver$name
+    }
+    n_tot = nrow(dist_mat)
+    n_dec = (n_tot * (n_tot - 1)) - sum(1:(n_tot - 1))
+    if (is.null(subset_weight)) {
+        subset_weight = 0
+    }
+    cvec = t(dist_mat)[lower.tri(dist_mat)] - (subset_weight * 
+        rep(1, n_dec))
+    rows_far = NULL
+    cols_far = NULL
+    vals_far = NULL
+    rows_near = NULL
+    cols_near = NULL
+    vals_near = NULL
+    rows_mom = NULL
+    cols_mom = NULL
+    vals_mom = NULL
+    rows_exact = NULL
+    cols_exact = NULL
+    vals_exact = NULL
+    rows_near_exact = NULL
+    cols_near_exact = NULL
+    vals_near_exact = NULL
+    rows_fine = NULL
+    cols_fine = NULL
+    vals_fine = NULL
+    rows_near_fine = NULL
+    cols_near_fine = NULL
+    vals_near_fine = NULL
+    rows_n = NULL
+    cols_n = NULL
+    vals_n = NULL
+    rows_target = NULL
+    cols_target = NULL
+    vals_target = NULL
+    rows_nbm = sort(rep(1:n_tot, n_tot - 1))
+    temp = matrix(0, nrow = n_tot, ncol = n_tot)
+    temp[lower.tri(temp)] = 1:n_dec
+    temp = temp + t(temp)
+    diag(temp) = NA
+    cols_nbm = as.vector(t(temp))
+    cols_nbm = cols_nbm[!is.na(cols_nbm)]
+    vals_nbm = rep(1, (n_tot - 1) * n_tot)
+    row_count = max(rows_nbm)
+    rows_ind_far_pairs = list()
+    if (!is.null(far_covs)) {
+        rows_far = NULL
+        cols_far = NULL
+        vals_far = NULL
+        n_far_covs = ncol(far_covs)
+        for (j in 1:n_far_covs) {
+            far_cov = far_covs[, j]
+            if (!is.null(far_groups)) {
+                far_group = far_groups[j]
+                row_ind_far_all = rep(row_count + 1, n_dec)
+                col_ind_far_all = rep(1:n_dec, 1)
+                i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+                aux = matrix(rep(1:n_tot, n_tot), nrow = n_tot, 
+                  byrow = F)
+                j_ind = aux[lower.tri(aux)]
+                vals_far_all = far_cov[i_ind] - far_cov[j_ind] - 
+                  (far_group * rep(1, n_dec))
+                row_count = max(row_ind_far_all)
+            }
+            if (!is.null(far_pairs)) {
+                far_pair = far_pairs[j]
+                aux = abs(outer(far_cov, far_cov, FUN = "-"))
+                temp = as.vector(matrix(t(aux)[lower.tri(aux)], 
+                  nrow = 1, byrow = TRUE))
+                cols_ind_far_pairs = which(temp < far_pair)
+                if (length(cols_ind_far_pairs) > 0) {
+                  rows_ind_far_pairs[[j]] = row_count + (1:length(cols_ind_far_pairs))
+                  vals_far_pairs = rep(1, length(cols_ind_far_pairs))
+                  row_count = max(rows_ind_far_pairs[[j]])
+                }
+                if (length(cols_ind_far_pairs) == 0) {
+                  cols_ind_far_pairs = NULL
+                  rows_ind_far_pairs[[j]] = -1
+                  vals_far_pairs = NULL
+                }
+            }
+            if (!is.null(far_groups) && is.null(far_pairs)) {
+                rows_far = c(rows_far, row_ind_far_all)
+                cols_far = c(cols_far, col_ind_far_all)
+                vals_far = c(vals_far, vals_far_all)
+            }
+            if (is.null(far_groups) && !is.null(far_pairs) && 
+                rows_ind_far_pairs[[j]] != -1) {
+                rows_far = c(rows_far, rows_ind_far_pairs[[j]])
+                cols_far = c(cols_far, cols_ind_far_pairs)
+                vals_far = c(vals_far, vals_far_pairs)
+            }
+            if (!is.null(far_groups) && !is.null(far_pairs) && 
+                rows_ind_far_pairs[[j]] != -1) {
+                rows_far = c(rows_far, row_ind_far_all, rows_ind_far_pairs[[j]])
+                cols_far = c(cols_far, col_ind_far_all, cols_ind_far_pairs)
+                vals_far = c(vals_far, vals_far_all, vals_far_pairs)
+            }
+            if (!is.null(far_groups) && !is.null(far_pairs) && 
+                rows_ind_far_pairs[[j]] == -1) {
+                rows_far = c(rows_far, row_ind_far_all)
+                cols_far = c(cols_far, col_ind_far_all)
+                vals_far = c(vals_far, vals_far_all)
+            }
+        }
+    }
+    rows_ind_near_pairs = list()
+    if (!is.null(near_covs)) {
+        rows_near = NULL
+        cols_near = NULL
+        vals_near = NULL
+        n_near_covs = ncol(near_covs)
+        for (j in 1:n_near_covs) {
+            near_cov = near_covs[, j]
+            if (!is.null(near_groups)) {
+                near_group = near_groups[j]
+                row_ind_near_all = rep(row_count + 1, n_dec)
+                col_ind_near_all = rep(1:n_dec, 1)
+                i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+                aux = matrix(rep(1:n_tot, n_tot), nrow = n_tot, 
+                  byrow = F)
+                j_ind = aux[lower.tri(aux)]
+                vals_near_all = near_cov[i_ind] - near_cov[j_ind] - 
+                  (near_group * rep(1, n_dec))
+                row_count = max(row_ind_near_all)
+            }
+            if (!is.null(near_pairs)) {
+                near_pair = near_pairs[j]
+                aux = abs(outer(near_cov, near_cov, FUN = "-"))
+                temp = as.vector(matrix(t(aux)[lower.tri(aux)], 
+                  nrow = 1, byrow = TRUE))
+                cols_ind_near_pairs = which(temp > near_pair)
+                if (length(cols_ind_near_pairs) > 0) {
+                  rows_ind_near_pairs[[j]] = row_count + (1:length(cols_ind_near_pairs))
+                  vals_near_pairs = rep(1, length(cols_ind_near_pairs))
+                  row_count = max(rows_ind_near_pairs[[j]])
+                }
+                if (length(cols_ind_near_pairs) == 0) {
+                  cols_ind_near_pairs = NULL
+                  rows_ind_near_pairs[[j]] = -1
+                  vals_near_pairs = NULL
+                }
+            }
+            if (!is.null(near_groups) && is.null(near_pairs)) {
+                rows_near = c(rows_near, row_ind_near_all)
+                cols_near = c(cols_near, col_ind_near_all)
+                vals_near = c(vals_near, vals_near_all)
+            }
+            if (is.null(near_groups) && !is.null(near_pairs) && 
+                rows_ind_near_pairs[[j]] != -1) {
+                rows_near = c(rows_near, rows_ind_near_pairs[[j]])
+                cols_near = c(cols_near, cols_ind_near_pairs)
+                vals_near = c(vals_near, vals_near_pairs)
+            }
+            if (!is.null(near_groups) && !is.null(near_pairs) && 
+                rows_ind_near_pairs[[j]] != -1) {
+                rows_near = c(rows_near, row_ind_near_all, rows_ind_near_pairs[[j]])
+                cols_near = c(cols_near, col_ind_near_all, cols_ind_near_pairs)
+                vals_near = c(vals_near, vals_near_all, vals_near_pairs)
+            }
+            if (!is.null(near_groups) && !is.null(near_pairs) && 
+                rows_ind_near_pairs[[j]] == -1) {
+                rows_near = c(rows_near, row_ind_near_all)
+                cols_near = c(cols_near, col_ind_near_all)
+                vals_near = c(vals_near, vals_near_all)
+            }
+        }
+    }
+    if (!is.null(mom_covs) & is.null(mom_targets)) {
+        rows_mom_1 = NA
+        cols_mom_1 = NA
+        vals_mom_1 = NA
+        rows_mom_2 = NA
+        cols_mom_2 = NA
+        vals_mom_2 = NA
+        n_covs_m = ncol(mom_covs)
+        for (i in 1:n_covs_m) {
+            cov_m = mom_covs[, i]
+            rows_mom_1 = c(rows_mom_1, rep(row_count + i, n_dec))
+            cols_mom_1 = c(cols_mom_1, 1:n_dec)
+            i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+            aux = matrix(rep(1:n_tot, n_tot), nrow = n_tot, byrow = F)
+            j_ind = aux[lower.tri(aux)]
+            vals_mom_1 = c(vals_mom_1, cov_m[i_ind] - cov_m[j_ind] - 
+                (mom_tols[i] * rep(1, n_dec)))
+        }
+        rows_mom_1 = rows_mom_1[-1]
+        cols_mom_1 = cols_mom_1[-1]
+        vals_mom_1 = vals_mom_1[-1]
+        row_count = max(rows_mom_1)
+        for (i in 1:n_covs_m) {
+            cov_m = mom_covs[, i]
+            rows_mom_2 = c(rows_mom_2, rep(row_count + i, n_dec))
+            cols_mom_2 = c(cols_mom_2, 1:n_dec)
+            i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+            aux = matrix(rep(1:n_tot, n_tot), nrow = n_tot, byrow = F)
+            j_ind = aux[lower.tri(aux)]
+            vals_mom_2 = c(vals_mom_2, cov_m[j_ind] - cov_m[i_ind] - 
+                (mom_tols[i] * rep(1, n_dec)))
+        }
+        rows_mom_2 = rows_mom_2[-1]
+        cols_mom_2 = cols_mom_2[-1]
+        vals_mom_2 = vals_mom_2[-1]
+        rows_mom = c(rows_mom_1, rows_mom_2)
+        cols_mom = c(cols_mom_1, cols_mom_2)
+        vals_mom = c(vals_mom_1, vals_mom_2)
+        row_count = max(rows_mom)
+    }
+    if (!is.null(mom_covs) & !is.null(mom_targets)) {
+        n_covs_m = ncol(mom_covs)
+        rows_target = sort(rep(1:(4 * n_covs_m) + row_count, 
+            n_dec))
+        for (i in 1:n_covs_m) {
+            cov_m = mom_covs[, i]
+            cols_target = c(cols_target, rep(1:n_dec, 4))
+            i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+            aux = matrix(rep(1:n_tot, n_tot), nrow = n_tot, byrow = F)
+            j_ind = aux[lower.tri(aux)]
+            vals_target = c(vals_target, cov_m[i_ind] - (mom_targets[i] + 
+                mom_tols[i]), -1 * cov_m[i_ind] + (mom_targets[i] - 
+                mom_tols[i]), cov_m[j_ind] - (mom_targets[i] + 
+                mom_tols[i]), -1 * cov_m[j_ind] + (mom_targets[i] - 
+                mom_tols[i]))
+        }
+        row_count = max(rows_target)
+    }
+    rows_exact = numeric()
+    cols_exact = numeric()
+    vals_exact = numeric()
+    if (!is.null(exact_covs)) {
+        n_exact_cats = ncol(exact_covs)
+        for (i in 1:n_exact_cats) {
+            rows_exact = c(rows_exact, rep(row_count + i, n_dec))
+            cols_exact = c(cols_exact, 1:n_dec)
+            dist_exact_cov = abs(outer(exact_covs[, i], exact_covs[, 
+                i], "-"))
+            vals_exact = c(vals_exact, dist_exact_cov[lower.tri(dist_exact_cov)])
+        }
+        row_count = max(rows_exact)
+    }
+    rows_near_exact = numeric()
+    cols_near_exact = numeric()
+    vals_near_exact = numeric()
+    if (!is.null(near_exact_covs)) {
+        n_near_exact_cats = ncol(near_exact_covs)
+        for (i in 1:n_near_exact_cats) {
+            rows_near_exact = c(rows_near_exact, rep(row_count + 
+                j, n_dec))
+            cols_near_exact = c(cols_near_exact, 1:n_dec)
+            dist_near_exact_cov = abs(outer(near_exact_covs[, 
+                i], near_exact_covs[, i], "-"))
+            vals_near_exact = c(vals_near_exact, dist_near_exact_cov[lower.tri(dist_near_exact_cov)])
+        }
+        row_count = max(rows_near_exact)
+    }
+    if (!is.null(fine_covs)) {
+        fine_covs_2 = rep(NA, nrow(fine_covs))
+        n_fine_covs = ncol(fine_covs)
+        j = 1
+        for (i in 1:n_fine_covs) {
+            aux = factor(fine_covs[, i])
+            fine_covs_2 = cbind(fine_covs_2, diag(nlevels(aux))[aux, 
+                ])
+            if (j == 1) {
+                fine_covs_2 = fine_covs_2[, -1]
+            }
+            j = j + 1
+        }
+        n_fine_cats = ncol(fine_covs_2)
+        j = 1
+        for (i in 1:n_fine_cats) {
+            rows_fine = c(rows_fine, rep(row_count + j, n_dec))
+            cols_fine = c(cols_fine, 1:n_dec)
+            dist_fine_cov = outer(fine_covs_2[, i], fine_covs_2[, 
+                i], "-")
+            dist_fine_cov = t(dist_fine_cov)
+            vals_fine = c(vals_fine, dist_fine_cov[lower.tri(dist_fine_cov)])
+            if (j == 1) {
+                rows_fine = rows_fine[-1]
+                cols_fine = cols_fine[-1]
+                vals_fine = vals_fine[-1]
+            }
+            j = j + 1
+        }
+        row_count = max(rows_fine)
+    }
+    if (!is.null(near_fine_covs)) {
+        near_fine_covs_2 = rep(NA, nrow(near_fine_covs))
+        n_near_fine_covs = ncol(near_fine_covs)
+        j = 1
+        for (i in 1:n_near_fine_covs) {
+            aux = factor(near_fine_covs[, i])
+            near_fine_covs_2 = cbind(near_fine_covs_2, diag(nlevels(aux))[aux, 
+                ])
+            if (j == 1) {
+                near_fine_covs_2 = near_fine_covs_2[, -1]
+            }
+            j = j + 1
+        }
+        n_near_fine_cats = ncol(near_fine_covs_2)
+        j = 1
+        for (i in 1:n_near_fine_cats) {
+            for (h in 1:2) {
+                rows_near_fine = c(rows_near_fine, rep(row_count + 
+                  j, n_dec))
+                cols_near_fine = c(cols_near_fine, 1:n_dec)
+                dist_near_fine_cov = outer(near_fine_covs_2[, 
+                  i], near_fine_covs_2[, i], "-")
+                dist_near_fine_cov = t(dist_near_fine_cov)
+                vals_near_fine = c(vals_near_fine, dist_near_fine_cov[lower.tri(dist_near_fine_cov)])
+                if (j == 1) {
+                  rows_near_fine = rows_near_fine[-1]
+                  cols_near_fine = cols_near_fine[-1]
+                  vals_near_fine = vals_near_fine[-1]
+                }
+                j = j + 1
+            }
+        }
+        row_count = max(rows_near_fine)
+    }
+    if (!is.null(total_pairs)) {
+        rows_n = rep(row_count + 1, n_dec)
+        cols_n = 1:n_dec
+        vals_n = rep(1, n_dec)
+        row_count = max(rows_n)
+    }
+    rows = c(rows_nbm, rows_far, rows_near, rows_mom, rows_target, 
+        rows_exact, rows_near_exact, rows_fine, rows_near_fine, 
+        rows_n)
+    cols = c(cols_nbm, cols_far, cols_near, cols_mom, cols_target, 
+        cols_exact, cols_near_exact, cols_fine, cols_near_fine, 
+        cols_n)
+    vals = c(vals_nbm, vals_far, vals_near, vals_mom, vals_target, 
+        vals_exact, vals_near_exact, vals_fine, vals_near_fine, 
+        vals_n)
+    aux = cbind(rows, cols, vals)[order(cols), ]
+    cnstrn_mat = simple_triplet_matrix(i = aux[, 1], j = aux[, 
+        2], v = aux[, 3])
+    Amat = cnstrn_mat
+    bvec = rep(1, length(table(rows_nbm)))
+    if (!is.null(far_covs)) {
+        n_far_covs = ncol(far_covs)
+        for (j in 1:n_far_covs) {
+            if (!is.null(far_groups)) {
+                bvec = c(bvec, rep(0, 1))
+            }
+            if (!is.null(far_pairs) && rows_ind_far_pairs[[j]] != 
+                -1) {
+                bvec = c(bvec, rep(0, length(table(rows_ind_far_pairs[[j]]))))
+            }
+        }
+    }
+    if (!is.null(near_covs)) {
+        n_near_covs = ncol(near_covs)
+        for (j in 1:n_near_covs) {
+            if (!is.null(near_groups)) {
+                bvec = c(bvec, rep(0, 1))
+            }
+            if (!is.null(near_pairs) && rows_ind_near_pairs[[j]] != 
+                -1) {
+                bvec = c(bvec, rep(0, length(table(rows_ind_near_pairs[[j]]))))
+            }
+        }
+    }
+    bvec = c(bvec, rep(0, length(table(rows_mom))))
+    bvec = c(bvec, rep(0, length(table(rows_target))))
+    if (!is.null(exact_covs)) {
+        bvec = c(bvec, rep(0, ncol(exact_covs)))
+    }
+    if (!is.null(near_exact_covs)) {
+        bvec = c(bvec, near_exact_devs)
+    }
+    bvec = c(bvec, rep(0, length(table(rows_fine))))
+    if (!is.null(near_fine_covs)) {
+        bvec_8_aux = rep(NA, length(rows_near_fine))
+        bvec_8_aux[seq(1, length(rows_near_fine), 2)] = -near_fine_devs
+        bvec_8_aux[seq(2, length(rows_near_fine), 2)] = near_fine_devs
+        bvec = c(bvec, bvec_8_aux)
+    }
+    if (!is.null(total_pairs)) {
+        bvec = c(bvec, total_pairs)
+    }
+    ub = rep(1, n_dec)
+    sense = rep("L", length(table(rows_nbm)))
+    if (!is.null(far_covs)) {
+        n_far_covs = ncol(far_covs)
+        for (j in 1:n_far_covs) {
+            if (!is.null(far_groups)) {
+                sense = c(sense, rep("G", 1))
+            }
+            if (!is.null(far_pairs) && rows_ind_far_pairs[[j]] != 
+                -1) {
+                sense = c(sense, rep("E", length(table(rows_ind_far_pairs[[j]]))))
+            }
+        }
+    }
+    if (!is.null(near_covs)) {
+        n_near_covs = ncol(near_covs)
+        for (j in 1:n_near_covs) {
+            if (!is.null(near_groups)) {
+                sense = c(sense, rep("L", 1))
+            }
+            if (!is.null(near_pairs) && rows_ind_near_pairs[[j]] != 
+                -1) {
+                sense = c(sense, rep("E", length(table(rows_ind_near_pairs[[j]]))))
+            }
+        }
+    }
+    sense = c(sense, rep("L", length(table(rows_mom))))
+    sense = c(sense, rep("L", length(table(rows_target))))
+    if (!is.null(exact_covs)) {
+        sense = c(sense, rep("E", ncol(exact_covs)))
+    }
+    if (!is.null(near_exact_covs)) {
+        sense = c(sense, rep("L", ncol(near_exact_covs)))
+    }
+    sense = c(sense, rep("E", length(table(rows_fine))))
+    sense = c(sense, rep(c("G", "L"), length(table(rows_near_fine))/2))
+    sense = c(sense, rep("E", length(total_pairs)))
+    if (approximate == 1) {
+        var_type = rep("C", n_dec)
+    }
+    else {
+        var_type = rep("B", n_dec)
+    }
+    if (solver == "glpk") {
+        dir = rep(NA, length(sense))
+        dir[sense == "E"] = "=="
+        dir[sense == "L"] = "<="
+        dir[sense == "G"] = ">="
+        bound = list(lower = list(ind = c(1:length(ub)), val = rep(0, 
+            length(ub))), upper = list(ind = c(1:length(ub)), 
+            val = ub))
+        ptm = proc.time()
+        out = Rglpk_solve_LP(cvec, Amat, dir, bvec, bounds = bound, 
+            types = var_type, max = FALSE)
+        time = (proc.time() - ptm)[3]
+        if (out$status != 0) {
+            cat(format("  Error: problem infeasible!"), "\n")
+            obj_val = NA
+            obj_dist_mat = NA
+            id_1 = NA
+            id_2 = NA
+            group_id = NA
+            time = NA
+        }
+        if (out$status == 0) {
+            if (approximate == 1) {
+                rel = .relaxation_n(n_tot, out$solution, dist_mat, 
+                  subset_weight, "glpk", round_cplex, trace)
+                out$solution = rel$sol
+                out$optimum = rel$obj
+                time = time + rel$time
+            }
+            i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+            aux = matrix(1:n_tot, nrow = n_tot, ncol = n_tot)
+            j_ind = aux[lower.tri(aux)]
+            group_1 = i_ind[out$solution == 1]
+            group_2 = j_ind[out$solution == 1]
+            max_groups = apply(cbind(group_1, group_2), 1, max)
+            id_1 = group_1[max_groups <= n_tot]
+            id_2 = group_2[max_groups <= n_tot]
+            group_id_1 = 1:(length(id_1))
+            group_id_2 = 1:(length(id_2))
+            group_id = c(group_id_1, group_id_2)
+            obj_val = out$optimum
+            obj_dist_mat = sum(t(dist_mat)[lower.tri(dist_mat)] * 
+                out$solution)
+        }
+    }
+    return = list(obj_total = obj_val, obj_dist_mat = obj_dist_mat, 
+        id_1 = id_1, id_2 = id_2, group_id = group_id, time = time)
+}
+
+
+
+
+
+makePlot <- function(Mt, I, Ks) {
+  upper <- as.numeric(I[,"Maxs"])
+  lower <- as.numeric(I[,"Mins"])
+  No.Vars = length(upper)
+  print(parallelplot(Ks, horizontal.axis = FALSE,
+                     scales = list(x = list(rot = 90), 
+                                   y = list(draw = FALSE)),
+                     col = "grey50", lower = lower, upper = upper, 
+                     main = Mt,
+                     panel = function(...) {
+                       panel.parallel(...)
+                       grid.text(lower,
+                                 x=unit(1:No.Vars, "native"),
+                                 y=unit(2, "mm"), just="bottom",
+                                 gp=gpar(col="grey", cex=.7))
+                       grid.text(upper,
+                                 x=unit(1:No.Vars, "native"),
+                                 y=unit(1, "npc") - unit(2, "mm"), 
+                                 just="top",
+                                 gp=gpar(col="grey", cex=.7))
+                     }))
+} ## closing function
+
+make.Ks = function(M, vars, D, name, Plot, S, ToC){
+  r.I = length(vars)
+  No.cols = length(vars[[1]])
+  I = matrix(NA, nrow = r.I, ncol = No.cols)
+  for(i in 1:r.I) I[i,] = unlist(vars[[i]])
+  
+  dimnames(I) = list(rep(NULL, r.I), c("cols", "w", "L", "Mins", "Maxs"))
+  
+  ## No. of participant hospitals
+  N = dim(D)[1]
+  
+  mymat = sdmat = matrix(NA, nrow = N, ncol = r.I)
+  
+  ## Combining columns
+  for(i in 1:r.I) mymat[,i] = D[,I[i,"cols"]]
+  
+  ## Standardising and adding weights
+  col.means = colMeans(mymat)
+  col.sds = apply(mymat, 2, sd)
+  w = as.numeric(I[,"w"])
+  for(i in 1:r.I) sdmat[,i] = 
+    w[i]*(mymat[,i] - col.means[i])/col.sds[i]
+  
+  ## Making the distance matrix
+  dist_mat_obj = dist(sdmat, diag = TRUE, upper = TRUE)
+  dist_mat = as.matrix(dist_mat_obj)
+  
+  ## Telling the computer wich method to use to solve
+  t_max = 60*5
+  solver = S
+  approximate = 0
+  solver = list(name = solver, t_max = t_max, approximate = approximate, 
+                round_cplex = 0, trace_cplex = 0)
+  
+  ## Solving
+  out = suppressMessages(nmatch(dist_mat = dist_mat, total_pairs = floor(N/2), 
+               solver = solver, subset_weight = NULL))
+  
+  # These guys have the row numbers of the matched pairs
+  id_1 = out$id_1  
+  id_2 = out$id_2 
+  
+  ## If there are any leftovers they get assigned where
+  ## the user wants them assigned
+  X = dim(D)[1] %% 2 == 0
+  if(X == FALSE) {LO = sum(1:dim(D)[1]) - sum(id_1, id_2)}
+  
+  ## Will be used in the loop below - a place to put Ks, 
+  ## filled below, then graphed after using parallel coordinate plot
+  Ks = matrix(NA, nrow = M, ncol = r.I)
+  
+  ## Used to run the loop below
+  M.seq = seq_along(1:M)
+  
+  for(i in M.seq){
+    ## Randomising once - 0 ctl, 1 trt, (subtract one because when 
+    ## making Trt below the middle step has to identify the length of 
+    ## Trt or it gets fussy and won't add on the last value)
+    R = replicate(length(id_1), rbinom(1, size = 1, prob = 0.5))
+    S = 1 - R
+    
+    ## The 1 is for the leftover row that goes to the trt arm
+    Trt = c(R, S)
+    
+    ## Making the data, TA is included and goes to the trt arm
+    if (X == TRUE) {
+      Dt = data.frame(mymat[c(id_1, id_2),], Trt)
+    } else {
+      Dt = data.frame(mymat[c(id_1, id_2, LO),], c(Trt, (ToC - 1)))
+    }
+    
+    ## Picking out trt and ctl covariates
+    Trt.CV = Dt[which(Trt == 1), 1:r.I]
+    Ctl.CV = Dt[-which(Trt == 1), 1:r.I]
+    
+    Ks[i,] = abs((apply(Trt.CV, 2, sum) - 
+                    apply(Ctl.CV, 2, sum))/length(R))
+  }## ending for i in M.seq
+  
+  ## So the labels in parcoord come out nicely
+  ## NEW colnames here
+  colnames(Ks) = I[,'L']
+  
+  P = list()
+  P[[1]] = name
+  P[[2]] = I
+  P[[3]] = Ks
+  
+  P
+} ## closing the function make.Ks
+
+K = input$NoVars
+
+C = sapply(1:K(), function(i){input[[paste0("cols",i)]]})
+L = sapply(1:K(), function(i){input[[paste0("label",i)]]})
+W = sapply(1:K(), function(i){input[[paste0("weight",i)]]})
+S = sapply(1:K(), function(i){input[[paste0("slider",i)]]})
+
+V = list()
+for(i in 1:K()){
+  V[[i]] = list()
+  V[[i]][[1]] = C[i]
+  V[[i]][[2]] = as.numeric(W[i])
+  V[[i]][[3]] = L[i]
+  V[[i]][[4]] = 0
+  V[[i]][[5]] = as.numeric(S[i])
+}
+
+D = suppressMessages(make.Ks(M = input$Times, D = D, vars = V, 
+                             name = isolate({input$Title}),
+        ToC = isolate({input$Toc}), S = "glpk"))
+
+makePlot(Mt = D[[1]], I = D[[2]], Ks = D[[3]])
+
+# make.As <- function(V, Da){
+#   No.Vars = length(V)
+#   A = list()
+#   for(i in 1:No.Vars) {
+#     A[[i]] = c(summary(D[,V[[i]]])[c(1,6,4)], 
+#                sd(D[,V[[i]]]), colMeans(Da[[3]])[i])
+#     A[[i]] = signif(A[[i]], 3)
+#     A[[i]] = as.data.frame(A[[i]])
+#     rownames(A[[i]]) = c("Min", "Max", "Mean", "SD", "Mean Diff Arms")
+#     colnames(A[[i]]) = ""
+#   }
+#   
+#   A
+# }
+# 
+# ## This plots the summaries that Ken wanted at the bottom
+# make.PlotA<-function(A, K) {
+#   plot.new()
+#   plot.window(xlim=c(1/(K-1),(K+0.5)), ylim=c(0,0.2))
+#   title(main="A Few Summaries Below") 
+#   addtable2plot(1, 0, A[[1]], display.rownames=TRUE)
+#   
+#   for(i in 2:K)
+#     addtable2plot(i, 0, A[[i]])
+# }
+# 
+# A = make.As(V = C, Da = D)
+# make.PlotA(A = A, K = K)
+
+```
