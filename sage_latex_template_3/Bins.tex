@@ -24,7 +24,7 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
 \hypersetup{unicode=true,
-            pdftitle={Matching in Cluster Randomized Trials},
+            pdftitle={A Priori Matching in Cluster Randomized Trials},
             pdfkeywords={cluster-randomized trials, matching},
             pdfborder={0 0 0},
             breaklinks=true}
@@ -76,7 +76,7 @@
 }
 
 \setlength{\droptitle}{-2em}
-  \title{Matching in Cluster Randomized Trials}
+  \title{\(A\) \(Priori\) Matching in Cluster Randomized Trials}
   \pretitle{\vspace{\droptitle}\centering\huge}
   \posttitle{\par}
   \author{true}
@@ -84,7 +84,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{April 18, 2017}
+  \date{April 28, 2017}
 
 
 \begin{document}
@@ -105,11 +105,32 @@ weighting for advantageous randomization schema.
 \subsection{Introduction}\label{introduction}
 
 To determine the efficacy of a treatment, individually randomized trials
-(IRTS) are the gold standard.
+(IRTs) with blinding are the ``strongest study design available''
+\citep{gatsonis2017methods}. Unfortunately, cost and study design
+amongst other things mean some interventions can not be randomized on an
+individual level. For example, training medical doctors to improve
+patient interactions would require individuals be randomized to a doctor
+not of their choosing and assumes no medical emergencies treated by
+other doctors for the duration of the study. To remedy this,
+investigators could consider randomizing medical practices to
+intervention or control groups. Trials where groups of participants are
+randomized are called cluster randomized trials (CRTs). Three reasons
+for conducting a CRTs are: (i) implementation occurs at the cluster
+level, (ii) to avoid contamination, and (iii) to measure intervention
+effects among cluster members who do not receive treatment
+\citep{balzer2012match, CRTrials2009}.
 
-\textbf{Scholarship: How are people matching CRTs? Read and find out.}
+Many authors discuss the importance of matching in CRTs
+\citep{balzer2012match, CRTrials2009, gatsonis2017methods, murray1998design, imai2009essential, PMVsStrat, donner2007merits, klar1997merits}.
+SUMMARY HERE
 
-\subsection{Methods}\label{methods}
+Despite all this information few authors discuss methodologies to
+support the matching process. We suggest a method suitable for \(a\)
+\(priori\) matching using baseline data. In section 2 we outline our
+method, section 3 applies it to the PROTECT dataset, and section 4 is a
+brief discussion.
+
+\subsection{Methods }\label{methods}
 
 To approach this complex topic of balancing randomization in CRTs we
 suggest a new approach. Our approach involves weighting variables of
@@ -192,13 +213,13 @@ must be made.
 To demonstrate the usefulness of this technique we present a brief
 summary of our randomization process using baseline data from the
 PROTECT trial (Project PROTECT: Protecting Nursing Homes From Infections
-and Hospitalization). In this trial, the investigators are studying
-whether bathing with chlorhexidine gluconate and iodophor nasal swabs
-``can reduce hospitalizations associated with infections, antibiotic
-utilization, and multi-drug resistant organism (MDRO) prevalence''
-versus regular bathing. Additional training is given to nursing homes in
-the treatment arm to ensure comprehension and adherence to trial
-protocol.
+and Hospitalization) \citep{ProtectTrial}. In this trial, the
+investigators are studying whether bathing with chlorhexidine gluconate
+and iodophor nasal swabs ``can reduce hospitalizations associated with
+infections, antibiotic utilization, and multi-drug resistant organism
+(MDRO) prevalence'' versus regular bathing. Additional training is given
+to nursing homes in the treatment arm to ensure comprehension and
+adherence to trial protocol.
 
 Prior randomize baseline data was collected for ?????? on the 29????
 nursing homes. With this data, investigators met to prioritize variables
@@ -212,14 +233,22 @@ over 100 days, average daily census, and mean number of baths per
 resident per week. If they were able to include more variables without
 effecting the balance of the others they felt matching on AVERAGE
 DEPENDENT late LOSS activities of daily lives, and the Centers for
-Medicare and Medicaid Services (CMS) rating of eaching nursing home.
+Medicare and Medicaid Services (CMS) rating of eaching nursing home. To
+ease understanding, our initial discussion will involve 2 variables:
+percentage discharges to hospital with infection based on primary and
+other diagnsoses, and average daily census.
 
 \begin{longtable}[]{@{}lll@{}}
+\caption{Abbreviations of variables used to randomize}\tabularnewline
+\toprule
+Primary import & Secondary import & Tetiary import\tabularnewline
+\midrule
+\endfirsthead
 \toprule
 Primary import & Secondary import & Tetiary import\tabularnewline
 \midrule
 \endhead
-\% DC w/Inf & \% Long Stay & Late ADLs\tabularnewline
+\% Inf & \% Long Stay & Late ADLs\tabularnewline
 \% DC & Avg Daily Census & CMS Star\tabularnewline
 MDRO & Baths/Week\tabularnewline
 \% Abx &\tabularnewline

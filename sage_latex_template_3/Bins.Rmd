@@ -1,5 +1,5 @@
 ---
-title: "Matching in Cluster Randomized Trials"
+title: "$A$ $Priori$ Matching in Cluster Randomized Trials"
 author:
 - name: S. Gwynn Sturdevant, Ken Kleinman
   affiliation: University of Massachusetts Amherst
@@ -17,11 +17,15 @@ date: "`r format(Sys.time(), '%B %d, %Y')`"
 ---
 
 ## Introduction
-To determine the efficacy of a treatment, individually randomized trials (IRTS) are the gold standard. 
 
-**Scholarship: How are people matching CRTs? Read and find out.**
+To determine the efficacy of a treatment, individually randomized trials (IRTs) with blinding are the "strongest study design available" [@gatsonis2017methods]. Unfortunately, cost and study design amongst other things mean some interventions can not be randomized on an individual level. For example, training medical doctors to improve patient interactions would require individuals be randomized to a doctor not of their choosing and assumes no medical emergencies treated by other doctors for the duration of the study. To remedy this, investigators could consider randomizing medical practices to intervention or control groups. Trials where groups of participants are randomized are called cluster randomized trials (CRTs). Three reasons for conducting a CRTs are: (i) implementation occurs at the cluster level, (ii) to avoid contamination, and (iii) to measure intervention effects among cluster members who do not receive treatment [@balzer2012match; @CRTrials2009].
 
-## Methods
+Many authors discuss the importance of matching in CRTs [@balzer2012match; @CRTrials2009; @gatsonis2017methods; @murray1998design; @imai2009essential;
+@PMVsStrat; @donner2007merits; @klar1997merits]. SUMMARY HERE
+
+Despite all this information few authors discuss methodologies to support the matching process. We suggest a method suitable for $a$ $priori$ matching using baseline data. In section 2 <!-- #sec:Method  --> we outline our method, section 3 applies it to the PROTECT dataset, and section 4 is a brief discussion.
+
+## Methods <!-- (#sec:Method) trying to get numbering to work not sure how yet  -->
 
 To approach this complex topic of balancing randomization in CRTs we suggest a new approach. Our approach involves weighting variables of import, matching units using these weights, and randomizing many times to obtain a distribution of possiblities when official randomization occurs. Investigators assess these distributions to determine if possible randomizations are sufficiently balanced, if not, weighting is adjusted and the process begins again. The details follow.
 
@@ -53,7 +57,7 @@ Once the matching is completed and pairs found we return to using the raw data, 
 THE ABOVE NEEDS A BETTER ABSOLUTE VALUE SYMBOL. for $j = 1, 2, ..., m.$ We randomize $N$ times and find $k_{lj}$ the difference in the two arms for the $j^{th}$ priority variable for each of the $l = 1, 2, ..., N$ re-randomizations. To assist analysis we draw a parallel coordinates plot where the $j^{th}$ axis plots $k_{lj}$ for $l = 1, 2, ..., N.$ If the principal investigator finds the possible differences too large for a priority variable $j$, increasing $w_j$ and re-running the above will update the matching to attain closer matches for this variable and lessen the differences. The penality in this process is that closer matches for variable $j$ are likely to imply reduced closeness in another variable, so compromises must be made.
 
 ## Results
-To demonstrate the usefulness of this technique we present a brief summary of our randomization process using baseline data from the PROTECT trial (Project PROTECT: Protecting Nursing Homes From Infections and Hospitalization). In this trial, the investigators are studying whether bathing with chlorhexidine gluconate and iodophor nasal swabs "can reduce hospitalizations associated with infections, antibiotic utilization, and multi-drug resistant organism (MDRO) prevalence" versus regular bathing. Additional training is given to nursing homes in the treatment arm to ensure comprehension and adherence to trial protocol. 
+To demonstrate the usefulness of this technique we present a brief summary of our randomization process using baseline data from the PROTECT trial (Project PROTECT: Protecting Nursing Homes From Infections and Hospitalization) [@ProtectTrial]. In this trial, the investigators are studying whether bathing with chlorhexidine gluconate and iodophor nasal swabs "can reduce hospitalizations associated with infections, antibiotic utilization, and multi-drug resistant organism (MDRO) prevalence" versus regular bathing. Additional training is given to nursing homes in the treatment arm to ensure comprehension and adherence to trial protocol. 
 
 Prior randomize baseline data was collected for ?????? on the 29???? nursing homes. With this data, investigators met to prioritize variables into several categories: primary, secondary, tertiary, and not relevant. For this trial, the investigators decided that percentage discharges to hospital with infection based on primary and other diagnsoses, percentage discharge to hospital, percentages MDRO, and percentage usage of antibacterials started at nursing home were of primary importance. Of secondary importance were percentage of admissions with length of stay over 100 days, average daily census, and mean number of baths per resident per week. If they were able to include more variables without effecting the balance of the others they felt matching on AVERAGE DEPENDENT late LOSS activities of daily lives, and the Centers for Medicare and Medicaid Services (CMS) rating of eaching nursing home. To ease understanding, our initial discussion will involve 2 variables:  percentage discharges to hospital with infection based on primary and other diagnsoses, and average daily census.
 

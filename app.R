@@ -1,6 +1,9 @@
 ## install.packages("designmatch")
 library(designmatch)
 
+## To deploy app
+## rsconnect::deployApp("/Users/gwynn/Documents/PostDocKleinmanLab/Bins/Shiny/Again")
+
 ## The first is used for its parallelplot() function
 ## The second to add limits to all y-axises, and helps
 ## us make the final plot.
