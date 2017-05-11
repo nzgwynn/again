@@ -84,7 +84,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{April 28, 2017}
+  \date{May 09, 2017}
 
 
 \begin{document}
@@ -108,34 +108,56 @@ To determine the efficacy of a treatment, individually randomized trials
 (IRTs) with blinding are the ``strongest study design available''
 \citep{gatsonis2017methods}. Unfortunately, cost and study design
 amongst other things mean some interventions can not be randomized on an
-individual level. For example, training medical doctors to improve
-patient interactions would require individuals be randomized to a doctor
-not of their choosing and assumes no medical emergencies treated by
-other doctors for the duration of the study. To remedy this,
-investigators could consider randomizing medical practices to
-intervention or control groups. Trials where groups of participants are
+individual level. For example, education researchers decide to determine
+if training elementary school teachers in a reading program will affect
+literacy skills in third graders. Randomizing each third grader to
+treatment or control would not be suitable, as this equates to randomly
+allocating students to a teacher; rural schools tend to be smaller with
+only one teacher which further complicates matters. Instead, researchers
+may choose to randomize teachers, schools, or counties to determine any
+differences between the two arms of the study. Trials where groups are
 randomized are called cluster randomized trials (CRTs). Three reasons
 for conducting a CRTs are: (i) implementation occurs at the cluster
 level, (ii) to avoid contamination, and (iii) to measure intervention
 effects among cluster members who do not receive treatment
-\citep{balzer2012match, CRTrials2009}.
+\citep{balzer2012match, CRTrials2009}. CRTs are ``the gold standard when
+allocation of identifiable groups is necessary''
+\citep{murray2004design}.
 
-Many authors discuss the importance of matching in CRTs
-\citep{balzer2012match, CRTrials2009, gatsonis2017methods, murray1998design, imai2009essential, PMVsStrat, donner2007merits, klar1997merits}.
-SUMMARY HERE
+Many authors debate matching in CRTs
+\citep{balzer2012match, CRTrials2009, gatsonis2017methods, diehr1995breaking, murray1998design, imai2009essential, PMVsStrat, donner2007merits, klar1997merits, donner2000design, martin1993effect}.
+Murray argues that ``the choice of matching or stratification {[}of{]}
+factors is critical to the success of the procedure''
+\citep{murray1998design}. Some agree that caution must be used when
+matching a small number of clusters due to the decrease in power
+\citep{donner2000design, klar1997merits, balzer2012match, martin1993effect}.
+Breaking matches in the analysis stage addresses this
+\citep{diehr1995breaking}, but perhaps only when there are a small
+number of large clusters \citep{donner2007merits}. Others argue that
+when matching is effective in a small number of clusters as it
+``increases the chance of the intervention groups being well-balanced''
+\citep{donner2007merits}. Imai et al argue that not matching, in small
+or large sample, is ``equivalent to discarding a considerable fraction
+of one's data'' \citep{imai2009essential}. However, in one trial
+``matching actually led to a loss in statistical efficiency''
+\citep[\citet{donner2000design}]{manun1994influence}.
 
-Despite all this information few authors discuss methodologies to
-support the matching process. We suggest a method suitable for \(a\)
-\(priori\) matching using baseline data. In section 2 we outline our
-method, section 3 applies it to the PROTECT dataset, and section 4 is a
-brief discussion.
+Despite all this debate few authors discuss methodologies to support the
+matching process \citep{raab2001balance}. An alternative to matching
+suggests balancing criterion based on conditioned means of covariates
+\citep{raab2001balance}. ALSO ZUBIZARRETA. Our article is an extension
+of methods introduced in Chapter 4 of Methods in Comparative
+Effectiveness Research \citep{gatsonis2017methods}. We suggest a method
+suitable for \(a\) \(priori\) matching using baseline data. In section 2
+we outline our method, section 3 applies it to the PROTECT and SWAPOUT
+datasets, and section 4 is a brief discussion.
 
 \subsection{Methods }\label{methods}
 
 To approach this complex topic of balancing randomization in CRTs we
 suggest a new approach. Our approach involves weighting variables of
 import, matching units using these weights, and randomizing many times
-to obtain a distribution of possiblities when official randomization
+to obtain a distribution of possibilities when official randomization
 occurs. Investigators assess these distributions to determine if
 possible randomizations are sufficiently balanced, if not, weighting is
 adjusted and the process begins again. The details follow.
@@ -152,12 +174,10 @@ units \((1, 2, ..., n)\) to be randomized. We have
 
 In addition, we use \(\overline{w} = (w_{1}, w_{2},..., w_{m})\) to
 weight and standardize
-\((\overline{V_1}, \overline{V_2}, ..., \overline{V_m}).\) We have NOT
-SURE IF THIS IS RIGHT, THINK IT'S NOT!!!!!!!! something with ij is
-wrong.
+\((\overline{V_1}, \overline{V_2}, ..., \overline{V_m}).\) We have
 
 \begin{eqnarray*}
-v^{*}_{ii} = \frac{(v_{ii} - \frac{\sum _{j=1}^{n}v_{ij}}{n})*w_i}{sd(\overline{V_i})} 
+v^{*}_{ij} = \frac{(v_{ij} - \frac{\sum _{k=1}^{n}v_{ik}}{n})*w_i}{sd(\overline{V_i})} 
  \end{eqnarray*}
 
 where \(sd(\overline{V_i})\) is the standard deviation of
@@ -172,12 +192,13 @@ where \(sd(\overline{V_i})\) is the standard deviation of
 
 which we use to compute the Mahalanobois Distance matrix, \textbf{D}.
 From here we use the \texttt{nmatch} function in the
-\texttt{designmatch} package in \texttt{R} to find \(\frac{n}{2}\) pairs
-if \(n\) is even. If \(n\) is odd, the remainder can be randomized to
-treatment or control per the principal investigator. Without loss of
-generality, we assume \(n\) is even for the remainder of this paper and
-note that to include an odd \(n\) either treatment or control groups
-will include one more set of priority variables.
+\texttt{designmatch} \citep{doi} package in \texttt{R} to find
+\(\frac{n}{2}\) pairs if \(n\) is even. If \(n\) is odd, the remainder
+can be randomized to treatment or control per the principal
+investigator. Without loss of generality, we assume \(n\) is even for
+the remainder of this paper and note that to include an odd \(n\) either
+treatment or control groups will include one more set of priority
+variables.
 
 Once the matching is completed and pairs found we return to using the
 raw data, as this will be used to assess the weighting scheme. We now

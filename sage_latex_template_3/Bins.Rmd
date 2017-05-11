@@ -17,17 +17,16 @@ date: "`r format(Sys.time(), '%B %d, %Y')`"
 ---
 
 ## Introduction
+To determine the efficacy of a treatment, individually randomized trials (IRTs) with blinding are the "strongest study design available" [@gatsonis2017methods]. Unfortunately, cost and study design amongst other things mean some interventions can not be randomized on an individual level. For example, education researchers decide to determine if training elementary school teachers in a reading program will affect literacy skills in third graders. Randomizing each third grader to treatment or control would not be suitable, as this equates to randomly allocating students to a teacher; rural schools tend to be smaller with only one teacher which further complicates matters. Instead, researchers may choose to randomize teachers, schools, or counties to determine any differences between the two arms of the study. Trials where groups are randomized are called cluster randomized trials (CRTs). Three reasons for conducting a CRTs are: (i) implementation occurs at the cluster level, (ii) to avoid contamination, and (iii) to measure intervention effects among cluster members who do not receive treatment [@balzer2012match; @CRTrials2009]. CRTs are "the gold standard when allocation of identifiable groups is necessary" [@murray2004design].
 
-To determine the efficacy of a treatment, individually randomized trials (IRTs) with blinding are the "strongest study design available" [@gatsonis2017methods]. Unfortunately, cost and study design amongst other things mean some interventions can not be randomized on an individual level. For example, training medical doctors to improve patient interactions would require individuals be randomized to a doctor not of their choosing and assumes no medical emergencies treated by other doctors for the duration of the study. To remedy this, investigators could consider randomizing medical practices to intervention or control groups. Trials where groups of participants are randomized are called cluster randomized trials (CRTs). Three reasons for conducting a CRTs are: (i) implementation occurs at the cluster level, (ii) to avoid contamination, and (iii) to measure intervention effects among cluster members who do not receive treatment [@balzer2012match; @CRTrials2009].
+Many authors debate matching in CRTs [@balzer2012match; @CRTrials2009; @gatsonis2017methods; @diehr1995breaking; @murray1998design; @imai2009essential;
+@PMVsStrat; @donner2007merits; @klar1997merits; @donner2000design; @martin1993effect]. Murray argues that "the choice of matching or stratification [of] factors is critical to the success of the procedure" [@murray1998design]. Some agree that caution must be used when matching a small number of clusters due to the decrease in power [@donner2000design; @klar1997merits; @balzer2012match; @martin1993effect]. Breaking matches in the analysis stage addresses this [@diehr1995breaking], but perhaps only when there are a small number of large clusters [@donner2007merits].  Others argue that matching is effective in a small number of clusters as it "increases the chance of the intervention groups being well-balanced" [@donner2007merits]. Imai et al argue that not matching, in small or large sample, is "equivalent to discarding a considerable fraction of one's data" [@imai2009essential]. However, in one trial "matching actually led to a loss in statistical efficiency" [@manun1994influence, @donner2000design]. 
 
-Many authors discuss the importance of matching in CRTs [@balzer2012match; @CRTrials2009; @gatsonis2017methods; @murray1998design; @imai2009essential;
-@PMVsStrat; @donner2007merits; @klar1997merits]. SUMMARY HERE
-
-Despite all this information few authors discuss methodologies to support the matching process. We suggest a method suitable for $a$ $priori$ matching using baseline data. In section 2 <!-- #sec:Method  --> we outline our method, section 3 applies it to the PROTECT dataset, and section 4 is a brief discussion.
+Despite all this debate few authors discuss methodologies to support the matching process [@raab2001balance]. An alternative to matching suggests balancing criterion based on conditioned means of covariates [@raab2001balance].  ZUBIZARRETA [@greevy2004optimal]. Our article is an extension of methods introduced in Chapter 4 of Methods in Comparative Effectiveness Research [@gatsonis2017methods]. We suggest a method suitable for $a$ $priori$ matching using baseline data. In section 2 <!-- #sec:Method  --> we outline our method, section 3 applies it to the PROTECT dataset, and section 4 is a brief discussion.
 
 ## Methods <!-- (#sec:Method) trying to get numbering to work not sure how yet  -->
 
-To approach this complex topic of balancing randomization in CRTs we suggest a new approach. Our approach involves weighting variables of import, matching units using these weights, and randomizing many times to obtain a distribution of possiblities when official randomization occurs. Investigators assess these distributions to determine if possible randomizations are sufficiently balanced, if not, weighting is adjusted and the process begins again. The details follow.
+To approach this complex topic of balancing randomization in CRTs we suggest a new approach. Our approach involves weighting variables of import, matching units using these weights, and randomizing many times to obtain a distribution of possibilities when official randomization occurs. Investigators assess these distributions to determine if possible randomizations are sufficiently balanced, if not, weighting is adjusted and the process begins again. The details follow.
 
 The initial step involves prioritizing variables $(1, 2,..., m)$ from units $(1, 2, ..., n)$ to be randomized. We have
 
@@ -37,9 +36,9 @@ The initial step involves prioritizing variables $(1, 2,..., m)$ from units $(1,
  \vdots & = & \vdots\\    
  \overline{V_m} & = & (v_{m1}, v_{m2},..., v_{mn}).\\
  \end{eqnarray*}
-In addition, we use $\overline{w} = (w_{1}, w_{2},..., w_{m})$ to weight and standardize $(\overline{V_1}, \overline{V_2}, ..., \overline{V_m}).$ We have NOT SURE IF THIS IS RIGHT, THINK IT'S NOT!!!!!!!! something with ij is wrong.
+In addition, we use $\overline{w} = (w_{1}, w_{2},..., w_{m})$ to weight and standardize $(\overline{V_1}, \overline{V_2}, ..., \overline{V_m}).$ We have
 \begin{eqnarray*}
-v^{*}_{ii} = \frac{(v_{ii} - \frac{\sum _{j=1}^{n}v_{ij}}{n})*w_i}{sd(\overline{V_i})} 
+v^{*}_{ij} = \frac{(v_{ij} - \frac{\sum _{k=1}^{n}v_{ik}}{n})*w_i}{sd(\overline{V_i})} 
  \end{eqnarray*}
 where $sd(\overline{V_i})$ is the standard deviation of $\overline{V_i}.$ We now have
 \begin{eqnarray*}
@@ -48,7 +47,7 @@ where $sd(\overline{V_i})$ is the standard deviation of $\overline{V_i}.$ We now
  \vdots & = & \vdots\\    
  \overline{V_m^*} & = & (v_{m1}^*, v_{m2}^*,..., v_{mn}^*).\\
  \end{eqnarray*}
- which we use to compute the Mahalanobois Distance matrix, **D**. From here we use the \texttt{nmatch} function in the \texttt{designmatch} package in \texttt{R} to find $\frac{n}{2}$ pairs if $n$ is even. If $n$ is odd, the remainder can be randomized to treatment or control per the principal investigator. Without loss of generality, we assume $n$ is even for the remainder of this paper and note that to include an odd $n$ either treatment or control groups will include one more set of priority variables.
+ which we use to compute the Mahalanobois Distance matrix, **D**. From here we use the \texttt{nmatch} function in the \texttt{designmatch} [@doi] package in \texttt{R} to find $\frac{n}{2}$ pairs if $n$ is even. If $n$ is odd, the remainder can be randomized to treatment or control per the principal investigator. Without loss of generality, we assume $n$ is even for the remainder of this paper and note that to include an odd $n$ either treatment or control groups will include one more set of priority variables.
  
 Once the matching is completed and pairs found we return to using the raw data, as this will be used to assess the weighting scheme. We now have pairs $(\overline{V}_{11}, \overline{V}_{12}), (\overline{V}_{21}, \overline{V}_{22}), ..., (\overline{V}_{\frac{n}{2}1}, \overline{V}_{\frac{n}{2}2}).$ The first match in each pair will be randomized to either treatment or control using the \texttt{rbinom} function in \texttt{R}. Next, we subset $\overline{V}_1, \overline{V}_2, ..., \overline{V}_m$ into appropriate randomization subgroups: $\overline{V}_{1T}, \overline{V}_{1C}, \overline{V}_{2T}, \overline{V}_{2C},..., \overline{V}_{\frac{n}{2}T}, \overline{V}_{\frac{n}{2}C}$ where $\overline{V}_{iT} = (v_{i1}^T, v_{i2}^T,..., v_{in}^T),$ similarly for $\overline{V}_{iC}.$ Using these we find 
 \begin{eqnarray*}
@@ -57,15 +56,15 @@ Once the matching is completed and pairs found we return to using the raw data, 
 THE ABOVE NEEDS A BETTER ABSOLUTE VALUE SYMBOL. for $j = 1, 2, ..., m.$ We randomize $N$ times and find $k_{lj}$ the difference in the two arms for the $j^{th}$ priority variable for each of the $l = 1, 2, ..., N$ re-randomizations. To assist analysis we draw a parallel coordinates plot where the $j^{th}$ axis plots $k_{lj}$ for $l = 1, 2, ..., N.$ If the principal investigator finds the possible differences too large for a priority variable $j$, increasing $w_j$ and re-running the above will update the matching to attain closer matches for this variable and lessen the differences. The penality in this process is that closer matches for variable $j$ are likely to imply reduced closeness in another variable, so compromises must be made.
 
 ## Results
-To demonstrate the usefulness of this technique we present a brief summary of our randomization process using baseline data from the PROTECT trial (Project PROTECT: Protecting Nursing Homes From Infections and Hospitalization) [@ProtectTrial]. In this trial, the investigators are studying whether bathing with chlorhexidine gluconate and iodophor nasal swabs "can reduce hospitalizations associated with infections, antibiotic utilization, and multi-drug resistant organism (MDRO) prevalence" versus regular bathing. Additional training is given to nursing homes in the treatment arm to ensure comprehension and adherence to trial protocol. 
+To demonstrate the usefulness of this technique we present a brief summary of our randomization process using baseline data from the PROTECT trial (Project PROTECT: Protecting Nursing Homes From Infections and Hospitalization) [@ProtectTrial]. In this trial, the investigators are studying whether bathing with chlorhexidine gluconate and iodophor nasal swabs "can reduce hospitalizations associated with infections, antibiotic utilization, and multi-drug resistant organism (MDRO) prevalence" versus regular bathing and no nasal swabs. Additional training is given to nursing home empolyees in the treatment arm to ensure comprehension and adherence to trial protocol. 
 
-Prior randomize baseline data was collected for ?????? on the 29???? nursing homes. With this data, investigators met to prioritize variables into several categories: primary, secondary, tertiary, and not relevant. For this trial, the investigators decided that percentage discharges to hospital with infection based on primary and other diagnsoses, percentage discharge to hospital, percentages MDRO, and percentage usage of antibacterials started at nursing home were of primary importance. Of secondary importance were percentage of admissions with length of stay over 100 days, average daily census, and mean number of baths per resident per week. If they were able to include more variables without effecting the balance of the others they felt matching on AVERAGE DEPENDENT late LOSS activities of daily lives, and the Centers for Medicare and Medicaid Services (CMS) rating of eaching nursing home. To ease understanding, our initial discussion will involve 2 variables:  percentage discharges to hospital with infection based on primary and other diagnsoses, and average daily census.
+Prior to randomization baseline data was collected for 6 months on the 28 nursing homes. With this data, investigators met to prioritize baseline variables into several categories: primary, secondary, tertiary, and not relevant. For this trial, the investigators decided that percentage discharges to hospital with infection based on primary and other diagnsoses, percentage discharge to hospital, percentages MDRO, and percentage usage of antibacterials started at nursing home were of primary importance. Of secondary importance were percentage of admissions with length of stay over 100 days, average daily census, and mean number of baths per resident per week. If they were able to include more variables without effecting the balance of the others they felt matching on AVERAGE DEPENDENT late LOSS activities of daily lives, and the Centers for Medicare and Medicaid Services (CMS) rating of eaching nursing home. To ease understanding, our initial discussion will involve 2 variables:  percentage discharges to hospital with infection based on primary and other diagnsoses, and average daily census.
 
 
 
 Primary import  | Secondary import | Tetiary import 
 --------------- | ---------------- | -------------- 
-% Inf | % Long Stay | Late ADLs
+% DC Inf | % Long Stay | Late ADLs
 % DC  | Avg Daily Census | CMS Star
 MDRO  | Baths/Week
 % Abx |
@@ -110,6 +109,8 @@ drawDetails.lattice <- function(x, recording=FALSE){
 ## Function that draws the plot and saves it in a file
 ## Graphing Ks
 makePlot <- function(V, P, D, Tm, NVs){
+  ## Tm = Number of times we randomize (default 300) 
+  ## NVs = Number of variables
   ## When there are 2 variables to be plotted on 1 panel it is easier
   ## to do this in layout then in coding below. Number of Panels
   LV = length(V)
@@ -301,7 +302,8 @@ makePlot <- function(V, P, D, Tm, NVs){
   p1 = parallelplot(~P[[3]][1:NVs], P[[3]], groups = G, horizontal.axis = FALSE,
                     scales = list(x = list(rot = 90),  draw = FALSE,
                                   y = list(draw = FALSE)),
-                    col = c("grey50", mypalette[7]), lower = 0, upper = upper,
+                    col = c("grey50", "black"), lwd = c(1,3),
+                    lower = 0, upper = upper,
                     par.settings = list(axis.line = list(col = 0)),
                     panel = function(...) {
                       panel.parallel(...)
@@ -354,9 +356,6 @@ VHV <- function(xscale = NULL, xwidth, hist, fillCol, lineCol, Side) {
 ## setwd(".")
 D = read_excel("ArtData.xlsx", sheet=1,skip = 1)[1:29,]
 D = as.data.frame(D)
-
-## Removing all the \r\n so that selectInput will work
-colnames(D) <- labs <- gsub("\r\n"," ", colnames(D))
 
 ## Numeric variables for default inputs
 nums = labs[which(sapply(D, is.numeric) == TRUE)]
@@ -459,9 +458,44 @@ make.Ks = function(M, vars, D, Plot, S, ToC){
   P
 } ## closing the function make.Ks
 
+V = list(list("% Discharges to Hospital\r\nw/ Infx based on Primary\r\n& Other Diagnoses", 2, "% DC Infx", 0, 10),
+         list("2014\r\nCensus", .5, "Avg Daily Census", 0, 30))
+
+V1 = list(list("% Discharges to Hospital\r\nw/ Infx based on Primary\r\n& Other Diagnoses", 0, "% DC Infx", 0, 10),
+         list("2014\r\nCensus", 0, "Avg Daily Census", 0, 30))
+
+V2 = list(list("% Discharges to Hospital\r\nw/ Infx based on Primary\r\n& Other Diagnoses", 2, "% DC Infx", 0, 10),
+         list("2014\r\nCensus", 1, "Avg Daily Census", 0, 30))
+
+## Making data 
+## The leftover is sent to the treatment arm (ToC = 2)
+P = make.Ks(M = 300, D = D, Plot = "noscreen", vars = V, S = "glpk", ToC = 2)
+P1 = make.Ks(M = 300, D = D, Plot = "noscreen", vars = V1, S = "glpk", ToC = 2)
+P2 = make.Ks(M = 300, D = D, Plot = "noscreen", vars = V2, S = "glpk", ToC = 2)
+
+## Making the things to plot
+A = makePlot(V = V, P = P, D = D, Tm = 300, NVs = 2)
+A1 = makePlot(V = V1, P = P1, D = D, Tm = 300, NVs = 2)
+A2 = makePlot(V = V2, P = P2, D = D, Tm = 300, NVs = 2)
+
+
+grid.newpage()
+pushViewport(viewport(x=0, y=0.02, width=1, height=.25,
+                      just=c("left", "bottom")))
+grid.draw(A[[1]])
+upViewport()
+
+
+pushViewport(viewport(x=0, y=0.17, width=1, height=.83,
+                      just=c("left", "bottom")))
+drawDetails.lattice(A[[2]])
+upViewport()
+
+
+
 ```
 
-Prior to randomization, investigators 
+Prior to randomization, investigators spent time using a web application built using the \texttt{Shiny} package in \texttt{R}. The purpose of this is to determine which weights give advantageous balance across relevant baseline variables. 
 
 ## Discussion
 

@@ -1,4 +1,4 @@
-\begin{thebibliography}{9}
+\begin{thebibliography}{16}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -17,6 +17,22 @@ Elizabeth DeLong, Lingling Li, and Andrea Cook.
 \newblock URL
   \url{https://www.nihcollaboratory.org/Products/Pairing-vs-stratification_V1.0.pdf}.
 
+\bibitem[Diehr et~al.(1995)Diehr, Martin, Koepsell, and
+  Cheadle]{diehr1995breaking}
+Paula Diehr, Donald~C Martin, Thomas Koepsell, and Allen Cheadle.
+\newblock Breaking the matches in a paired t-test for community interventions
+  when the number of pairs is small.
+\newblock \emph{Statistics in medicine}, 14\penalty0 (13):\penalty0 1491--1504,
+  1995.
+
+\bibitem[Donner and Klar(2000)]{donner2000design}
+A.~Donner and N.~Klar.
+\newblock \emph{Design and Analysis of Cluster Randomization Trials in Health
+  Research}.
+\newblock Wiley, 2000.
+\newblock ISBN 9780340691533.
+\newblock URL \url{https://books.google.com/books?id=QJZrQgAACAAJ}.
+
 \bibitem[Donner et~al.(2007)Donner, Taljaard, and Klar]{donner2007merits}
 Allan Donner, Monica Taljaard, and Neil Klar.
 \newblock The merits of breaking the matches: a cautionary tale.
@@ -26,6 +42,13 @@ Allan Donner, Monica Taljaard, and Neil Klar.
 \bibitem[Gatsonis and Morton(2017)]{gatsonis2017methods}
 Constantine Gatsonis and Sally~C Morton.
 \newblock Methods in comparative effectiveness research, 2017.
+
+\bibitem[Greevy et~al.(2004)Greevy, Lu, Silber, and Rosenbaum]{doi}
+Robert Greevy, Bo~Lu, Jeffrey~H. Silber, and Paul Rosenbaum.
+\newblock Optimal multivariate matching before randomization.
+\newblock \emph{Biostatistics}, 5\penalty0 (2):\penalty0 263, 2004.
+\newblock \doi{10.1093/biostatistics/5.2.263}.
+\newblock URL \url{+ http://dx.doi.org/10.1093/biostatistics/5.2.263}.
 
 \bibitem[Hayes(2009)]{CRTrials2009}
 Moulton Hayes.
@@ -52,6 +75,29 @@ Neil Klar and Allan Donner.
 \newblock \emph{Statistics in medicine}, 16\penalty0 (15):\penalty0 1753--1764,
   1997.
 
+\bibitem[Manun'ebo et~al.(1994)Manun'ebo, Haggerty, Gaie, Ashworth, and
+  Kirkwood]{manun1994influence}
+Manwela~N Manun'ebo, Patricia~A Haggerty, Muladi~Kalen Gaie, Ann Ashworth, and
+  Betty~R Kirkwood.
+\newblock Influence of demographic, socioeconomic and.
+\newblock \emph{Journal of tropical medicine and hygiene}, 97:\penalty0 31--38,
+  1994.
+
+\bibitem[Martin et~al.(1993)Martin, Diehr, Perrin, and
+  Koepsell]{martin1993effect}
+Donald~C Martin, Paula Diehr, Edward~B Perrin, and Thomas~D Koepsell.
+\newblock The effect of matching on the power of randomized community
+  intervention studies.
+\newblock \emph{Statistics in medicine}, 12\penalty0 (3-4):\penalty0 329--338,
+  1993.
+
+\bibitem[Murray et~al.(2004)Murray, Varnell, and Blitstein]{murray2004design}
+David~M Murray, Sherri~P Varnell, and Jonathan~L Blitstein.
+\newblock Design and analysis of group-randomized trials: a review of recent
+  methodological developments.
+\newblock \emph{American journal of public health}, 94\penalty0 (3):\penalty0
+  423--432, 2004.
+
 \bibitem[Murray(1998)]{murray1998design}
 D.M. Murray.
 \newblock \emph{Design and Analysis of Group-randomized Trials}.
@@ -59,5 +105,11 @@ D.M. Murray.
   Trials. Oxford University Press, 1998.
 \newblock ISBN 9780195120363.
 \newblock URL \url{https://books.google.com/books?id=cVLs3m4a9ZoC}.
+
+\bibitem[Raab and Butcher(2001)]{raab2001balance}
+Gillian~M Raab and Izzy Butcher.
+\newblock Balance in cluster randomized trials.
+\newblock \emph{Statistics in medicine}, 20\penalty0 (3):\penalty0 351--365,
+  2001.
 
 \end{thebibliography}

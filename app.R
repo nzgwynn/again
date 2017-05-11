@@ -37,6 +37,8 @@ drawDetails.lattice <- function(x, recording=FALSE){
 ## Function that draws the plot and saves it in a file
 ## Graphing Ks
 makePlot <- function(V, P, D, Tm, NVs){
+  ## Tm Number of times we randomize (300 by default)
+  ## NVs - number of variables
   ## When there are 2 variables to be plotted on 1 panel it is easier
   ## to do this in layout then in coding below. Number of Panels
   LV = length(V)
