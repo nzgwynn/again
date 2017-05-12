@@ -47,7 +47,7 @@ where $sd(\overline{V_i})$ is the standard deviation of $\overline{V_i}.$ We now
  \vdots & = & \vdots\\    
  \overline{V_m^*} & = & (v_{m1}^*, v_{m2}^*,..., v_{mn}^*).\\
  \end{eqnarray*}
- which we use to compute the Mahalanobois Distance matrix, **D**. From here we use the \texttt{nmatch} function in the \texttt{designmatch} [@doi] package in \texttt{R} to find $\frac{n}{2}$ pairs if $n$ is even. If $n$ is odd, the remainder can be randomized to treatment or control per the principal investigator. Without loss of generality, we assume $n$ is even for the remainder of this paper and note that to include an odd $n$ either treatment or control groups will include one more set of priority variables.
+ which we use to compute the Mahalanobois Distance matrix, **D**. From here we use the \texttt{nmatch} function in the \texttt{designmatch} [@doi] package in \texttt{R} [@nmatch]to find $\frac{n}{2}$ pairs if $n$ is even. If $n$ is odd, the remainder can be randomized to treatment or control per the principal investigator. Without loss of generality, we assume $n$ is even for the remainder of this paper and note that to include an odd $n$ either treatment or control groups will include one more set of priority variables.
  
 Once the matching is completed and pairs found we return to using the raw data, as this will be used to assess the weighting scheme. We now have pairs $(\overline{V}_{11}, \overline{V}_{12}), (\overline{V}_{21}, \overline{V}_{22}), ..., (\overline{V}_{\frac{n}{2}1}, \overline{V}_{\frac{n}{2}2}).$ The first match in each pair will be randomized to either treatment or control using the \texttt{rbinom} function in \texttt{R}. Next, we subset $\overline{V}_1, \overline{V}_2, ..., \overline{V}_m$ into appropriate randomization subgroups: $\overline{V}_{1T}, \overline{V}_{1C}, \overline{V}_{2T}, \overline{V}_{2C},..., \overline{V}_{\frac{n}{2}T}, \overline{V}_{\frac{n}{2}C}$ where $\overline{V}_{iT} = (v_{i1}^T, v_{i2}^T,..., v_{in}^T),$ similarly for $\overline{V}_{iC}.$ Using these we find 
 \begin{eqnarray*}
@@ -72,7 +72,7 @@ MDRO  | Baths/Week
 Table: Abbreviations of variables used to randomize
 
 ```{r setup, include=FALSE}
-## setwd(".")
+setwd("/Users/gwynn/Documents/PostDocKleinmanLab/Bins/Shiny/Again/sage_latex_template_3")
 ## install.packages("designmatch")
 library(designmatch)
 
@@ -474,24 +474,52 @@ P1 = make.Ks(M = 300, D = D, Plot = "noscreen", vars = V1, S = "glpk", ToC = 2)
 P2 = make.Ks(M = 300, D = D, Plot = "noscreen", vars = V2, S = "glpk", ToC = 2)
 
 ## Making the things to plot
+## Half the screen on bottom
 A = makePlot(V = V, P = P, D = D, Tm = 300, NVs = 2)
+
+## Top Left
 A1 = makePlot(V = V1, P = P1, D = D, Tm = 300, NVs = 2)
+
+## Top Right
 A2 = makePlot(V = V2, P = P2, D = D, Tm = 300, NVs = 2)
 
-
+## The bottom one
 grid.newpage()
-pushViewport(viewport(x=0, y=0.02, width=1, height=.25,
+pushViewport(viewport(x=0, y=0.02, width=1, height=.125,
                       just=c("left", "bottom")))
 grid.draw(A[[1]])
 upViewport()
 
 
-pushViewport(viewport(x=0, y=0.17, width=1, height=.83,
+pushViewport(viewport(x=0, y=0.045, width=1, height=.455,
                       just=c("left", "bottom")))
 drawDetails.lattice(A[[2]])
 upViewport()
 
+## Top Left
+grid.newpage()
+pushViewport(viewport(x=0, y=0.52, width=.5, height=.125,
+                      just=c("left", "bottom")))
+grid.draw(A[[1]])
+upViewport()
 
+pushViewport(viewport(x=0, y=0.565, width=.5, height=.455,
+                      just=c("left", "bottom")))
+drawDetails.lattice(A[[2]])
+upViewport()
+
+## Top Right
+grid.newpage()
+pushViewport(viewport(x=0.5, y=0.52, width=.5, height=.125,
+                      just=c("left", "bottom")))
+grid.draw(A[[1]])
+upViewport()
+
+
+pushViewport(viewport(x=0.5, y=0.565, width=.5, height=.455,
+                      just=c("left", "bottom")))
+drawDetails.lattice(A[[2]])
+upViewport()
 
 ```
 
