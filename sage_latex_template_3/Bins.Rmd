@@ -60,8 +60,6 @@ To demonstrate the usefulness of this technique we present a brief summary of ou
 
 Prior to randomization baseline data was collected for 6 months on the 28 nursing homes. With this data, investigators met to prioritize baseline variables into several categories: primary, secondary, tertiary, and not relevant. For this trial, the investigators decided that percentage discharges to hospital with infection based on primary and other diagnsoses, percentage discharge to hospital, percentages MDRO, and percentage usage of antibacterials started at nursing home were of primary importance. Of secondary importance were percentage of admissions with length of stay over 100 days, average daily census, and mean number of baths per resident per week. If they were able to include more variables without effecting the balance of the others they felt matching on AVERAGE DEPENDENT late LOSS activities of daily lives, and the Centers for Medicare and Medicaid Services (CMS) rating of eaching nursing home. To ease understanding, our initial discussion will involve 2 variables:  percentage discharges to hospital with infection based on primary and other diagnsoses, and average daily census.
 
-
-
 Primary import  | Secondary import | Tetiary import 
 --------------- | ---------------- | -------------- 
 % DC Inf | % Long Stay | Late ADLs
@@ -356,6 +354,7 @@ VHV <- function(xscale = NULL, xwidth, hist, fillCol, lineCol, Side) {
 ## setwd(".")
 D = read_excel("ArtData.xlsx", sheet=1,skip = 1)[1:29,]
 D = as.data.frame(D)
+labs <- colnames(D)
 
 ## Numeric variables for default inputs
 nums = labs[which(sapply(D, is.numeric) == TRUE)]

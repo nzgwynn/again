@@ -84,7 +84,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{May 09, 2017}
+  \date{May 12, 2017}
 
 
 \begin{document}
@@ -134,8 +134,8 @@ matching a small number of clusters due to the decrease in power
 Breaking matches in the analysis stage addresses this
 \citep{diehr1995breaking}, but perhaps only when there are a small
 number of large clusters \citep{donner2007merits}. Others argue that
-when matching is effective in a small number of clusters as it
-``increases the chance of the intervention groups being well-balanced''
+matching is effective in a small number of clusters as it ``increases
+the chance of the intervention groups being well-balanced''
 \citep{donner2007merits}. Imai et al argue that not matching, in small
 or large sample, is ``equivalent to discarding a considerable fraction
 of one's data'' \citep{imai2009essential}. However, in one trial
@@ -145,12 +145,12 @@ of one's data'' \citep{imai2009essential}. However, in one trial
 Despite all this debate few authors discuss methodologies to support the
 matching process \citep{raab2001balance}. An alternative to matching
 suggests balancing criterion based on conditioned means of covariates
-\citep{raab2001balance}. ALSO ZUBIZARRETA. Our article is an extension
-of methods introduced in Chapter 4 of Methods in Comparative
-Effectiveness Research \citep{gatsonis2017methods}. We suggest a method
-suitable for \(a\) \(priori\) matching using baseline data. In section 2
-we outline our method, section 3 applies it to the PROTECT and SWAPOUT
-datasets, and section 4 is a brief discussion.
+\citep{raab2001balance}. ZUBIZARRETA \citep{greevy2004optimal}. Our
+article is an extension of methods introduced in Chapter 4 of Methods in
+Comparative Effectiveness Research \citep{gatsonis2017methods}. We
+suggest a method suitable for \(a\) \(priori\) matching using baseline
+data. In section 2 we outline our method, section 3 applies it to the
+PROTECT dataset, and section 4 is a brief discussion.
 
 \subsection{Methods }\label{methods}
 
@@ -192,9 +192,9 @@ where \(sd(\overline{V_i})\) is the standard deviation of
 
 which we use to compute the Mahalanobois Distance matrix, \textbf{D}.
 From here we use the \texttt{nmatch} function in the
-\texttt{designmatch} \citep{doi} package in \texttt{R} to find
-\(\frac{n}{2}\) pairs if \(n\) is even. If \(n\) is odd, the remainder
-can be randomized to treatment or control per the principal
+\texttt{designmatch} \citep{doi} package in \texttt{R} \citep{nmatch}to
+find \(\frac{n}{2}\) pairs if \(n\) is even. If \(n\) is odd, the
+remainder can be randomized to treatment or control per the principal
 investigator. Without loss of generality, we assume \(n\) is even for
 the remainder of this paper and note that to include an odd \(n\) either
 treatment or control groups will include one more set of priority
@@ -238,26 +238,26 @@ and Hospitalization) \citep{ProtectTrial}. In this trial, the
 investigators are studying whether bathing with chlorhexidine gluconate
 and iodophor nasal swabs ``can reduce hospitalizations associated with
 infections, antibiotic utilization, and multi-drug resistant organism
-(MDRO) prevalence'' versus regular bathing. Additional training is given
-to nursing homes in the treatment arm to ensure comprehension and
-adherence to trial protocol.
+(MDRO) prevalence'' versus regular bathing and no nasal swabs.
+Additional training is given to nursing home empolyees in the treatment
+arm to ensure comprehension and adherence to trial protocol.
 
-Prior randomize baseline data was collected for ?????? on the 29????
-nursing homes. With this data, investigators met to prioritize variables
-into several categories: primary, secondary, tertiary, and not relevant.
-For this trial, the investigators decided that percentage discharges to
-hospital with infection based on primary and other diagnsoses,
-percentage discharge to hospital, percentages MDRO, and percentage usage
-of antibacterials started at nursing home were of primary importance. Of
-secondary importance were percentage of admissions with length of stay
-over 100 days, average daily census, and mean number of baths per
-resident per week. If they were able to include more variables without
-effecting the balance of the others they felt matching on AVERAGE
-DEPENDENT late LOSS activities of daily lives, and the Centers for
-Medicare and Medicaid Services (CMS) rating of eaching nursing home. To
-ease understanding, our initial discussion will involve 2 variables:
-percentage discharges to hospital with infection based on primary and
-other diagnsoses, and average daily census.
+Prior to randomization baseline data was collected for 6 months on the
+28 nursing homes. With this data, investigators met to prioritize
+baseline variables into several categories: primary, secondary,
+tertiary, and not relevant. For this trial, the investigators decided
+that percentage discharges to hospital with infection based on primary
+and other diagnsoses, percentage discharge to hospital, percentages
+MDRO, and percentage usage of antibacterials started at nursing home
+were of primary importance. Of secondary importance were percentage of
+admissions with length of stay over 100 days, average daily census, and
+mean number of baths per resident per week. If they were able to include
+more variables without effecting the balance of the others they felt
+matching on AVERAGE DEPENDENT late LOSS activities of daily lives, and
+the Centers for Medicare and Medicaid Services (CMS) rating of eaching
+nursing home. To ease understanding, our initial discussion will involve
+2 variables: percentage discharges to hospital with infection based on
+primary and other diagnsoses, and average daily census.
 
 \begin{longtable}[]{@{}lll@{}}
 \caption{Abbreviations of variables used to randomize}\tabularnewline
@@ -269,14 +269,17 @@ Primary import & Secondary import & Tetiary import\tabularnewline
 Primary import & Secondary import & Tetiary import\tabularnewline
 \midrule
 \endhead
-\% Inf & \% Long Stay & Late ADLs\tabularnewline
+\% DC Inf & \% Long Stay & Late ADLs\tabularnewline
 \% DC & Avg Daily Census & CMS Star\tabularnewline
 MDRO & Baths/Week\tabularnewline
 \% Abx &\tabularnewline
 \bottomrule
 \end{longtable}
 
-Prior to randomization, investigators
+Prior to randomization, investigators spent time using a web application
+built using the \texttt{Shiny} package in \texttt{R}. The purpose of
+this is to determine which weights give advantageous balance across
+relevant baseline variables.
 
 \subsection{Discussion}\label{discussion}
 
