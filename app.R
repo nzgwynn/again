@@ -280,7 +280,11 @@ VHV <- function(xscale = NULL, xwidth, hist, fillCol, lineCol, Side) {
 
 
 ## reading the data
-D = read_excel("SwapOut_Randomization_Hosp_Data_170329.xlsx", sheet=3)[1:140,]
+# D = read_excel("SwapOut_Randomization_Hosp_Data_170329.xlsx", sheet=3)[1:140,]
+# D = as.data.frame(D)
+
+setwd("/Users/gwynn/Documents/PostDocKleinmanLab/Bins/Shiny/Again/sage_latex_template_3")
+D = read_excel("ArtData.xlsx", sheet=1,skip = 1)[1:29,]
 D = as.data.frame(D)
 
 ## Removing all the \r\n so that selectInput will work
@@ -296,7 +300,7 @@ nums = labs[which(sapply(D, is.numeric) == TRUE)]
 # names is the file name
 # S is the optimisation method
 
-make.Ks = function(M, vars, D, Plot, S, ToC){
+make.Ks = function(M, vars, D, name, Plot, S, ToC){
   r.I = length(vars)
   No.cols = length(vars[[1]])
   I = matrix(NA, nrow = r.I, ncol = No.cols)
@@ -356,14 +360,17 @@ make.Ks = function(M, vars, D, Plot, S, ToC){
     ## Trt or it gets fussy and won't add on the last value)
     R = replicate(length(id_1), rbinom(1, size = 1, prob = 0.5))
     S = 1 - R
-    
-    ## The 1 is for the leftover row that goes to the trt arm
     Trt = c(R, S)
     
-    ## Making the data, TA is included and goes to the trt arm
+    ## Making the data
     if (X == TRUE) {
+      
+      ## If nothing is leftover we don't need ToC
       Dt = data.frame(mymat[c(id_1, id_2),], Trt)
     } else {
+      
+      ## If anything is, then we do
+      ## ToC is 2 for trt and 1 for control, added at end
       Dt = data.frame(mymat[c(id_1, id_2, LO),], c(Trt, (ToC - 1)))
     }
     
@@ -372,7 +379,7 @@ make.Ks = function(M, vars, D, Plot, S, ToC){
     Ctl.CV = Dt[-which(Trt == 1), 1:r.I]
     
     Ks[i,] = abs((apply(Trt.CV, 2, sum) - 
-                    apply(Ctl.CV, 2, sum))/length(R))
+                    apply(Ctl.CV, 2, sum))/N)
   }## ending for i in M.seq
   
   ## So the labels in parcoord come out nicely
@@ -380,12 +387,13 @@ make.Ks = function(M, vars, D, Plot, S, ToC){
   colnames(Ks) = I[,'L']
   
   P = list()
-  P[[1]] = vars
+  P[[1]] = name
   P[[2]] = I
   P[[3]] = as.data.frame(Ks)
   
   P
 } ## closing the function make.Ks
+
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -521,7 +529,8 @@ server <- function(input, output, session){
       V[[i]][[5]] = as.numeric(S[i])
     }
     
-    make.Ks(M = input$Times, D = D, vars = V, ToC = isolate({input$Toc}), S = "glpk")
+    make.Ks(M = input$Times, D = D, vars = V, 
+            ToC = as.numeric(isolate({input$Toc})), S = "glpk")
   }) ## eventReactive
   
   observeEvent(input$Tab2, {
