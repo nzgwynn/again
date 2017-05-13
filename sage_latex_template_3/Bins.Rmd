@@ -297,6 +297,11 @@ makePlot <- function(V, P, D, Tm, NVs){
   ## Setting the upper values for the parallelplot
   upper <- as.numeric(P[[2]][,"Maxs"])
   
+  ## Naming the columns
+  I = P[[2]]
+  CNs <- c(I[,'L'], "G")
+  colnames(P[[3]]) = CNs
+  
   p1 = parallelplot(~P[[3]][1:NVs], P[[3]], groups = G, horizontal.axis = FALSE,
                     scales = list(x = list(rot = 90),  draw = FALSE,
                                   y = list(draw = FALSE)),
@@ -305,8 +310,14 @@ makePlot <- function(V, P, D, Tm, NVs){
                     par.settings = list(axis.line = list(col = 0)),
                     panel = function(...) {
                       panel.parallel(...)
+                      ## If plotting with histograms underneath take out
+                      ## first grid.text
+                      grid.text(0,
+                                 x=unit(1:NVs, "native"),
+                                 y=unit(2, "mm"), just="bottom",
+                                 gp=gpar(col="grey", cex=.7))
                       grid.text(upper,
-                                x=unit(1:11, "native"),
+                                x=unit(1:NVs, "native"),
                                 y=unit(1, "npc") - unit(2, "mm"), 
                                 just="top",
                                 gp=gpar(col="grey", cex=.7))
@@ -457,14 +468,14 @@ make.Ks = function(M, vars, D, Plot, S, ToC){
   P
 } ## closing the function make.Ks
 
-V = list(list("% Discharges to Hospital\r\nw/ Infx based on Primary\r\n& Other Diagnoses", 2, "% DC Infx", 0, 10),
-         list("2014\r\nCensus", .5, "Avg Daily Census", 0, 30))
+V = list(list("2014 Total\r\nDischarges", 0, "Total DC", 0, 10),
+         list("2014\r\nCensus", .5, "Avg Daily Census", 0, 40))
 
-V1 = list(list("% Discharges to Hospital\r\nw/ Infx based on Primary\r\n& Other Diagnoses", 0, "% DC Infx", 0, 10),
-         list("2014\r\nCensus", 0, "Avg Daily Census", 0, 30))
+V1 = list(list("2014 Total\r\nDischarges", 0, "Total DC", 0, 10),
+         list("2014\r\nCensus", 0, "Avg Daily Census", 0, 40))
 
-V2 = list(list("% Discharges to Hospital\r\nw/ Infx based on Primary\r\n& Other Diagnoses", 2, "% DC Infx", 0, 10),
-         list("2014\r\nCensus", 1, "Avg Daily Census", 0, 30))
+V2 = list(list("2014 Total\r\nDischarges", 5, "Total DC", 0, 10),
+         list("2014\r\nCensus", 0, "Avg Daily Census", 0, 40))
 
 ## Making data 
 ## The leftover is sent to the treatment arm (ToC = 2)
@@ -484,40 +495,22 @@ A2 = makePlot(V = V2, P = P2, D = D, Tm = 300, NVs = 2)
 
 ## The bottom one
 grid.newpage()
-pushViewport(viewport(x=0, y=0.02, width=1, height=.125,
-                      just=c("left", "bottom")))
-grid.draw(A[[1]])
-upViewport()
 
-
-pushViewport(viewport(x=0, y=0.045, width=1, height=.455,
+pushViewport(viewport(x=0, y=0, width=1, height=.5,
                       just=c("left", "bottom")))
 drawDetails.lattice(A[[2]])
 upViewport()
 
 ## Top Left
-grid.newpage()
-pushViewport(viewport(x=0, y=0.52, width=.5, height=.125,
+pushViewport(viewport(x=0, y=0.52, width=.5, height=.5,
                       just=c("left", "bottom")))
-grid.draw(A[[1]])
-upViewport()
-
-pushViewport(viewport(x=0, y=0.565, width=.5, height=.455,
-                      just=c("left", "bottom")))
-drawDetails.lattice(A[[2]])
+drawDetails.lattice(A1[[2]])
 upViewport()
 
 ## Top Right
-grid.newpage()
-pushViewport(viewport(x=0.5, y=0.52, width=.5, height=.125,
+pushViewport(viewport(x=0.5, y=0.52, width=.5, height=.5,
                       just=c("left", "bottom")))
-grid.draw(A[[1]])
-upViewport()
-
-
-pushViewport(viewport(x=0.5, y=0.565, width=.5, height=.455,
-                      just=c("left", "bottom")))
-drawDetails.lattice(A[[2]])
+drawDetails.lattice(A2[[2]])
 upViewport()
 
 ```
