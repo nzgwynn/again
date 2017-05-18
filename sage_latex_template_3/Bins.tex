@@ -84,7 +84,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{May 13, 2017}
+  \date{May 17, 2017}
 
 
 \begin{document}
@@ -150,7 +150,7 @@ article is an extension of methods introduced in Chapter 4 of Methods in
 Comparative Effectiveness Research \citep{gatsonis2017methods}. We
 suggest a method suitable for \(a\) \(priori\) matching using baseline
 data. In section 2 we outline our method, section 3 applies it to the
-PROTECT dataset, and section 4 is a brief discussion.
+SWAPOUT dataset, and section 4 is a brief discussion.
 
 \subsection{Methods }\label{methods}
 
@@ -233,46 +233,59 @@ must be made.
 
 To demonstrate the usefulness of this technique we present a brief
 summary of our randomization process using baseline data from the
-PROTECT trial (Project PROTECT: Protecting Nursing Homes From Infections
-and Hospitalization) \citep{ProtectTrial}. In this trial, the
-investigators are studying whether bathing with chlorhexidine gluconate
-and iodophor nasal swabs ``can reduce hospitalizations associated with
-infections, antibiotic utilization, and multi-drug resistant organism
-(MDRO) prevalence'' versus regular bathing and no nasal swabs.
-Additional training is given to nursing home empolyees in the treatment
-arm to ensure comprehension and adherence to trial protocol.
+SWAPOUT trial (Cluster-randomized Non-inferiority Trial Comparing
+Mupirocin vs Iodophor for Nasal Decolonization of ICU Patients to Assess
+Impact on Staphylococcus aureus Clinical Cultures and All-cause
+Bloodstream Infection During Routine Chlorhexidine Bathing)
+\citep{SOTrial}. In this non-inferiority trial, the investigators are
+studying whether bathing with chlorhexidine gluconate and swabbing
+iodophor nasal swabs are inferior to bathing with the same and mupirocin
+nasal swabs. REDUCE trial ADD REF mupirocin nasal swabs and bathing with
+chlorhexidine reduced the MRSA Staphylococcus aureus (an antibiotic
+resistant infection) in Hospital Corporation of America intensive care
+units (ICU). However, physicians are reluctant to use mupirocin, an
+antibiotic, so investigators are swapping it with iodophor.
 
-Prior to randomization baseline data was collected for 6 months on the
-28 nursing homes. With this data, investigators met to prioritize
-baseline variables into several categories: primary, secondary,
-tertiary, and not relevant. For this trial, the investigators decided
-that percentage discharges to hospital with infection based on primary
-and other diagnsoses, percentage discharge to hospital, percentages
-MDRO, and percentage usage of antibacterials started at nursing home
-were of primary importance. Of secondary importance were percentage of
-admissions with length of stay over 100 days, average daily census, and
-mean number of baths per resident per week. If they were able to include
-more variables without effecting the balance of the others they felt
-matching on AVERAGE DEPENDENT late LOSS activities of daily lives, and
-the Centers for Medicare and Medicaid Services (CMS) rating of eaching
-nursing home. To ease understanding, our initial discussion will involve
-2 variables: percentage discharges to hospital with infection based on
-primary and other diagnsoses, and average daily census.
+Prior to randomization baseline data was collected for 20 months on the
+137 hospitals. With this data, investigators met to prioritize baseline
+variables into several categories: primary, secondary, tertiary,
+quaternary, and not relevant to randomization. For this trial, the
+investigators decided that average monthly volume of patients with
+attributable time, average monthly attributable days, Staphylococcus
+aureus ICU-attributable cultures per 1,000 days, MRSA ICU-attributable
+cultures per 1,000 days, all pathogen ICU-attributable bacteremia
+cultures per 1,000 days, regional mupirocin resistance estimate, percent
+of admissions with MRSA diagnosis within a year, percent of mupirocin
+use admission to day 5, survey Chlorhexidine Glucominate were all of
+primary importance. Of secondary importance were median ICU length of
+stay, and mean elixhauser total score. Of tertiary importance were the
+percentage of ICU medicaid patients, and Polymerase chain reaction
+clinical specimen status. Lastly, percent admissions to skilled nursing
+facility (SNF), and if the ICU has specialty units for burn, trauma,
+etc. A list of abbreviations in the above order can be found in Table 1.
+To ease understanding, our initial discussion will involve 3 variables:
+Patient days, Staphylococcus auer rate, and MRSA rate.
 
-\begin{longtable}[]{@{}lll@{}}
+\begin{longtable}[]{@{}llll@{}}
 \caption{Abbreviations of variables used to randomize}\tabularnewline
 \toprule
-Primary import & Secondary import & Tetiary import\tabularnewline
+Primary import & Secondary import & Tetiary import & Quaternary
+import\tabularnewline
 \midrule
 \endfirsthead
 \toprule
-Primary import & Secondary import & Tetiary import\tabularnewline
+Primary import & Secondary import & Tetiary import & Quaternary
+import\tabularnewline
 \midrule
 \endhead
-\% DC Inf & \% Long Stay & Late ADLs\tabularnewline
-\% DC & Avg Daily Census & CMS Star\tabularnewline
-MDRO & Baths/Week\tabularnewline
-\% Abx &\tabularnewline
+Pt Days & Median LOS & Medicaid\tabularnewline
+S auer Rate & Comorbidity Score & TALI WHAT ELSE??\tabularnewline
+MRSA Rate &\tabularnewline
+All Blood &\tabularnewline
+Mup-R &\tabularnewline
+Hx MRSA &\tabularnewline
+Mup Adherence &\tabularnewline
+CHG Adherence &\tabularnewline
 \bottomrule
 \end{longtable}
 
@@ -287,6 +300,11 @@ Look how smart we are.
 
 Use of color to make it clear where the closer to 0 ones are. Click on
 axis.
+
+\subsection{Appendix}\label{appendix}
+
+A more formal explanation of the variables here, to be checked with
+Susan.
 
 \bibliography{bibliography.bib}
 

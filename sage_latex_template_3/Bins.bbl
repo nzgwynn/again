@@ -64,12 +64,6 @@ Moulton Hayes.
 \newblock \emph{Cluster Randomised Trials}.
 \newblock Chapman and Hall\/CRC, 2009.
 
-\bibitem[Huang()]{ProtectTrial}
-Susan Huang.
-\newblock Project protect: Protecting nursing homes from infections and
-  hospitalization (protect).
-\newblock URL \url{https://clinicaltrials.gov/ct2/show/NCT03118232}.
-
 \bibitem[Imai et~al.(2009)Imai, King, Nall, et~al.]{imai2009essential}
 Kosuke Imai, Gary King, Clayton Nall, et~al.
 \newblock The essential role of pair matching in cluster-randomized
@@ -114,6 +108,12 @@ D.M. Murray.
   Trials. Oxford University Press, 1998.
 \newblock ISBN 9780195120363.
 \newblock URL \url{https://books.google.com/books?id=cVLs3m4a9ZoC}.
+
+\bibitem[Platt()]{SOTrial}
+Richard Platt.
+\newblock Mupirocin-iodophor icu decolonization swap out trial.
+\newblock URL
+  \url{https://clinicaltrials.gov/ct2/show/NCT03140423?term=swap+out&rank=1}.
 
 \bibitem[Raab and Butcher(2001)]{raab2001balance}
 Gillian~M Raab and Izzy Butcher.
