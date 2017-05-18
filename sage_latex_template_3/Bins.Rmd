@@ -60,6 +60,8 @@ THE ABOVE NEEDS A BETTER ABSOLUTE VALUE SYMBOL. for $j = 1, 2, ..., m.$ We rando
 ## Results
 To demonstrate the usefulness of this technique we present a brief summary of our randomization process using baseline data from the SWAPOUT trial (Cluster-randomized Non-inferiority Trial Comparing Mupirocin vs Iodophor for Nasal Decolonization of ICU Patients to Assess Impact on Staphylococcus aureus Clinical Cultures and All-cause Bloodstream Infection During Routine Chlorhexidine Bathing) [@SOTrial]. In this non-inferiority trial, the investigators are studying whether bathing with chlorhexidine gluconate and swabbing iodophor nasal swabs are inferior to bathing with the same and mupirocin nasal swabs. REDUCE trial [@huang2013targeted] mupirocin nasal swabs and bathing with chlorhexidine reduced the MRSA Staphylococcus aureus (an antibiotic resistant infection) in Hospital Corporation of America intensive care units (ICU). However, physicians are reluctant to use mupirocin, an antibiotic, so investigators are swapping it with iodophor. 
 
+I JUST GOT MORE INFO FROM TALI AND KATIE ABOUT THIS THAT I'LL FORWARD TO YOU. I'M NOT LOOKING AT IT FOR AWHILE.
+
 Primary import | Secondary import |	Tetiary import |	Quaternary import
 -------------- | ---------------- |--------------- | ----------------- |
 Pt Days |	Median LOS |	Medicaid 	
