@@ -24,7 +24,7 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
 \hypersetup{unicode=true,
-            pdftitle={A Priori Matching in Cluster Randomized Trials},
+            pdftitle={Matching in Cluster Randomized Trials Using the Glodilocks Approach},
             pdfkeywords={cluster-randomized trials, matching},
             pdfborder={0 0 0},
             breaklinks=true}
@@ -76,7 +76,7 @@
 }
 
 \setlength{\droptitle}{-2em}
-  \title{\(A\) \(Priori\) Matching in Cluster Randomized Trials}
+  \title{Matching in Cluster Randomized Trials Using the Glodilocks Approach}
   \pretitle{\vspace{\droptitle}\centering\huge}
   \posttitle{\par}
   \author{true}
@@ -124,6 +124,8 @@ effects among cluster members who do not receive treatment
 allocation of identifiable groups is necessary''
 \citep{murray2004design}.
 
+DO I NEED TO SAY SOMETHING ABOUT MATCHING HERE?? PROBABLY SO??
+
 Many authors debate matching in CRTs
 \citep{balzer2012match, CRTrials2009, gatsonis2017methods, diehr1995breaking, murray1998design, imai2009essential, PMVsStrat, donner2007merits, klar1997merits, donner2000design, martin1993effect}.
 Murray argues that ``the choice of matching or stratification {[}of{]}
@@ -145,12 +147,12 @@ of one's data'' \citep{imai2009essential}. However, in one trial
 Despite all this debate few authors discuss methodologies to support the
 matching process \citep{raab2001balance}. An alternative to matching
 suggests balancing criterion based on conditioned means of covariates
-\citep{raab2001balance}. ZUBIZARRETA \citep{greevy2004optimal}. Our
-article is an extension of methods introduced in Chapter 4 of Methods in
-Comparative Effectiveness Research \citep{gatsonis2017methods}. We
-suggest a method suitable for \(a\) \(priori\) matching using baseline
-data. In section 2 we outline our method, section 3 applies it to the
-SWAPOUT dataset, and section 4 is a brief discussion.
+\citep{raab2001balance}. Our article is an extension of methods
+introduced in Chapter 4 of Methods in Comparative Effectiveness Research
+\citep{gatsonis2017methods}. We suggest a method suitable for \(a\)
+\(priori\) matching using baseline data. In section 2 we outline our
+method, section 3 applies it to the SWAPOUT dataset, and section 4 is a
+brief discussion.
 
 \subsection{Methods }\label{methods}
 
@@ -240,11 +242,29 @@ Bloodstream Infection During Routine Chlorhexidine Bathing)
 \citep{SOTrial}. In this non-inferiority trial, the investigators are
 studying whether bathing with chlorhexidine gluconate and swabbing
 iodophor nasal swabs are inferior to bathing with the same and mupirocin
-nasal swabs. REDUCE trial ADD REF mupirocin nasal swabs and bathing with
-chlorhexidine reduced the MRSA Staphylococcus aureus (an antibiotic
-resistant infection) in Hospital Corporation of America intensive care
-units (ICU). However, physicians are reluctant to use mupirocin, an
-antibiotic, so investigators are swapping it with iodophor.
+nasal swabs. REDUCE trial \citep{huang2013targeted} mupirocin nasal
+swabs and bathing with chlorhexidine reduced the MRSA Staphylococcus
+aureus (an antibiotic resistant infection) in Hospital Corporation of
+America intensive care units (ICU). However, physicians are reluctant to
+use mupirocin, an antibiotic, so investigators are swapping it with
+iodophor.
+
+\begin{longtable}[]{@{}llll@{}}
+\toprule
+Primary import & Secondary import & Tetiary import & Quaternary
+import\tabularnewline
+\midrule
+\endhead
+Pt Days & Median LOS & Medicaid\tabularnewline
+S auer Rate & Comorbidity Score & TALI WHAT ELSE??\tabularnewline
+MRSA Rate &\tabularnewline
+All Blood &\tabularnewline
+Mup-R &\tabularnewline
+Hx MRSA &\tabularnewline
+Mup Adherence &\tabularnewline
+CHG Adherence &\tabularnewline
+\bottomrule
+\end{longtable}
 
 Prior to randomization baseline data was collected for 20 months on the
 137 hospitals. With this data, investigators met to prioritize baseline
@@ -262,48 +282,103 @@ stay, and mean elixhauser total score. Of tertiary importance were the
 percentage of ICU medicaid patients, and Polymerase chain reaction
 clinical specimen status. Lastly, percent admissions to skilled nursing
 facility (SNF), and if the ICU has specialty units for burn, trauma,
-etc. A list of abbreviations in the above order can be found in Table 1.
-To ease understanding, our initial discussion will involve 3 variables:
-Patient days, Staphylococcus auer rate, and MRSA rate.
-
-\begin{longtable}[]{@{}llll@{}}
-\caption{Abbreviations of variables used to randomize}\tabularnewline
-\toprule
-Primary import & Secondary import & Tetiary import & Quaternary
-import\tabularnewline
-\midrule
-\endfirsthead
-\toprule
-Primary import & Secondary import & Tetiary import & Quaternary
-import\tabularnewline
-\midrule
-\endhead
-Pt Days & Median LOS & Medicaid\tabularnewline
-S auer Rate & Comorbidity Score & TALI WHAT ELSE??\tabularnewline
-MRSA Rate &\tabularnewline
-All Blood &\tabularnewline
-Mup-R &\tabularnewline
-Hx MRSA &\tabularnewline
-Mup Adherence &\tabularnewline
-CHG Adherence &\tabularnewline
-\bottomrule
-\end{longtable}
+etc. More information is avaliable in appendix 1. To ease understanding,
+our initial discussion will involve 3 variables: Patient days,
+Staphylococcus auer rate, and MRSA rate.
 
 \begin{center}\includegraphics{Bins_files/figure-latex/IntroGraph-1} \end{center}
 
 Prior to randomization, investigators spent time using a web application
 built using the \texttt{Shiny} package in \texttt{R}. The purpose of
 this is to determine which weights give advantageous balance across
-relevant baseline variables.
+relevant baseline variables. We recommend deciding on ideal and
+acheivable maximum differences in study arms and using many combinations
+of weights until one is found which ensures randomization is likely to
+be within those bounds. In the well-known childrens fable The Three
+Bears, Goldilocks tries three bowls of porridge, one is too hot, the
+other too cold, and the third is just right \citep{3Bears}. We recommend
+a similar procedure applied to weights, with perhaps more attempts.
+
+Figure 1 demonstrates this process using three variables: attributable
+patient days per month, Staphylococcus auer rate, and MRSA rate. After
+initial explorations on the web application, investigators agreed that
+an ideal maximum mean differences in treatment and control arms for
+these variables were: 80 attributable patient days per month, 15\%
+difference in Staphylococcus aureus infection rates, and 15\% difference
+in MRSA rate. The graph on the top left shows no weighting on any of
+these variables, the maximums are not consistently attained on any axis:
+there is a reasonable chance that if randomization occured with this
+weighting all variables would be above the desired maximum mean
+differences in treatment and control arms. To rectify this, nonzero
+weighting must be added. In the top-right graph a weight of 8 has been
+applied to the Staphylococcus auer rate. In this graph, the matching of
+hospitals is strongly skewed so that hospitals with similar
+Staphylococcus auer rates are paired. This results in low mean
+difference between the treatment and control arms in that variable. The
+middle axis is consistently below the maximum value: if randomization
+occured using these weights we are likely to get suitable balance in
+this variable. Unfortunately, there is a penalty. Hospitals with similar
+Staphylococcus auer rates may not have similar attributable patient days
+per month and MRSA rates, which results in increases in these values. In
+particular, our investigators felt that the chance of attaining MRSA
+rates above 15\% were too high for this weighting. The bottom plot shows
+the possible mean balances used in the actual randomization for these
+three variables, the weights for each variable were 1, 4, and 2,
+respectively. In all three graphs, the black line indicates the mean
+value of all points on each axis.
+
+Our investigators used this approach with 16 variables. After trying
+many weights this weighting provided the best balance between treatment
+and control arms for the variables of important. When the trial was
+randomized we used this weighting to match hospitals in the study, then
+randomized the first member of each match to either treatment control.
+
+\begin{center}\includegraphics{Bins_files/figure-latex/FullGraph-1} \end{center}
 
 \subsection{Discussion}\label{discussion}
 
-Look how smart we are.
+While the Goldilocks approach to randomizing does not ensure balance in
+the treatment and control arms, it is a tool that provides investigators
+with a method to explore weights that impact matching and balance. We
+encourage investigators that utilize CRTs to use this method prior to
+randomizing to find more balance in treatment and control arms and
+SOMETHING THEORETICAL HERE!!!!
+
+Future work in this area includes publishing a \texttt{Shiny} web
+application for investigators to utilise. This application will
+eventually be an interactive plot that enables users to click on each
+axis and view where low and high draws of that variable fall for other
+variables. In some cases, our investigators find that matching on 1
+variable seems to give suitable balance throughout.
 
 \subsection{Appendix}\label{appendix}
 
-A more formal explanation of the variables here, to be checked with
-Susan.
+A more formal explanation of the variables here, in table format, to be
+checked with Susan.
+
+\begin{longtable}[]{@{}ll@{}}
+\caption{Abbreviations of variables used to randomize}\tabularnewline
+\toprule
+Variable & Description\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Variable & Description\tabularnewline
+\midrule
+\endhead
+Pt Days &\tabularnewline
+S auer Rate &\tabularnewline
+MRSA Rate &\tabularnewline
+All Blood &\tabularnewline
+Mup-R &\tabularnewline
+Hx MRSA &\tabularnewline
+Mup Adherence &\tabularnewline
+CHG Adherence &\tabularnewline
+Median LOS &\tabularnewline
+Medicaid &\tabularnewline
+Comorbidity Score &\tabularnewline
+\bottomrule
+\end{longtable}
 
 \bibliography{bibliography.bib}
 

@@ -1,9 +1,12 @@
-\begin{thebibliography}{18}
+\begin{thebibliography}{19}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[3Be()]{3Bears}
+URL \url{https://en.wikipedia.org/wiki/Goldilocks_and_the_Three_Bears}.
 
 \bibitem[Balzer et~al.(2012)Balzer, Petersen, and van~der
   Laan]{balzer2012match}
@@ -43,26 +46,26 @@ Allan Donner, Monica Taljaard, and Neil Klar.
 Constantine Gatsonis and Sally~C Morton.
 \newblock Methods in comparative effectiveness research, 2017.
 
-\bibitem[Greevy et~al.(2004{\natexlab{a}})Greevy, Lu, Silber, and
-  Rosenbaum]{doi}
+\bibitem[Greevy et~al.(2004)Greevy, Lu, Silber, and Rosenbaum]{doi}
 Robert Greevy, Bo~Lu, Jeffrey~H. Silber, and Paul Rosenbaum.
 \newblock Optimal multivariate matching before randomization.
-\newblock \emph{Biostatistics}, 5\penalty0 (2):\penalty0 263,
-  2004{\natexlab{a}}.
+\newblock \emph{Biostatistics}, 5\penalty0 (2):\penalty0 263, 2004.
 \newblock \doi{10.1093/biostatistics/5.2.263}.
 \newblock URL \url{+ http://dx.doi.org/10.1093/biostatistics/5.2.263}.
-
-\bibitem[Greevy et~al.(2004{\natexlab{b}})Greevy, Lu, Silber, and
-  Rosenbaum]{greevy2004optimal}
-Robert Greevy, Bo~Lu, Jeffrey~H Silber, and Paul Rosenbaum.
-\newblock Optimal multivariate matching before randomization.
-\newblock \emph{Biostatistics}, 5\penalty0 (2):\penalty0 263--275,
-  2004{\natexlab{b}}.
 
 \bibitem[Hayes(2009)]{CRTrials2009}
 Moulton Hayes.
 \newblock \emph{Cluster Randomised Trials}.
 \newblock Chapman and Hall\/CRC, 2009.
+
+\bibitem[Huang et~al.(2013)Huang, Septimus, Kleinman, Moody, Hickok, Avery,
+  Lankiewicz, Gombosev, Terpstra, Hartford, et~al.]{huang2013targeted}
+Susan~S Huang, Edward Septimus, Ken Kleinman, Julia Moody, Jason Hickok,
+  Taliser~R Avery, Julie Lankiewicz, Adrijana Gombosev, Leah Terpstra, Fallon
+  Hartford, et~al.
+\newblock Targeted versus universal decolonization to prevent icu infection.
+\newblock \emph{New England Journal of Medicine}, 368\penalty0 (24):\penalty0
+  2255--2265, 2013.
 
 \bibitem[Imai et~al.(2009)Imai, King, Nall, et~al.]{imai2009essential}
 Kosuke Imai, Gary King, Clayton Nall, et~al.
