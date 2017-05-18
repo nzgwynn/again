@@ -73,7 +73,7 @@ CHG Adherence |
 
 Table: Abbreviations of variables used to randomize
 
-```{r IntroGraph, include=FALSE}
+```{r IntroGraph, echo=FALSE, fig.align='center', fig.show='asis', message=FALSE, warning=FALSE, cache.lazy=TRUE}
 setwd("/Users/gwynn/Documents/PostDocKleinmanLab/Bins/Shiny/Again/sage_latex_template_3")
 ## install.packages("designmatch")
 library(designmatch)
@@ -83,10 +83,6 @@ library(designmatch)
 ## us make the final plot.
 library(lattice)
 library(grid)
-library(gridGraphics)
-
-## To add a table to the plot
-library(plotrix)
 
 ## Used to read in the data
 ## install.packages("readxl")
@@ -107,6 +103,552 @@ drawDetails.lattice <- function(x, recording=FALSE){
   lattice:::plot.trellis(x$p, newpage=FALSE)
 } 
 
+nmatch <- function (dist_mat, subset_weight = NULL, total_pairs = NULL, 
+    mom = NULL, exact = NULL, near_exact = NULL, fine = NULL, 
+    near_fine = NULL, near = NULL, far = NULL, solver = NULL) 
+{
+    if (is.null(mom)) {
+        mom_covs = NULL
+        mom_tols = NULL
+        mom_targets = NULL
+    }
+    else {
+        mom_covs = mom$covs
+        mom_tols = mom$tols
+        mom_targets = mom$targets
+    }
+    if (is.null(exact)) {
+        exact_covs = NULL
+    }
+    else {
+        exact_covs = exact$covs
+    }
+    if (is.null(near_exact)) {
+        near_exact_covs = NULL
+        near_exact_devs = NULL
+    }
+    else {
+        near_exact_covs = near_exact$covs
+        near_exact_devs = near_exact$devs
+    }
+    if (is.null(fine)) {
+        fine_covs = NULL
+    }
+    else {
+        fine_covs = fine$covs
+    }
+    if (is.null(near_fine)) {
+        near_fine_covs = NULL
+        near_fine_devs = NULL
+    }
+    else {
+        near_fine_covs = near_fine$covs
+        near_fine_devs = near_fine$devs
+    }
+    if (is.null(near)) {
+        near_covs = NULL
+        near_pairs = NULL
+        near_groups = NULL
+    }
+    else {
+        near_covs = near$covs
+        near_pairs = near$pairs
+        near_groups = near$groups
+    }
+    if (is.null(far)) {
+        far_covs = NULL
+        far_pairs = NULL
+        far_groups = NULL
+    }
+    else {
+        far_covs = far$covs
+        far_pairs = far$pairs
+        far_groups = far$groups
+    }
+    if (is.null(solver)) {
+        solver = "glpk"
+        t_max = 60 * 15
+        approximate = 1
+    }
+    else {
+        t_max = solver$t_max
+        approximate = solver$approximate
+        trace = solver$trace
+        round_cplex = solver$round_cplex
+        solver = solver$name
+    }
+    n_tot = nrow(dist_mat)
+    n_dec = (n_tot * (n_tot - 1)) - sum(1:(n_tot - 1))
+    if (is.null(subset_weight)) {
+        subset_weight = 0
+    }
+    cvec = t(dist_mat)[lower.tri(dist_mat)] - (subset_weight * 
+        rep(1, n_dec))
+    rows_far = NULL
+    cols_far = NULL
+    vals_far = NULL
+    rows_near = NULL
+    cols_near = NULL
+    vals_near = NULL
+    rows_mom = NULL
+    cols_mom = NULL
+    vals_mom = NULL
+    rows_exact = NULL
+    cols_exact = NULL
+    vals_exact = NULL
+    rows_near_exact = NULL
+    cols_near_exact = NULL
+    vals_near_exact = NULL
+    rows_fine = NULL
+    cols_fine = NULL
+    vals_fine = NULL
+    rows_near_fine = NULL
+    cols_near_fine = NULL
+    vals_near_fine = NULL
+    rows_n = NULL
+    cols_n = NULL
+    vals_n = NULL
+    rows_target = NULL
+    cols_target = NULL
+    vals_target = NULL
+    rows_nbm = sort(rep(1:n_tot, n_tot - 1))
+    temp = matrix(0, nrow = n_tot, ncol = n_tot)
+    temp[lower.tri(temp)] = 1:n_dec
+    temp = temp + t(temp)
+    diag(temp) = NA
+    cols_nbm = as.vector(t(temp))
+    cols_nbm = cols_nbm[!is.na(cols_nbm)]
+    vals_nbm = rep(1, (n_tot - 1) * n_tot)
+    row_count = max(rows_nbm)
+    rows_ind_far_pairs = list()
+    if (!is.null(far_covs)) {
+        rows_far = NULL
+        cols_far = NULL
+        vals_far = NULL
+        n_far_covs = ncol(far_covs)
+        for (j in 1:n_far_covs) {
+            far_cov = far_covs[, j]
+            if (!is.null(far_groups)) {
+                far_group = far_groups[j]
+                row_ind_far_all = rep(row_count + 1, n_dec)
+                col_ind_far_all = rep(1:n_dec, 1)
+                i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+                aux = matrix(rep(1:n_tot, n_tot), nrow = n_tot, 
+                  byrow = F)
+                j_ind = aux[lower.tri(aux)]
+                vals_far_all = far_cov[i_ind] - far_cov[j_ind] - 
+                  (far_group * rep(1, n_dec))
+                row_count = max(row_ind_far_all)
+            }
+            if (!is.null(far_pairs)) {
+                far_pair = far_pairs[j]
+                aux = abs(outer(far_cov, far_cov, FUN = "-"))
+                temp = as.vector(matrix(t(aux)[lower.tri(aux)], 
+                  nrow = 1, byrow = TRUE))
+                cols_ind_far_pairs = which(temp < far_pair)
+                if (length(cols_ind_far_pairs) > 0) {
+                  rows_ind_far_pairs[[j]] = row_count + (1:length(cols_ind_far_pairs))
+                  vals_far_pairs = rep(1, length(cols_ind_far_pairs))
+                  row_count = max(rows_ind_far_pairs[[j]])
+                }
+                if (length(cols_ind_far_pairs) == 0) {
+                  cols_ind_far_pairs = NULL
+                  rows_ind_far_pairs[[j]] = -1
+                  vals_far_pairs = NULL
+                }
+            }
+            if (!is.null(far_groups) && is.null(far_pairs)) {
+                rows_far = c(rows_far, row_ind_far_all)
+                cols_far = c(cols_far, col_ind_far_all)
+                vals_far = c(vals_far, vals_far_all)
+            }
+            if (is.null(far_groups) && !is.null(far_pairs) && 
+                rows_ind_far_pairs[[j]] != -1) {
+                rows_far = c(rows_far, rows_ind_far_pairs[[j]])
+                cols_far = c(cols_far, cols_ind_far_pairs)
+                vals_far = c(vals_far, vals_far_pairs)
+            }
+            if (!is.null(far_groups) && !is.null(far_pairs) && 
+                rows_ind_far_pairs[[j]] != -1) {
+                rows_far = c(rows_far, row_ind_far_all, rows_ind_far_pairs[[j]])
+                cols_far = c(cols_far, col_ind_far_all, cols_ind_far_pairs)
+                vals_far = c(vals_far, vals_far_all, vals_far_pairs)
+            }
+            if (!is.null(far_groups) && !is.null(far_pairs) && 
+                rows_ind_far_pairs[[j]] == -1) {
+                rows_far = c(rows_far, row_ind_far_all)
+                cols_far = c(cols_far, col_ind_far_all)
+                vals_far = c(vals_far, vals_far_all)
+            }
+        }
+    }
+    rows_ind_near_pairs = list()
+    if (!is.null(near_covs)) {
+        rows_near = NULL
+        cols_near = NULL
+        vals_near = NULL
+        n_near_covs = ncol(near_covs)
+        for (j in 1:n_near_covs) {
+            near_cov = near_covs[, j]
+            if (!is.null(near_groups)) {
+                near_group = near_groups[j]
+                row_ind_near_all = rep(row_count + 1, n_dec)
+                col_ind_near_all = rep(1:n_dec, 1)
+                i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+                aux = matrix(rep(1:n_tot, n_tot), nrow = n_tot, 
+                  byrow = F)
+                j_ind = aux[lower.tri(aux)]
+                vals_near_all = near_cov[i_ind] - near_cov[j_ind] - 
+                  (near_group * rep(1, n_dec))
+                row_count = max(row_ind_near_all)
+            }
+            if (!is.null(near_pairs)) {
+                near_pair = near_pairs[j]
+                aux = abs(outer(near_cov, near_cov, FUN = "-"))
+                temp = as.vector(matrix(t(aux)[lower.tri(aux)], 
+                  nrow = 1, byrow = TRUE))
+                cols_ind_near_pairs = which(temp > near_pair)
+                if (length(cols_ind_near_pairs) > 0) {
+                  rows_ind_near_pairs[[j]] = row_count + (1:length(cols_ind_near_pairs))
+                  vals_near_pairs = rep(1, length(cols_ind_near_pairs))
+                  row_count = max(rows_ind_near_pairs[[j]])
+                }
+                if (length(cols_ind_near_pairs) == 0) {
+                  cols_ind_near_pairs = NULL
+                  rows_ind_near_pairs[[j]] = -1
+                  vals_near_pairs = NULL
+                }
+            }
+            if (!is.null(near_groups) && is.null(near_pairs)) {
+                rows_near = c(rows_near, row_ind_near_all)
+                cols_near = c(cols_near, col_ind_near_all)
+                vals_near = c(vals_near, vals_near_all)
+            }
+            if (is.null(near_groups) && !is.null(near_pairs) && 
+                rows_ind_near_pairs[[j]] != -1) {
+                rows_near = c(rows_near, rows_ind_near_pairs[[j]])
+                cols_near = c(cols_near, cols_ind_near_pairs)
+                vals_near = c(vals_near, vals_near_pairs)
+            }
+            if (!is.null(near_groups) && !is.null(near_pairs) && 
+                rows_ind_near_pairs[[j]] != -1) {
+                rows_near = c(rows_near, row_ind_near_all, rows_ind_near_pairs[[j]])
+                cols_near = c(cols_near, col_ind_near_all, cols_ind_near_pairs)
+                vals_near = c(vals_near, vals_near_all, vals_near_pairs)
+            }
+            if (!is.null(near_groups) && !is.null(near_pairs) && 
+                rows_ind_near_pairs[[j]] == -1) {
+                rows_near = c(rows_near, row_ind_near_all)
+                cols_near = c(cols_near, col_ind_near_all)
+                vals_near = c(vals_near, vals_near_all)
+            }
+        }
+    }
+    if (!is.null(mom_covs) & is.null(mom_targets)) {
+        rows_mom_1 = NA
+        cols_mom_1 = NA
+        vals_mom_1 = NA
+        rows_mom_2 = NA
+        cols_mom_2 = NA
+        vals_mom_2 = NA
+        n_covs_m = ncol(mom_covs)
+        for (i in 1:n_covs_m) {
+            cov_m = mom_covs[, i]
+            rows_mom_1 = c(rows_mom_1, rep(row_count + i, n_dec))
+            cols_mom_1 = c(cols_mom_1, 1:n_dec)
+            i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+            aux = matrix(rep(1:n_tot, n_tot), nrow = n_tot, byrow = F)
+            j_ind = aux[lower.tri(aux)]
+            vals_mom_1 = c(vals_mom_1, cov_m[i_ind] - cov_m[j_ind] - 
+                (mom_tols[i] * rep(1, n_dec)))
+        }
+        rows_mom_1 = rows_mom_1[-1]
+        cols_mom_1 = cols_mom_1[-1]
+        vals_mom_1 = vals_mom_1[-1]
+        row_count = max(rows_mom_1)
+        for (i in 1:n_covs_m) {
+            cov_m = mom_covs[, i]
+            rows_mom_2 = c(rows_mom_2, rep(row_count + i, n_dec))
+            cols_mom_2 = c(cols_mom_2, 1:n_dec)
+            i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+            aux = matrix(rep(1:n_tot, n_tot), nrow = n_tot, byrow = F)
+            j_ind = aux[lower.tri(aux)]
+            vals_mom_2 = c(vals_mom_2, cov_m[j_ind] - cov_m[i_ind] - 
+                (mom_tols[i] * rep(1, n_dec)))
+        }
+        rows_mom_2 = rows_mom_2[-1]
+        cols_mom_2 = cols_mom_2[-1]
+        vals_mom_2 = vals_mom_2[-1]
+        rows_mom = c(rows_mom_1, rows_mom_2)
+        cols_mom = c(cols_mom_1, cols_mom_2)
+        vals_mom = c(vals_mom_1, vals_mom_2)
+        row_count = max(rows_mom)
+    }
+    if (!is.null(mom_covs) & !is.null(mom_targets)) {
+        n_covs_m = ncol(mom_covs)
+        rows_target = sort(rep(1:(4 * n_covs_m) + row_count, 
+            n_dec))
+        for (i in 1:n_covs_m) {
+            cov_m = mom_covs[, i]
+            cols_target = c(cols_target, rep(1:n_dec, 4))
+            i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+            aux = matrix(rep(1:n_tot, n_tot), nrow = n_tot, byrow = F)
+            j_ind = aux[lower.tri(aux)]
+            vals_target = c(vals_target, cov_m[i_ind] - (mom_targets[i] + 
+                mom_tols[i]), -1 * cov_m[i_ind] + (mom_targets[i] - 
+                mom_tols[i]), cov_m[j_ind] - (mom_targets[i] + 
+                mom_tols[i]), -1 * cov_m[j_ind] + (mom_targets[i] - 
+                mom_tols[i]))
+        }
+        row_count = max(rows_target)
+    }
+    rows_exact = numeric()
+    cols_exact = numeric()
+    vals_exact = numeric()
+    if (!is.null(exact_covs)) {
+        n_exact_cats = ncol(exact_covs)
+        for (i in 1:n_exact_cats) {
+            rows_exact = c(rows_exact, rep(row_count + i, n_dec))
+            cols_exact = c(cols_exact, 1:n_dec)
+            dist_exact_cov = abs(outer(exact_covs[, i], exact_covs[, 
+                i], "-"))
+            vals_exact = c(vals_exact, dist_exact_cov[lower.tri(dist_exact_cov)])
+        }
+        row_count = max(rows_exact)
+    }
+    rows_near_exact = numeric()
+    cols_near_exact = numeric()
+    vals_near_exact = numeric()
+    if (!is.null(near_exact_covs)) {
+        n_near_exact_cats = ncol(near_exact_covs)
+        for (i in 1:n_near_exact_cats) {
+            rows_near_exact = c(rows_near_exact, rep(row_count + 
+                j, n_dec))
+            cols_near_exact = c(cols_near_exact, 1:n_dec)
+            dist_near_exact_cov = abs(outer(near_exact_covs[, 
+                i], near_exact_covs[, i], "-"))
+            vals_near_exact = c(vals_near_exact, dist_near_exact_cov[lower.tri(dist_near_exact_cov)])
+        }
+        row_count = max(rows_near_exact)
+    }
+    if (!is.null(fine_covs)) {
+        fine_covs_2 = rep(NA, nrow(fine_covs))
+        n_fine_covs = ncol(fine_covs)
+        j = 1
+        for (i in 1:n_fine_covs) {
+            aux = factor(fine_covs[, i])
+            fine_covs_2 = cbind(fine_covs_2, diag(nlevels(aux))[aux, 
+                ])
+            if (j == 1) {
+                fine_covs_2 = fine_covs_2[, -1]
+            }
+            j = j + 1
+        }
+        n_fine_cats = ncol(fine_covs_2)
+        j = 1
+        for (i in 1:n_fine_cats) {
+            rows_fine = c(rows_fine, rep(row_count + j, n_dec))
+            cols_fine = c(cols_fine, 1:n_dec)
+            dist_fine_cov = outer(fine_covs_2[, i], fine_covs_2[, 
+                i], "-")
+            dist_fine_cov = t(dist_fine_cov)
+            vals_fine = c(vals_fine, dist_fine_cov[lower.tri(dist_fine_cov)])
+            if (j == 1) {
+                rows_fine = rows_fine[-1]
+                cols_fine = cols_fine[-1]
+                vals_fine = vals_fine[-1]
+            }
+            j = j + 1
+        }
+        row_count = max(rows_fine)
+    }
+    if (!is.null(near_fine_covs)) {
+        near_fine_covs_2 = rep(NA, nrow(near_fine_covs))
+        n_near_fine_covs = ncol(near_fine_covs)
+        j = 1
+        for (i in 1:n_near_fine_covs) {
+            aux = factor(near_fine_covs[, i])
+            near_fine_covs_2 = cbind(near_fine_covs_2, diag(nlevels(aux))[aux, 
+                ])
+            if (j == 1) {
+                near_fine_covs_2 = near_fine_covs_2[, -1]
+            }
+            j = j + 1
+        }
+        n_near_fine_cats = ncol(near_fine_covs_2)
+        j = 1
+        for (i in 1:n_near_fine_cats) {
+            for (h in 1:2) {
+                rows_near_fine = c(rows_near_fine, rep(row_count + 
+                  j, n_dec))
+                cols_near_fine = c(cols_near_fine, 1:n_dec)
+                dist_near_fine_cov = outer(near_fine_covs_2[, 
+                  i], near_fine_covs_2[, i], "-")
+                dist_near_fine_cov = t(dist_near_fine_cov)
+                vals_near_fine = c(vals_near_fine, dist_near_fine_cov[lower.tri(dist_near_fine_cov)])
+                if (j == 1) {
+                  rows_near_fine = rows_near_fine[-1]
+                  cols_near_fine = cols_near_fine[-1]
+                  vals_near_fine = vals_near_fine[-1]
+                }
+                j = j + 1
+            }
+        }
+        row_count = max(rows_near_fine)
+    }
+    if (!is.null(total_pairs)) {
+        rows_n = rep(row_count + 1, n_dec)
+        cols_n = 1:n_dec
+        vals_n = rep(1, n_dec)
+        row_count = max(rows_n)
+    }
+    rows = c(rows_nbm, rows_far, rows_near, rows_mom, rows_target, 
+        rows_exact, rows_near_exact, rows_fine, rows_near_fine, 
+        rows_n)
+    cols = c(cols_nbm, cols_far, cols_near, cols_mom, cols_target, 
+        cols_exact, cols_near_exact, cols_fine, cols_near_fine, 
+        cols_n)
+    vals = c(vals_nbm, vals_far, vals_near, vals_mom, vals_target, 
+        vals_exact, vals_near_exact, vals_fine, vals_near_fine, 
+        vals_n)
+    aux = cbind(rows, cols, vals)[order(cols), ]
+    cnstrn_mat = simple_triplet_matrix(i = aux[, 1], j = aux[, 
+        2], v = aux[, 3])
+    Amat = cnstrn_mat
+    bvec = rep(1, length(table(rows_nbm)))
+    if (!is.null(far_covs)) {
+        n_far_covs = ncol(far_covs)
+        for (j in 1:n_far_covs) {
+            if (!is.null(far_groups)) {
+                bvec = c(bvec, rep(0, 1))
+            }
+            if (!is.null(far_pairs) && rows_ind_far_pairs[[j]] != 
+                -1) {
+                bvec = c(bvec, rep(0, length(table(rows_ind_far_pairs[[j]]))))
+            }
+        }
+    }
+    if (!is.null(near_covs)) {
+        n_near_covs = ncol(near_covs)
+        for (j in 1:n_near_covs) {
+            if (!is.null(near_groups)) {
+                bvec = c(bvec, rep(0, 1))
+            }
+            if (!is.null(near_pairs) && rows_ind_near_pairs[[j]] != 
+                -1) {
+                bvec = c(bvec, rep(0, length(table(rows_ind_near_pairs[[j]]))))
+            }
+        }
+    }
+    bvec = c(bvec, rep(0, length(table(rows_mom))))
+    bvec = c(bvec, rep(0, length(table(rows_target))))
+    if (!is.null(exact_covs)) {
+        bvec = c(bvec, rep(0, ncol(exact_covs)))
+    }
+    if (!is.null(near_exact_covs)) {
+        bvec = c(bvec, near_exact_devs)
+    }
+    bvec = c(bvec, rep(0, length(table(rows_fine))))
+    if (!is.null(near_fine_covs)) {
+        bvec_8_aux = rep(NA, length(rows_near_fine))
+        bvec_8_aux[seq(1, length(rows_near_fine), 2)] = -near_fine_devs
+        bvec_8_aux[seq(2, length(rows_near_fine), 2)] = near_fine_devs
+        bvec = c(bvec, bvec_8_aux)
+    }
+    if (!is.null(total_pairs)) {
+        bvec = c(bvec, total_pairs)
+    }
+    ub = rep(1, n_dec)
+    sense = rep("L", length(table(rows_nbm)))
+    if (!is.null(far_covs)) {
+        n_far_covs = ncol(far_covs)
+        for (j in 1:n_far_covs) {
+            if (!is.null(far_groups)) {
+                sense = c(sense, rep("G", 1))
+            }
+            if (!is.null(far_pairs) && rows_ind_far_pairs[[j]] != 
+                -1) {
+                sense = c(sense, rep("E", length(table(rows_ind_far_pairs[[j]]))))
+            }
+        }
+    }
+    if (!is.null(near_covs)) {
+        n_near_covs = ncol(near_covs)
+        for (j in 1:n_near_covs) {
+            if (!is.null(near_groups)) {
+                sense = c(sense, rep("L", 1))
+            }
+            if (!is.null(near_pairs) && rows_ind_near_pairs[[j]] != 
+                -1) {
+                sense = c(sense, rep("E", length(table(rows_ind_near_pairs[[j]]))))
+            }
+        }
+    }
+    sense = c(sense, rep("L", length(table(rows_mom))))
+    sense = c(sense, rep("L", length(table(rows_target))))
+    if (!is.null(exact_covs)) {
+        sense = c(sense, rep("E", ncol(exact_covs)))
+    }
+    if (!is.null(near_exact_covs)) {
+        sense = c(sense, rep("L", ncol(near_exact_covs)))
+    }
+    sense = c(sense, rep("E", length(table(rows_fine))))
+    sense = c(sense, rep(c("G", "L"), length(table(rows_near_fine))/2))
+    sense = c(sense, rep("E", length(total_pairs)))
+    if (approximate == 1) {
+        var_type = rep("C", n_dec)
+    }
+    else {
+        var_type = rep("B", n_dec)
+    }
+    if (solver == "glpk") {
+        dir = rep(NA, length(sense))
+        dir[sense == "E"] = "=="
+        dir[sense == "L"] = "<="
+        dir[sense == "G"] = ">="
+        bound = list(lower = list(ind = c(1:length(ub)), val = rep(0, 
+            length(ub))), upper = list(ind = c(1:length(ub)), 
+            val = ub))
+        ptm = proc.time()
+        out = Rglpk_solve_LP(cvec, Amat, dir, bvec, bounds = bound, 
+            types = var_type, max = FALSE)
+        time = (proc.time() - ptm)[3]
+        if (out$status != 0) {
+            cat(format("  Error: problem infeasible!"), "\n")
+            obj_val = NA
+            obj_dist_mat = NA
+            id_1 = NA
+            id_2 = NA
+            group_id = NA
+            time = NA
+        }
+        if (out$status == 0) {
+            if (approximate == 1) {
+                rel = .relaxation_n(n_tot, out$solution, dist_mat, 
+                  subset_weight, "glpk", round_cplex, trace)
+                out$solution = rel$sol
+                out$optimum = rel$obj
+                time = time + rel$time
+            }
+            i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+            aux = matrix(1:n_tot, nrow = n_tot, ncol = n_tot)
+            j_ind = aux[lower.tri(aux)]
+            group_1 = i_ind[out$solution == 1]
+            group_2 = j_ind[out$solution == 1]
+            max_groups = apply(cbind(group_1, group_2), 1, max)
+            id_1 = group_1[max_groups <= n_tot]
+            id_2 = group_2[max_groups <= n_tot]
+            group_id_1 = 1:(length(id_1))
+            group_id_2 = 1:(length(id_2))
+            group_id = c(group_id_1, group_id_2)
+            obj_val = out$optimum
+            obj_dist_mat = sum(t(dist_mat)[lower.tri(dist_mat)] * 
+                out$solution)
+        }
+    }
+    return = list(obj_total = obj_val, obj_dist_mat = obj_dist_mat, 
+        id_1 = id_1, id_2 = id_2, group_id = group_id, time = time)
+}
 
 makePlot = function(V, P, D, Tm, NVs, cols){
   ## Including means of columns and indicator that tells
@@ -138,7 +680,7 @@ makePlot = function(V, P, D, Tm, NVs, cols){
                                  y=unit(2, "mm"), just="bottom",
                                  gp=gpar(col="grey", cex=.7))
                       grid.text(upper[cols],
-                                x=unit(1:length(cols), "native"),
+                                x=unit(c(1.01, 2, 2.97), "native"),
                                 y=unit(1, "npc") - unit(2, "mm"), 
                                 just="top",
                                 gp=gpar(col="grey", cex=.7))
@@ -339,26 +881,25 @@ drawDetails.lattice(A[[2]])
 upViewport()
 
 ## Top Left
-pushViewport(viewport(x=0, y=0.5, width=.52, height=.5,
+pushViewport(viewport(x=0.01, y=0.40, width=.49, height=.6,
                       just=c("left", "bottom")))
 drawDetails.lattice(A1[[2]])
 upViewport()
 
 ## Top Right
-pushViewport(viewport(x=0.52, y=0.50, width=.48, height=.5,
+pushViewport(viewport(x=0.49, y=0.40, width=.49, height=.6,
                       just=c("left", "bottom")))
 drawDetails.lattice(A2[[2]])
 upViewport()
+
 
 ```
 
 Prior to randomization, investigators spent time using a web application built using the \texttt{Shiny} package in \texttt{R}. The purpose of this is to determine which weights give advantageous balance across relevant baseline variables. 
 
 ## Discussion
-
 Look how smart we are.
 
-Use of color to make it clear where the closer to 0 ones are. Click on axis.
 
 
 ## Appendix
