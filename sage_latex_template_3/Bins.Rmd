@@ -60,20 +60,20 @@ THE ABOVE NEEDS A BETTER ABSOLUTE VALUE SYMBOL. for $j = 1, 2, ..., m.$ We rando
 ## Results
 To demonstrate the usefulness of this technique we present a brief summary of our randomization process using baseline data from the SWAPOUT trial (Cluster-randomized Non-inferiority Trial Comparing Mupirocin vs Iodophor for Nasal Decolonization of ICU Patients to Assess Impact on Staphylococcus aureus Clinical Cultures and All-cause Bloodstream Infection During Routine Chlorhexidine Bathing) [@SOTrial]. In this non-inferiority trial, the investigators are studying whether bathing with chlorhexidine gluconate and swabbing iodophor nasal swabs are inferior to bathing with the same and mupirocin nasal swabs. REDUCE trial [@huang2013targeted] mupirocin nasal swabs and bathing with chlorhexidine reduced the MRSA Staphylococcus aureus (an antibiotic resistant infection) in Hospital Corporation of America intensive care units (ICU). However, physicians are reluctant to use mupirocin, an antibiotic, so investigators are swapping it with iodophor. 
 
-I JUST GOT MORE INFO FROM TALI AND KATIE ABOUT THIS THAT I'LL FORWARD TO YOU. I'M NOT LOOKING AT IT FOR AWHILE.
-
-Primary import | Secondary import |	Tetiary import |	Quaternary import
--------------- | ---------------- |--------------- | ----------------- |
-Pt Days |	Median LOS |	Medicaid 	
-S auer Rate |	Comorbidity Score |	TALI WHAT ELSE?? 	
-MRSA Rate |			
-All Blood |			
-Mup-R |			
-Hx MRSA |			
+Primary       | Secondary         |	Tetiary   |	Quaternary | Quinary
+------------- | ----------------- | --------- | ---------- | ---------
+Pt Days       |	Median LOS        |	Medicaid  | DC SNF     | Onc_BMT_Trp
+S auer Rate   |	Comorbidity Score |	PCR Blood | Surgery    | BMT_Trp
+MRSA Rate     |			
+All Blood     |			
+Mup-R         |			
+Hx MRSA       |			
 Mup Adherence |			
 CHG Adherence |	
 
-Prior to randomization baseline data was collected for 20 months on the 137 hospitals. With this data, investigators met to prioritize baseline variables into several categories: primary, secondary, tertiary, quaternary, and not relevant to randomization. For this trial, the investigators decided that average monthly volume of patients with attributable time, average monthly attributable days, Staphylococcus aureus ICU-attributable cultures per 1,000 days, MRSA ICU-attributable cultures per 1,000 days, all pathogen ICU-attributable bacteremia cultures per 1,000 days, regional mupirocin resistance estimate, percent of admissions with MRSA diagnosis within a year, percent of mupirocin use admission to day 5, survey Chlorhexidine Glucominate were all of primary importance. Of secondary importance were median ICU length of stay, and mean elixhauser total score. Of tertiary importance were the percentage of ICU medicaid patients, and Polymerase chain reaction clinical specimen status. Lastly, percent admissions to skilled nursing facility (SNF), and if the ICU has specialty units for burn, trauma, etc. More information is avaliable in appendix 1. To ease understanding, our initial discussion will involve 3 variables: Patient days, Staphylococcus auer rate, and MRSA rate.
+Table: Abbreviations of variables used to randomize
+
+Prior to randomization baseline data was collected for 20 months on the 137 hospitals. With this data, investigators met to prioritize baseline variables into several categories: primary, secondary, tertiary, quaternary, quinary, and not relevant to randomization. For this trial, the investigators decided that average monthly attributable days, Staphylococcus aureus Intensive Care Unit (ICU)-attributable cultures per 1,000 days, MRSA ICU-attributable cultures per 1,000 days, all pathogen ICU-attributable bacteremia cultures per 1,000 days, regional mupirocin resistance estimate, percent of admissions with MRSA diagnosis within a year, percent of mupirocin use admission to day 5, survey Chlorhexidine Glucominate were all of primary importance. Of secondary importance were median ICU length of stay, and mean elixhauser total score. Of tertiary importance were the percentage of ICU medicaid patients, and whether or not a facility uses Polymerase chain reactions to identify MRSA in blood. Next, percent admissions to skilled nursing facility (SNF), and the percent of admissions with Center for Disease Control and Prevention surveillance surgery. Lastly, if the ICU has specialty units for oncology, bone marrow transplant, or transplant units, and if the ICU has bone marrow transplant or transplant units. More information on each variable is avaliable in appendix 1 and their abbreviations, in the same order, can be found in table 1. To ease understanding, our initial discussion will involve the first 3 variables above: Patient days, Staphylococcus aureus rate, and MRSA rate. 
 
 ```{r IntroGraph, echo=FALSE, fig.align='center', fig.show='asis', message=FALSE, warning=FALSE, cache.lazy=TRUE}
 setwd("/Users/gwynn/Documents/PostDocKleinmanLab/Bins/Shiny/Again/sage_latex_template_3")
@@ -814,11 +814,11 @@ V = list(list("Attrib_Days_Month", 1, "Pt Days", 0, 80),
          list("Median_LOS", 3,"Median LOS", 0, 0.05),
          list("Elix_Score", 1,"Comorbidity Score", 0, 0.15),
          list("Medicaid", 0,"Medicaid", 0, 0.02),
+         list("PCR_Blood", 0,"PCR_Blood", 0, 0.1),
          list("DC_SNF", 0,"DC SNF", 0, 0.02),
          list("Surgery", 1,"Surgery", 0, 0.02),
          list("Onc_BMT_Trp", 2,"Onc_BMT_Trp", 0, 0.1),
-         list("BMT_Trp", 0,"BMT_Trp", 0, 0.1),
-         list("PCR_Blood", 0,"PCR_Blood", 0, 0.1)
+         list("BMT_Trp", 0,"BMT_Trp", 0, 0.1)
          )
 
 ## First 3 weights zeroed
@@ -833,11 +833,11 @@ V1 = list(list("Attrib_Days_Month", 0, "Pt Days", 0, 80),
          list("Median_LOS", 3,"Median LOS", 0, 0.05),
          list("Elix_Score", 1,"Comorbidity Score", 0, 0.15),
          list("Medicaid", 0,"Medicaid", 0, 0.02),
+         list("PCR_Blood", 0,"PCR_Blood", 0, 0.1),
          list("DC_SNF", 0,"DC SNF", 0, 0.02),
          list("Surgery", 1,"Surgery", 0, 0.02),
          list("Onc_BMT_Trp", 2,"Onc_BMT_Trp", 0, 0.1),
-         list("BMT_Trp", 0,"BMT_Trp", 0, 0.1),
-         list("PCR_Blood", 0,"PCR_Blood", 0, 0.1)
+         list("BMT_Trp", 0,"BMT_Trp", 0, 0.1)
          )
 
 ## Primary outcome weighted highly others zeroed
@@ -852,11 +852,11 @@ V2 = list(list("Attrib_Days_Month", 0, "Pt Days", 0, 80),
          list("Median_LOS", 3,"Median LOS", 0, 0.05),
          list("Elix_Score", 1,"Comorbidity Score", 0, 0.15),
          list("Medicaid", 0,"Medicaid", 0, 0.02),
+         list("PCR_Blood", 0,"PCR_Blood", 0, 0.1),
          list("DC_SNF", 0,"DC SNF", 0, 0.02),
          list("Surgery", 1,"Surgery", 0, 0.02),
          list("Onc_BMT_Trp", 2,"Onc_BMT_Trp", 0, 0.1),
-         list("BMT_Trp", 0,"BMT_Trp", 0, 0.1),
-         list("PCR_Blood", 0,"PCR_Blood", 0, 0.1)
+         list("BMT_Trp", 0,"BMT_Trp", 0, 0.1)
          )
 
 ## Making data 
@@ -1634,11 +1634,11 @@ V = list(list("Attrib_Days_Month", 1, "Pt Days", 0, 80),
          list("Median_LOS", 3,"Median LOS", 0, 0.05),
          list("Elix_Score", 1,"Comorbidity Score", 0, 0.15),
          list("Medicaid", 0,"Medicaid", 0, 0.02),
+         list("PCR_Blood", 0,"PCR_Blood", 0, 0.1),
          list("DC_SNF", 0,"DC SNF", 0, 0.02),
          list("Surgery", 1,"Surgery", 0, 0.02),
          list("Onc_BMT_Trp", 2,"Onc_BMT_Trp", 0, 0.1),
-         list("BMT_Trp", 0,"BMT_Trp", 0, 0.1),
-         list("PCR_Blood", 0,"PCR_Blood", 0, 0.1)
+         list("BMT_Trp", 0,"BMT_Trp", 0, 0.1)
          )
 
 ## Making data 
@@ -1656,8 +1656,6 @@ While the Goldilocks approach to randomizing does not ensure balance in the trea
 
 Future work in this area includes publishing a \texttt{Shiny} web application for investigators to utilise. This application will eventually be an interactive plot that enables users to click on each axis and view where low and high draws of that variable fall for other variables. In some cases, our investigators find that matching on 1 variable seems to give suitable balance throughout. 
 
-
-
 ## Appendix
 A more formal explanation of the variables here, in table format, to be checked with Susan.
 
@@ -1674,6 +1672,12 @@ CHG Adherence |
 Median LOS |
 Medicaid |
 Comorbidity Score |
+Medicaid |
+PCR Blood |
+DC SNF |
+Surgery |
+Onc_BMT_Trp |
+BMT_Trp |
 
-Table: Abbreviations of variables used to randomize
+Table 2: Thorough description of baseline variables used in this paper.
 
