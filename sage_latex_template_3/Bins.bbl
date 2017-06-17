@@ -5,9 +5,6 @@
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
 
-\bibitem[3Be()]{3Bears}
-URL \url{https://en.wikipedia.org/wiki/Goldilocks_and_the_Three_Bears}.
-
 \bibitem[Balzer et~al.(2012)Balzer, Petersen, and van~der
   Laan]{balzer2012match}
 Laura~B Balzer, Maya~L Petersen, and Mark~J van~der Laan.
@@ -123,6 +120,12 @@ Gillian~M Raab and Izzy Butcher.
 \newblock Balance in cluster randomized trials.
 \newblock \emph{Statistics in medicine}, 20\penalty0 (3):\penalty0 351--365,
   2001.
+
+\bibitem[STORIES. and HASSALL(1904)]{3Bears}
+NURSERY STORIES. and John HASSALL.
+\newblock \emph{The Old Nursery Stories and Rhymes ... Illustrated by John
+  Hassall}.
+\newblock Blackie \& Son, London, 1904.
 
 \bibitem[Zubizarreta and Kilcioglu()]{nmatch}
 J.~R. Zubizarreta and C.~Kilcioglu.
