@@ -91,15 +91,19 @@
 \maketitle
 \begin{abstract}
 Matching in cluster-randomized trials (CRTs) is important, but there is
-no best practice. When baseline data is available, we suggest a
-technique which can be used to identify the best weighting of pertinent
-variables to enable more balance between treatment and control groups.
-This technique involves standardizing the variables, computing the
-Mahalanobis distance, use matching to find pairs, then randomizing and
-rerandomizing. For each randomiziation we compute the difference in the
-treatment and control arms for each variable and plot these on a
-parallel-coordinates plot. Investigators can compare plots to identify
-weighting for advantageous randomization schema.
+no best practice. When baseline data is available, we suggest a strategy
+that can be used to identify a preferred weighting of pertinent
+variables to achieve the desired balance between treatment and control
+groups across numerous potential confounding variables. This strategy
+involves iteratively: 1)computing the Mahalanobis distance, 2) finding
+the pairs that minimize the overall within-pair distance; 3)
+rerandomizing multiple times to generate the potential between-arm
+imbalance; then 4) reweighting the potential confounder. To aid in the
+evaluation of step 3, we plot the between-arm differences for each
+variable with a parallel-coordinates plot. Investigators can compare
+plots of different weighting scheme to determine the one that best suits
+their needs. We demonstrate application of the approach with the
+Swap-Out trial.
 \end{abstract}
 
 \subsection{Introduction}\label{introduction}
