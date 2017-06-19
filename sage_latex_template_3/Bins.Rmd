@@ -1657,7 +1657,7 @@ makePlot(V = V, P = P, D = D, Tm = 300, NVs = 2, cols = 1:length(V))
 ## Discussion
 While the Goldilocks approach to randomizing does not ensure balance in the treatment and control arms, it is a tool that provides investigators with a method to explore strengths of matching that impact matching and balance. We encourage investigators that utilize CRTs to use this method prior to randomizing to find more balance in treatment and control arms.
 
-In SWAPOUT, we standardized all $16$ variables by subtracting the mean from each value, then dividing by the standard deviation. To simplify notation, we reduced the algorithm as this impacts the initial distribution but the process remains the same.
+In matching for SWAPOUT, we standardized all $16$ variables by subtracting the mean from each value, then dividing by the standard deviation. To simplify notation, we reduced the algorithm as this impacts the initial plot, but the process remains the same. In SWAPOUT, the $d_{ij}$ is derived from the nonstandardized data, the standardized data was solely used for matching.
 
 If investigators would like to use this method on studies with more than $2$ arms, $d_{ij}$ can be found for multiple combinations of arms and multiple plots can be assessed. 
 
