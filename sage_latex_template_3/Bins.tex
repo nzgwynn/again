@@ -24,7 +24,7 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
 \hypersetup{unicode=true,
-            pdftitle={Matching in Cluster Randomized Trials Using the Glodilocks Approach},
+            pdftitle={Matching in Cluster Randomized Trials Using the Goldilocks Approach},
             pdfkeywords={cluster-randomized trials, matching},
             pdfborder={0 0 0},
             breaklinks=true}
@@ -76,7 +76,7 @@
 }
 
 \setlength{\droptitle}{-2em}
-  \title{Matching in Cluster Randomized Trials Using the Glodilocks Approach}
+  \title{Matching in Cluster Randomized Trials Using the Goldilocks Approach}
   \pretitle{\vspace{\droptitle}\centering\huge}
   \posttitle{\par}
   \author{true}
@@ -125,9 +125,9 @@ allocation of identifiable groups is necessary''
 \citep{murray2004design}.
 
 One challenge in CRTs is their limited sample size. Most CRTs have less
-than 30 independent units to randomise, though each unit may have
+than 30 independent units to randomize, though each unit may have
 thousands of dependent individuals \citep{balzer2012match}. In IRTs,
-investigators expect randomisation to balance confounders across each
+investigators expect randomization to balance confounders across each
 arm of the trial, but the reduced size of CRTs makes this unlikely.
 Grouping similar units together, then randomizing, is one solution to
 this. Scholars debate the sizes of these groups, in particular,
@@ -147,7 +147,7 @@ Breaking matches in the analysis stage addresses this
 number of large clusters \citep{donner2007merits}. Others argue that
 matching is effective in a small number of clusters as it ``increases
 the chance of the intervention groups being well-balanced''
-\citep{donner2007merits}. Imai et al argue that not matching, in small
+\citep{donner2007merits}. Imai et al. argue that not matching, in small
 or large sample, is ``equivalent to discarding a considerable fraction
 of one's data'' \citep{imai2009essential}. However, in one trial
 ``matching actually led to a loss in statistical efficiency''
@@ -159,7 +159,7 @@ Our article is an extension of methods introduced in Chapter 4 of
 Methods in Comparative Effectiveness Research
 \citep{gatsonis2017methods}. We suggest a method suitable for \(a\)
 \(priori\) matching using baseline data. In section 2 we outline our
-method, section 3 applies it to the SWAPOUT dataset, and section 4 is a
+method, section 3 applies it to the SWAPOUT data set, and section 4 is a
 brief discussion.
 
 \subsection{Methods }\label{methods}
@@ -239,7 +239,7 @@ which we combine to form
 \end{eqnarray*}
 
 and re-run the matching to attain stronger matches for the variable
-\(j\). We again find \(d_{ij}\) and plot them. The penality in this
+\(j\). We again find \(d_{ij}\) and plot them. The penalty in this
 process is that closer matches for variable \(j\) are likely to imply
 reduced closeness in another variable, so compromises must be made.
 
@@ -264,11 +264,11 @@ assessing ``swapping''" it with iodophor.
 \begin{longtable}[]{@{}lllll@{}}
 \caption{Abbreviations of variables used to randomize}\tabularnewline
 \toprule
-Primary & Secondary & Tetiary & Quaternary & Quinary\tabularnewline
+Primary & Secondary & Tertiary & Quaternary & Quinary\tabularnewline
 \midrule
 \endfirsthead
 \toprule
-Primary & Secondary & Tetiary & Quaternary & Quinary\tabularnewline
+Primary & Secondary & Tertiary & Quaternary & Quinary\tabularnewline
 \midrule
 \endhead
 Pt Days & Median LOS & Medicaid & DC SNF & Onc\_BMT\_Trp\tabularnewline
@@ -297,15 +297,15 @@ pathogen ICU-attributable bacteremia cultures per 1,000 days, regional
 mupirocin resistance estimate, percent of admissions with MRSA diagnosis
 within a year, percent of mupirocin use admission to day 5, survey
 Chlorhexidine Glucominate were all of primary importance. Of secondary
-importance were median ICU length of stay, and mean elixhauser total
+importance were median ICU length of stay, and mean Elixhauser total
 score. Of tertiary importance were the percentage of ICU medicaid
-patients, and whether or not a facility uses Polymerase chain reactions
+patients, and whether or not a facility uses polymerase chain reactions
 to identify MRSA in blood. Next, percent admissions to skilled nursing
 facility (SNF), and the percent of admissions with Center for Disease
 Control and Prevention surveillance surgery. Lastly, if the ICU has
 specialty units for oncology, bone marrow transplant, or transplant
 units, and if the ICU has bone marrow transplant or transplant units.
-More information on each variable is avaliable in appendix 1 and their
+More information on each variable is available in appendix 1 and their
 abbreviations, in the same order, can be found in table 1. To ease
 understanding, our initial discussion will involve the first 3 variables
 above: Patient days, Staphylococcus aureus rate, and MRSA rate.
@@ -317,36 +317,36 @@ built using the \texttt{Shiny} package in \texttt{R}. The purpose of
 this is to help investigators explore the strengths of matching on
 multiple variables to see what gives advantageous balance across
 relevant baseline variables. We recommend deciding on ideal and
-acheivable maximum differences in study arms and using many combinations
+achievable maximum differences in study arms and using many combinations
 of strengths of matching until one is found which ensures randomization
-is likely to be within those bounds. In the well-known childrens fable
+is likely to be within those bounds. In the well-known children's fable
 The Three Bears, Goldilocks tries three bowls of porridge, one is too
 hot, the other too cold, and the third is just right \citep{3Bears}. We
 recommend a similar procedure applied to strengths of matching, with
 perhaps more attempts.
 
 Figure 1 demonstrates this process using three variables: attributable
-patient days per month, Staphylococcus auereus rate, and MRSA rate.
-After initial explorations on the web application, investigators agreed
-that an ideal maximum mean differences in treatment and control arms for
+patient days per month, Staphylococcus aureus rate, and MRSA rate. After
+initial explorations on the web application, investigators agreed that
+an ideal maximum mean differences in treatment and control arms for
 these variables were: 80 attributable patient days per month, 15\%
 difference in Staphylococcus aureus infection rates, and 15\% difference
 in MRSA rate. The graph on the top left shows no strength of matching on
 any of these variables, the values exceed the maximums in the second and
-third axis: there is a reasonable chance that if randomization occured
+third axis: there is a reasonable chance that if randomization occurred
 with this weighting the Staphylococcus aureus and MRSA rate would be
 above the desired maximum mean differences in treatment and control
 arms. To rectify this, positive strengths must be added. In the
 top-right graph a strength of 8 has been applied to the Staphylococcus
-auereus rate. In this graph, the matching of hospitals is strongly
-ajusted so that hospitals with similar Staphylococcus auereus rates are
+aureus rate. In this graph, the matching of hospitals is strongly
+adjusted so that hospitals with similar Staphylococcus aureus rates are
 paired. This results in low mean difference between the treatment and
 control arms in that variable. The values on the middle axis are below
-the maximum value: if randomization occured using these strengths we are
-likely to get suitable balance in this variable. Unfortunately, there is
-a penalty. Hospitals with similar Staphylococcus auereus rates do not
-have similar attributable patient days per month and MRSA rates, which
-results in these values exceeding the maximum. In particular, our
+the maximum value: if randomization occurred using these strengths we
+are likely to get suitable balance in this variable. Unfortunately,
+there is a penalty. Hospitals with similar Staphylococcus aureus rates
+do not have similar attributable patient days per month and MRSA rates,
+which results in these values exceeding the maximum. In particular, our
 investigators felt that the chance of attaining MRSA rates above 15\%
 were too high for these strengths. The bottom plot shows the possible
 mean balances used in the actual randomization for these three
@@ -362,9 +362,9 @@ study, then randomized the first member of each match to either
 treatment control. The results can be seen in Figure 2.
 
 One variable in Figure 2, median length of stay, is fixed on one value.
-For this variable, all computed randomisations had the same mean
+For this variable, all computed randomizations had the same mean
 difference in median length of stay in the control and treatment arm.
-When randomisation occurs we can be almost certain that we will attain
+When randomization occurs we can be almost certain that we will attain
 this mean difference in median length of stay in the treatment and
 control arms.
 
@@ -390,11 +390,11 @@ If investigators would like to use this method on studies with more than
 and multiple plots can be assessed.
 
 Future work in this area includes publishing a \texttt{Shiny} web
-application for investigators to utilise. This application will
-eventually be an interactive plot that enables users to click on each
-axis and view where low and high draws of that variable fall for other
-variables. In some cases, our investigators find that matching on 1
-variable seems to give suitable balance throughout.
+application for investigators to use. This application will eventually
+be an interactive plot that enables users to click on each axis and view
+where low and high draws of that variable fall for other variables. In
+some cases, our investigators find that matching on 1 variable seems to
+give suitable balance throughout.
 
 \subsection{Appendix}\label{appendix}
 
@@ -428,7 +428,7 @@ BMT\_Trp &\tabularnewline
 
 Table 2: Thorough description of baseline variables used in this paper.
 
-\bibliography{bibliography.bib}
+\bibliography{bibliography}
 
 
 \end{document}
