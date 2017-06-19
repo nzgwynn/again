@@ -11,7 +11,7 @@ output:
       latex_engine: pdflatex
 bibliography: bibliography.bib
 documentclass: sagej
-abstract: "Matching in cluster-randomized trials (CRTs) is important, but there is no best practice. When baseline data is available, we suggest a technique which can be used to identify the best weighting of pertinent variables to enable more balance between treatment and control groups. This technique involves standardizing the variables, computing the Mahalanobis distance, use matching to find pairs, then randomizing and rerandomizing. For each randomiziation we compute the difference in the treatment and control arms for each variable and plot these on a parallel-coordinates plot. Investigators can compare plots to identify weighting for advantageous randomization schema."
+abstract: "Matching in cluster-randomized trials (CRTs) is important, but there is no best practice. When baseline data is available, we suggest a technique which can be used to identify the best weighting of pertinent variables to enable more balance between treatment and control groups. This technique involves computing the Mahalanobis distance between the variables, use matching to find pairs, then randomizing multiple times. For each randomiziation we compute the difference in the treatment and control arms for each variable and plot these on a parallel-coordinates plot. Investigators can compare plots to identify strengths used to find matches for advantageous randomization schema."
 keywords: "cluster-randomized trials, matching"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 ---
