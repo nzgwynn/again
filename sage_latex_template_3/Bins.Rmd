@@ -79,7 +79,6 @@ A COMMENT YOU MADE WAS HERE - DATA FROM EMRS/billing records - UNSURE WHAT THIS 
 Prior to randomization baseline data was collected for 20 months on the 137 hospitals. With this data, investigators met to prioritize baseline variables into several categories: primary, secondary, tertiary, quaternary, quinary, and not relevant to randomization. For this trial, the investigators decided that average monthly attributable days, Staphylococcus aureus Intensive Care Unit (ICU)-attributable cultures per 1,000 days, MRSA ICU-attributable cultures per 1,000 days, all pathogen ICU-attributable bacteremia cultures per 1,000 days, regional mupirocin resistance estimate, percent of admissions with MRSA diagnosis within a year, percent of mupirocin use admission to day 5, survey Chlorhexidine Glucominate were all of primary importance. Of secondary importance were median ICU length of stay, and mean elixhauser total score. Of tertiary importance were the percentage of ICU medicaid patients, and whether or not a facility uses Polymerase chain reactions to identify MRSA in blood. Next, percent admissions to skilled nursing facility (SNF), and the percent of admissions with Center for Disease Control and Prevention surveillance surgery. Lastly, if the ICU has specialty units for oncology, bone marrow transplant, or transplant units, and if the ICU has bone marrow transplant or transplant units. More information on each variable is avaliable in appendix 1 and their abbreviations, in the same order, can be found in table 1. To ease understanding, our initial discussion will involve the first 3 variables above: Patient days, Staphylococcus aureus rate, and MRSA rate. 
 
 ```{r IntroGraph, echo=FALSE, fig.align='center', fig.show='asis', message=FALSE, warning=FALSE, cache.lazy=TRUE}
-setwd("/Users/gwynn/Documents/PostDocKleinmanLab/Bins/Shiny/Again/sage_latex_template_3")
 ## install.packages("designmatch")
 library(designmatch)
 
@@ -799,8 +798,7 @@ make.Ks = function(M, vars, D, Plot, S, ToC){
   P
 } ## closing the function make.Ks
 
-setwd("/Users/gwynn/Documents/PostDocKleinmanLab/Bins/Again1")
-D = read_excel("SwapOut_Randomization_2017_4_27_FINAL.xlsx",  sheet=2)[1:137,]
+D = read_excel("ArtData.xlsx",  sheet=2)[1:137,]
 D = as.data.frame(D)
 
 setwd("/Users/gwynn/Documents/PostDocKleinmanLab/Bins/Shiny/Again/sage_latex_template_3")
@@ -906,6 +904,8 @@ Prior to randomization, investigators spent time using a web application built u
 Figure 1 demonstrates this process using three variables: attributable patient days per month, Staphylococcus auereus rate, and MRSA rate. After initial explorations on the web application, investigators agreed that an ideal maximum mean differences in treatment and control arms for these variables were: 80 attributable patient days per month, 15% difference in Staphylococcus aureus infection rates, and 15% difference in MRSA rate. The graph on the top left shows no strength of matching on any of these variables, the values exceed the maximums in the second and third axis: there is a reasonable chance that if randomization occured with this weighting the Staphylococcus aureus and MRSA rate would be above the desired maximum mean differences in treatment and control arms. To rectify this, positive strengths must be added. In the top-right graph a strength of 8 has been applied to the Staphylococcus auereus rate. In this graph, the matching of hospitals is strongly ajusted so that hospitals with similar Staphylococcus auereus rates are paired. This results in low mean difference between the treatment and control arms in that variable. The values on the middle axis are below the maximum value: if randomization occured using these strengths we are likely to get suitable balance in this variable. Unfortunately, there is a penalty. Hospitals with similar Staphylococcus auereus rates do not have similar attributable patient days per month and MRSA rates, which results in these values exceeding the maximum. In particular, our investigators felt that the chance of attaining MRSA rates above 15% were too high for these strengths. The bottom plot shows the possible mean balances used in the actual randomization for these three variables, the strengths of matching for each variable were 1, 4, and 2, respectively. In all graphs, the black line indicates the mean value of all points on each axis. 
 
 Our investigators used this approach with 16 variables. After trying many strengths of matching they found one with the best balance between treatment and control arms for the variables of importance. When the trial was randomized we used these strength to match hospitals in the study, then randomized the first member of each match to either treatment control. The results can be seen in Figure 2. 
+
+One variable in Figure 2, median length of stay, is fixed on one value. For this variable, all computed randomisations had the same mean difference in median length of stay in the control and treatment arm. When randomisation occurs we can be almost certain that we will attain this mean difference in median length of stay in the treatment and control arms.
 
 ```{r FullGraph, echo=FALSE, fig.align='center', fig.show='asis', message=FALSE, warning=FALSE, cache.lazy=TRUE}
 setwd("/Users/gwynn/Documents/PostDocKleinmanLab/Bins/Shiny/Again/sage_latex_template_3")
