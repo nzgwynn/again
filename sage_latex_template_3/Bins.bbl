@@ -1,4 +1,4 @@
-\begin{thebibliography}{18}
+\begin{thebibliography}{19}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -107,6 +107,12 @@ Richard Platt.
 \newblock Mupirocin-iodophor icu decolonization swap out trial.
 \newblock URL
   \url{https://clinicaltrials.gov/ct2/show/NCT03140423?term=swap+out&rank=1}.
+
+\bibitem[{R Core Team}(2016)]{R}
+{R Core Team}.
+\newblock \emph{R: A Language and Environment for Statistical Computing}.
+\newblock R Foundation for Statistical Computing, Vienna, Austria, 2016.
+\newblock URL \url{https://www.R-project.org/}.
 
 \bibitem[Raab and Butcher(2001)]{raab2001balance}
 Gillian~M Raab and Izzy Butcher.

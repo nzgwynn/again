@@ -117,7 +117,7 @@ individual level.
 
 However, for design reasons, some interventions must be delivered to
 groups of subjects. In these cases, it is at least cost-efficient and
-possibly scientifically necessary to to gather data on subjects that are
+possibly scientifically necessary to gather data on subjects that are
 correlated with one another. For example, suppose education researchers
 need to evaluate teacher training for elementary school teachers with
 respect to it's effect on literacy skills in third graders. Randomizing
@@ -208,16 +208,8 @@ where
 and \(\overline{v_{\cdot k}} = \frac{1}{n} \sum_{i = 1}^m v_{ik}\). Then
 we find the pairs of clusters that minimize the global Mahalanobis
 distance across all of the pairs of clusters. This can be done in the R
-statistical programming environment (CITE!!) using the \texttt{nmatch()}
-function in the \texttt{designmatch} \citep{nmatch} package. If \(m\) is
-odd, the unmatched unit should be placed in both treatment and control
-group for exploratory purposes. (SGS-- I Don't understand the last
-sentence. I think it might be better to stipulate even number of
-clusters here, and suggest what to to with odd number of clusters at the
-end of this section. --KK) Without loss of generality, we assume \(m\)
-is even for the remainder of this paper and note that to include an odd
-\(m\) either treatment or control groups will include one more set of
-priority variables and the addition of 1 in the denominator of \(d_i\).
+statistical programming environment \citep{R} using the \texttt{nmatch}
+function in the \texttt{designmatch} \citep{nmatch} package.
 
 Once the matching is completed and we have pairs
 \((\overline{C_{11}}, \overline{C_{12}}), (\overline{C_{21}}, \overline{C_{22}}), ..., (\overline{C_{\frac{m}{2}1}}, \overline{C_{\frac{m}{2}2}}),\)
@@ -244,7 +236,7 @@ for \(r = 1, 2, ..., R.\)
 The investigators may find the distribution of possible randomizations
 unacceptable, for example because the mean distance between the arms is
 too large, or the maximum distance is too large. In that case, we
-introduce ``weights''" \(S = (s_{1}, s_{2},..., s_{n})\), which control
+introduce ``weights'' \(S = (s_{1}, s_{2},..., s_{n})\), which control
 the strength of matching on each variable. We have
 
 \begin{eqnarray*}
@@ -284,7 +276,7 @@ trial \citep{huang2013targeted} mupirocin nasal swabs and bathing with
 chlorhexidine reduced methycillin resistant Staphylococcus aureus in
 Hospital Corporation of America intensive care units (ICU). However,
 physicians are reluctant to use mupirocin, an antibiotic so broadly, so
-investigators are assessing ``swapping''" it with iodophor, a
+investigators are assessing ``swapping'' it with iodophor, a
 disinfectant.
 
 \begin{longtable}[]{@{}lllll@{}}
@@ -333,8 +325,7 @@ facility (DC SNF), and the percent of admissions with Center for Disease
 Control and Prevention surveillance surgery (Surgery). The final group
 included whether the ICU had specialty units for oncology, bone marrow
 transplant, or transplant units (Onc\_BMT\_Trp), and if the ICU has bone
-marrow transplant or transplant units (BMT\_Trp). More information on
-each variable is available in Appendix 1.
+marrow transplant or transplant units (BMT\_Trp).
 
 Prior to randomization, investigators spent time using a web app built
 using the \texttt{Shiny} package in \texttt{R} that implements the
@@ -359,11 +350,11 @@ tolerable maximum mean difference between treatment and control arms for
 these variables were: 80 attributable patient days per month, 0.15
 difference in Staphylococcus aureus infection rates, and 0.15 difference
 in MRSA rate. The graph on the top left shows the results of 300
-(SGS!!?) re-randomizations when all the weights are equal, equivalent to
-using the raw values of each variables. To read a parallel coordinates
-plot, trace a single gray line from ``Pt Days'' to ``S aur rate'' to
-``MRSA rate''; this shows the between- arm differences obtained from a
-single randomization. The values in the upper left show that several
+re-randomizations when all the weights are equal, equivalent to using
+the raw values of each variables. To read a parallel coordinates plot,
+trace a single gray line from ``Pt Days'' to ``S aur rate'' to ``MRSA
+rate''; this shows the between- arm differences obtained from a single
+randomization. The values in the upper left show that several
 randomizations exceeded the maximums in the second and third axis: there
 is a reasonable chance that if randomization occurred with this
 weighting the Staphylococcus aureus and MRSA rates would be imbalanced
@@ -393,12 +384,12 @@ balance between treatment and control arms for the variables of most
 importance. The results can be seen in Figure 2. For all the variables,
 none of the randomizations resulted in intolerable between-arm
 differences, and for most, the mean difference was much closer to 0 than
-the maximum tolerable. When the trial was randomized we used these
+the maximum tolerable. When the trial was randomized we used this
 strength to match hospitals in the study, then randomized one member of
 each match to treatment and the other to control.
 
 One variable in Figure 2, median length of stay, has the same value for
-all the re-randomizations. That is, for this variable, ever assignment
+all the re-randomizations. That is, for this variable, every assignment
 of treatment and control within the pairs results in the same mean
 difference in median length of stay between the control and treatment
 arms. This is likely due to the very small variability on this
@@ -416,61 +407,21 @@ balance. Investigators that use CRTs and plan to match can use this
 method prior to randomizing to help ensure balance between treatment and
 control arms.
 
-In matching for SWAPOUT, we standardized all \(16\) variables by
-subtracting the mean from each value, then dividing by the standard
-deviation. To simplify notation, we reduced the algorithm as this
-impacts the initial plot, but the process remains the same. In SWAPOUT,
-the \(d_{ij}\) is derived from the nonstandardized data, the
-standardized data was solely used for matching.
-
-SGS-- On the whole, I think we can omit the previous paragraph with a
-clear conscience. If you like, you can check to make sure that omitting
-the standardization does not change the results.
-
 If investigators would like to use this method on studies with more than
-\(2\) arms, \(d^*_i\) can be redefined as, for example, the standard
+\(2\) arms, \(d^*_{i}\) can be redefined as, for example, the standard
 deviation between among the arms.
+
+In SWAPOUT the number of units to randomize was odd. To address this,
+our \texttt{Shiny} web application allowed our investigators to choose
+if the unmatched unit was in the treatment or control arm. The \(d_{i}\)
+was adjusted accordingly.
 
 We plan to publish the \texttt{Shiny} web app described above for
 investigators to use. This application will eventually be an interactive
 plot that enables users to click on each axis and view where low and
 high draws of that variable fall for other variables.
 
-\subsection{Appendix}\label{appendix}
-
-Not sure this is needed!! --Ken
-
-A more formal explanation of the variables here, in table format, to be
-checked with Susan.
-
-\begin{longtable}[]{@{}ll@{}}
-\toprule
-Variable & Description\tabularnewline
-\midrule
-\endhead
-Pt Days &\tabularnewline
-S aur Rate &\tabularnewline
-MRSA Rate &\tabularnewline
-All Blood &\tabularnewline
-Mup-R &\tabularnewline
-Hx MRSA &\tabularnewline
-Mup Adherence &\tabularnewline
-CHG Adherence &\tabularnewline
-Median LOS &\tabularnewline
-Medicaid &\tabularnewline
-Comorbidity Score &\tabularnewline
-Medicaid &\tabularnewline
-PCR Blood &\tabularnewline
-DC SNF &\tabularnewline
-Surgery &\tabularnewline
-Onc\_BMT\_Trp &\tabularnewline
-BMT\_Trp &\tabularnewline
-\bottomrule
-\end{longtable}
-
-Table 2: Thorough description of baseline variables used in this paper.
-
-\bibliography{bibliography}
+\bibliography{bibliography.bib}
 
 
 \end{document}
