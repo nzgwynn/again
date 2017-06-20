@@ -1,34 +1,41 @@
 ---
 title: "Matching in Cluster Randomized Trials Using the Goldilocks Approach"
-author:
-- name: S. Gwynn Sturdevant, Ken Kleinman
-  affiliation: University of Massachusetts Amherst
+author: S. Gwynn Sturdevant, Susan Huang, Ken Kleinman
 output: 
     pdf_document:
       citation_package: natbib
       keep_tex: true
       fig_caption: true
       latex_engine: pdflatex
+      number_sections: true
 bibliography: bibliography.bib
-documentclass: sagej
 abstract: "Matching in cluster-randomized trials (CRTs) is important, but there is no best practice. When baseline data is available, we suggest a strategy that can be used to identify a preferred weighting of pertinent variables to achieve the desired balance between treatment and control groups across numerous potential confounding variables. This strategy involves iteratively: 1)computing the Mahalanobis distance, 2) finding the pairs that minimize the overall within-pair distance; 3) rerandomizing multiple times to generate the potential between-arm imbalance; then 4) reweighting the potential confounder.  To aid in the evaluation of step 3, we plot the between-arm differences for each variable with a parallel-coordinates plot. Investigators can compare plots of different weighting scheme to determine the one that best suits their needs.  We demonstrate application of the approach with the Swap-Out trial."
 keywords: "cluster-randomized trials, matching"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 ---
 
-## Introduction
-To determine the efficacy of a treatment, individually randomized trials (IRTs) with blinding are the "strongest study design available" [@gatsonis2017methods]. Unfortunately, cost and study design amongst other things mean some interventions can not be randomized on an individual level. For example, education researchers decide to determine if training elementary school teachers in a reading program will affect literacy skills in third graders. Randomizing each third grader to treatment or control would not be suitable, as this equates to randomly allocating students to a teacher; rural schools tend to be smaller with only one teacher which further complicates matters. Instead, researchers may choose to randomize teachers, schools, or counties to determine any differences between the two arms of the study. Trials where groups are randomized are called cluster randomized trials (CRTs). Three reasons for conducting a CRTs are: (i) implementation occurs at the cluster level, (ii) to avoid contamination, and (iii) to measure intervention effects among cluster members who do not receive treatment [@balzer2012match; @CRTrials2009]. CRTs are "the gold standard when allocation of identifiable groups is necessary" [@murray2004design].
+```{r, eval=FALSE, echo=FALSE}
+## Removed the following from the YAML, and the abstract worked.
+## documentclass: sagej
+```
 
-One challenge in CRTs is their limited sample size. Most CRTs have less than 30 independent units to randomize, though each unit may have thousands of dependent individuals [@balzer2012match]. In IRTs, investigators expect randomization to balance confounders across each arm of the trial, but the reduced size of CRTs makes this unlikely. Grouping similar units together, then randomizing, is one solution to this. Scholars debate the sizes of these groups, in particular, matching, which involves grouping 2 units together, and stratifying, where many more than 2 units are grouped[@PMVsStrat]. This article discusses matching. 
+
+
+# Introduction
+Individually randomized trials (IRTs) with blinding are the "strongest study design available" [@gatsonis2017methods] to efficacy of a treatment or an intervention. Unfortunately, cost and study design amongst other things mean some interventions can not be randomized on an individual level. 
+
+However, for design reasons, some interventions must be delivered to groups of subjects.  In these cases, it is at least cost-efficient and possibly scientifically necessary to  to gather data on subjects that are correlated with one another.  For example, suppose education researchers need to evaluate teacher training for elementary school teachers with respect to it's effect on literacy skills in third graders. Randomizing third graders to treatment or control conditions would not be practical-- it would imply training many, many teachers, and ignoring the majority of students as well as the variability of student within class.  In addition, some rural schools may have only one teacher, further complicating matters. Instead, researchers would randomize teachers, schools, or counties to the training or to the control condition and evaluate the effect on many students in each classroom. Trials where groups are randomized are called group-randomized or cluster-randomized trials (CRTs). Three reasons for conducting a CRTs are: (i) implementation occurs at the cluster level, (ii) to avoid contamination, and (iii) to measure intervention effects among cluster members who do not receive treatment [@balzer2012match; @CRTrials2009]. CRTs are "the gold standard when allocation of identifiable groups is necessary" [@murray2004design].
+
+One challenge in CRTs is their limited sample size. Most CRTs have less than 30 independent units to randomize, though each unit may have thousands of dependent individuals [@balzer2012match]. In large IRTs, investigators expect randomization to balance confounders across each arm of the trial.  The reduced size of CRTs makes imbalance a threat to the causal interpretation of any observed treatment effect. Grouping similar units together, then randomizing, is one solution to this. Scholars debate the sizes of these groups, in particular, matching, which involves grouping 2 units together, vs. stratifying, where many more than 2 units are grouped[@PMVsStrat]. This article discusses matching. 
 
 Many authors debate matching in CRTs [@balzer2012match; @CRTrials2009; @gatsonis2017methods; @diehr1995breaking; @murray1998design; @imai2009essential;
-@PMVsStrat; @donner2007merits; @klar1997merits; @donner2000design; @martin1993effect]. Murray argues that "the choice of matching or stratification [of] factors is critical to the success of the procedure" [@murray1998design]. Some agree that caution must be used when matching a small number of clusters due to the decrease in power [@donner2000design; @klar1997merits; @balzer2012match; @martin1993effect]. Breaking matches in the analysis stage addresses this [@diehr1995breaking], but perhaps only when there are a small number of large clusters [@donner2007merits].  Others argue that matching is effective in a small number of clusters as it "increases the chance of the intervention groups being well-balanced" [@donner2007merits]. Imai et al. argue that not matching, in small or large sample, is "equivalent to discarding a considerable fraction of one's data" [@imai2009essential]. However, in one trial "matching actually led to a loss in statistical efficiency" [@manun1994influence, @donner2000design]. Despite all this debate few authors discuss methodologies to support the matching process [@raab2001balance]. 
+@PMVsStrat; @donner2007merits; @klar1997merits; @donner2000design; @martin1993effect]. Murray argues that "the choice of matching or stratification [of] factors is critical to the success of the procedure" [@murray1998design]. Some agree that caution must be used when matching a small number of clusters due to the decrease in power [@donner2000design; @klar1997merits; @balzer2012match; @martin1993effect]. Breaking matches, i.e., ignoring the matching during data analysis, addresses this [@diehr1995breaking], but perhaps only when there are a small number of large clusters [@donner2007merits].  Others argue that matching is effective in a small number of clusters as it "increases the chance of the intervention groups being well-balanced" [@donner2007merits]. Imai et al. argue that not matching, in small or large sample, is "equivalent to discarding a considerable fraction of one's data" [@imai2009essential]. However, in one trial "matching actually led to a loss in statistical efficiency" [@manun1994influence, @donner2000design]. Despite all this debate few authors discuss how to match the clusters [@raab2001balance]. 
 
-Our article is an extension of methods introduced in Chapter 4 of Methods in Comparative Effectiveness Research [@gatsonis2017methods]. We suggest a method suitable for $a$ $priori$ matching using baseline data. In section 2 we outline our method, section 3 applies it to the SWAPOUT data set, and section 4 is a brief discussion.
+Our article is an extension of methods introduced previously [@gatsonis2017methods]. We suggest a method suitable for $a \; priori$ matching using baseline data. In section 2 we outline our method, section 3 applies it to data for the SWAPOUT trial, and section 4 is a brief discussion.
 
-## Methods <!-- (#sec:Method) trying to get numbering to work not sure how yet  -->
+# Methods <!-- (#sec:Method) trying to get numbering to work not sure how yet  -->
 
-To approach this complex topic of balancing randomization in CRTs we suggest a new approach. Our approach involves controlling the strength of the matching on variables of import, and randomizing many times to obtain a distribution of possibilities when official randomization occurs. Investigators assess these distributions to determine if possible randomizations are sufficiently balanced, if not, the strength criteria is adjusted and the process begins again. The details follow.
+To approach the complex topic of balancing randomization in CRTs we suggest a new approach. We match the clusters on many variables, using a "weighting" scheme to suggest which variables are most important.  Then we perform many randomizations to obtain a distribution of the possible arm assignments that might be obtained when official randomization occurs. Investigators assess these distributions to determine if potential randomizations result in sufficiently balanced treatment assignments.  If not, the weighting scheme is adjusted and the process begins again. The details follow.
 
 The initial step involves prioritizing variables $(1, 2,..., n)$ from units $(1, 2, ..., m)$ to be randomized. We have
 \begin{eqnarray*}
@@ -37,15 +44,15 @@ The initial step involves prioritizing variables $(1, 2,..., n)$ from units $(1,
  \vdots & = & \vdots\\    
  \overline{V_m} & = & (v_{m1}, v_{m2},..., v_{mn})\\
 \end{eqnarray*}
-where $v_{ij}$ is the $i^{th}$ variable from unit $j$: each $\overline{V_i}$ contains pertinent variables from unit $i$. From here, we compute the Mahalanobois Distance matrix, **D**, by finding $d(\overline{V_i}, \overline{V_j}) = \sum_{k=1}^n \frac{(v_{ik} - v_{jk})^2}{s_k^2}$ where $s_k^2 = \frac{1}{m} \sum_{l=1}^m(v_{lk} - \overline{v_{\cdot k}})$ and $\overline{v_{\cdot k}} = \frac{1}{n} \sum_{i = 1}^m v_{ik}$. Then we use the \texttt{nmatch} function in the \texttt{designmatch} [@doi] package in \texttt{R} [@nmatch] to find $\frac{m}{2}$ pairs if $m$ is even. If $m$ is odd, the last unit should be placed in both treatment and control group for exploratory purposes. Without loss of generality, we assume $m$ is even for the remainder of this paper and note that to include an odd $m$ either treatment or control groups will include one more set of priority variables and the addition of 1 in the denominator of $d_i$.
+where $v_{ij}$ is the $i^{th}$ variable from unit $j$: each $\overline{V_j}$ contains pertinent variables from unit $j$. From here, we compute the Mahalanobois distance between two units.  This is the generalized $n$-dimensional distance across the variables; for two units $a$ and $b$ it is calculated as $d(\overline{V_a}, \overline{V_b}) = \sum_{k=1}^n \frac{(v_{ak} - v_{bk})^2}{s_k^2}$ where $s_k^2 = \frac{1}{m} \sum_{l=1}^m(v_{lk} - \overline{v_{\cdot k}})$ and $\overline{v_{\cdot k}} = \frac{1}{n} \sum_{i = 1}^m v_{ik}$.  Then we find the pairs of clusters that minimize the global Mahalanobis distance across all of the pairs of clusters.  This can be done in the R statistical programming environment (CITE!!) using the \texttt{nmatch()} function in the \texttt{designmatch} [@nmatch] package. If $m$ is odd, the unmatched unit should be placed in both treatment and control group for exploratory purposes.  (SGS-- I Don't understand the last sentence.  I think it might be better to stipulate even number of clusters here, and suggest what to to with odd number of clusters at the end of this section. --KK) Without loss of generality, we assume $m$ is even for the remainder of this paper and note that to include an odd $m$ either treatment or control groups will include one more set of priority variables and the addition of 1 in the denominator of $d_i$.
  
-Once the matching is completed and we have pairs $(\overline{C_{11}}, \overline{C_{12}}), (\overline{C_{21}}, \overline{C_{22}}), ..., (\overline{C_{\frac{m}{2}1}}, \overline{C_{\frac{m}{2}2}}).$ KEN I'M NOT SURE HOW THIS FOLLOWS THROUGH!!!!! The first match in each pair will be randomized to either treatment or control, the second to the remainder. Next, we subset $\overline{V_1}, \overline{V_2}, ..., \overline{V_m}$ into appropriate randomization subgroups: $\overline{V_{1T}}, \overline{V_{1C}}, \overline{V_{2T}}, \overline{V_{2C}},..., \overline{V_{\frac{m}{2}T}}, \overline{V_{\frac{m}{2}C}}$ where $\overline{V_{iT}} = (v_{i1}^T, v_{i2}^T,..., v_{in}^T),$ similarly for $\overline{V}_{iC}.$ Using these we find 
+Once the matching is completed and we have pairs $(\overline{C_{11}}, \overline{C_{12}}), (\overline{C_{21}}, \overline{C_{22}}), ..., (\overline{C_{\frac{m}{2}1}}, \overline{C_{\frac{m}{2}2}}),$ where $C_{ij}$ is the $j$th cluster in the $i$th pair.  The first match in each pair will be randomized to either treatment or control, the second to the remainder. If cluster $C_{11}$ is randomized to treatment, we denote this as $C_{11}^T$, and this implies $C_{12}^C$, where the superscript indicates either treatment ($T$) or control($C$). Next, we find the per variable difference between the two groups: 
 \begin{eqnarray*}
- d_i = \frac{| \sum_{j = 1}^{\frac{m}{2}}v_{ij}^T - \sum_{j = 1}^{\frac{m}{2}}v_{ij}^C |}{\frac{m}{2}} 
+ d_i = \frac{| \sum_{j = 1}^{\frac{m}{2}}C_{ij}^T - \sum_{j = 1}^{\frac{m}{2}}C_{ij}^C |}{\frac{m}{2}} 
 \end{eqnarray*}
- for $i = 1, 2, ..., n.$ We randomize $R$ times and find $d_{ij}$ the average difference in the two arms for the $i^{th}$ priority variable for each of the $j = 1, 2, ..., R$ re-randomizations. To visualize we draw a parallel coordinates plot where the $i^{th}$ axis plots all $d_{ij}$ for $j = 1, 2, ..., R.$ 
+ for $i = 1, 2, ..., n.$  This generates the vector $d^* = (d_1, \ldots, d_n)$ of the average pairwise difference between the arms for each variable.  We repeat this process of randomization $R$ times and find $d^*_r$ the vector of average differences between the two arms for the $r$th re-randomization. To visualize we draw a parallel coordinates plot where the $i^{th}$ axis plots all $d^*_r$ for $r = 1, 2, ..., R.$ 
 
-If the investigators find the distribution of possible randomizations unacceptable for a priority variable $j$, we introduce $\overline{S} = (s_{1}, s_{2},..., s_{n})$, which controls the strength of matching on that variable. We have
+The investigators may find the distribution of possible randomizations unacceptable, for example because the mean distance between the arms is too large, or the maximum distance is too large. In that case, we introduce "weights"" $S = (s_{1}, s_{2},..., s_{n})$, which control the strength of matching on each variable. We have
 \begin{eqnarray*}
  v_{ij}^* = \prod_{i=1}^{m} v_{ij} \times s_j
 \end{eqnarray*} 
@@ -56,15 +63,15 @@ which we combine to form
  \vdots & = & \vdots\\    
  \overline{V_m^*} & = & (v_{m1}^*, v_{m2}^*,..., v_{mn}^*) .\\
 \end{eqnarray*} 
-and re-run the matching to attain stronger matches for the variable $j$. We again find $d_{ij}$ and plot them. The penalty in this process is that closer matches for variable $j$ are likely to imply reduced closeness in another variable, so compromises must be made.
+If $s_a > s_b$, this has the effect of making clusters "further apart" with respect to variable $a$, so that the when we re-run the matching algorithm, we will get closer matches for variable $a$ than variable $b$.  After selecting $S$ We again find $d^*_r$ and plot them. The penalty in this process is that closer matches for variable $a$ are likely to imply reduced closeness in another variable, so compromises must be made.
 
-## Results
-To demonstrate the usefulness of this technique we present a brief summary of our randomization process using baseline data from the SWAPOUT trial (Cluster-randomized Non-inferiority Trial Comparing Mupirocin vs Iodophor for Nasal Decolonization of ICU Patients to Assess Impact on Staphylococcus aureus Clinical Cultures and All-cause Bloodstream Infection During Routine Chlorhexidine Bathing) [@SOTrial]. In this non-inferiority trial, the investigators are studying whether bathing with chlorhexidine gluconate and swabbing iodophor nasal swabs are inferior to bathing with the same and mupirocin nasal swabs. In the REDUCE trial [@huang2013targeted] mupirocin nasal swabs and bathing with chlorhexidine reduced the MRSA Staphylococcus aureus (an antibiotic resistant infection) in Hospital Corporation of America intensive care units (ICU). However, physicians are reluctant to use mupirocin, an antibiotic, so investigators are assessing "swapping"" it with iodophor. 
+# Results
+To demonstrate the usefulness of this technique we present a brief summary of our randomization process using baseline data from the SWAPOUT trial (Cluster-randomized Non-inferiority Trial Comparing Mupirocin vs. Iodophor for Nasal Decolonization of ICU Patients to Assess Impact on Staphylococcus aureus Clinical Cultures and All-cause Bloodstream Infection During Routine Chlorhexidine Bathing) [@SOTrial]. In this non-inferiority trial, the investigators are studying whether bathing with chlorhexidine gluconate and swabbing with iodophor nasal swabs are an acceptable substitute for bathing with chlorhexidine but swabbing with the antibiotic mupirocin. In the REDUCE trial [@huang2013targeted] mupirocin nasal swabs and bathing with chlorhexidine reduced methycillin resistant Staphylococcus aureus in Hospital Corporation of America intensive care units (ICU). However, physicians are reluctant to use mupirocin, an antibiotic so broadly, so investigators are assessing "swapping"" it with iodophor, a disinfectant. 
 
 Primary       | Secondary         |	Tertiary   |	Quaternary | Quinary
 ------------- | ----------------- | --------- | ---------- | ---------
 Pt Days       |	Median LOS        |	Medicaid  | DC SNF     | Onc_BMT_Trp
-S auer Rate   |	Comorbidity Score |	PCR Blood | Surgery    | BMT_Trp
+S aur Rate   |	Comorbidity Score |	PCR Blood | Surgery    | BMT_Trp
 MRSA Rate     |			
 All Blood     |			
 Mup-R         |			
@@ -74,9 +81,12 @@ CHG Adherence |
 
 Table: Abbreviations of variables used to randomize
 
-A COMMENT YOU MADE WAS HERE - DATA FROM EMRS/billing records - UNSURE WHAT THIS MEANS!!!!
+Data collected from electronic medical records and electronic billing systems were available for matching prior to randomization.  We used data from 20 months from 137 hospitals whose administrators had consented to participate. With this data, investigators met to prioritize baseline variables into several categories, as shown in Table 1: primary, secondary, tertiary, quaternary, quinary, and not relevant to randomization. For this trial, the investigators decided that average monthly attributable days (pt_days), Staphylococcus aureus Intensive Care Unit (ICU)-attributable cultures per 1,000 days (S aur rate), MRSA ICU-attributable cultures per 1,000 days (MRSA rate), all pathogen ICU-attributable bacteremia cultures per 1,000 days (All Blood), regional mupirocin resistance estimate (Mup-R), percent of admissions with MRSA diagnosis within a year (Hx MRSA), percent of mupirocin use admission to day 5 (Mup Adherence), and surveyed use of chlorhexidine gluconate (CHG Adherence) were all of primary importance. Of secondary importance were median ICU length of stay (Median LOS), and mean Elixhauser total score (Comorbidity Score). Of tertiary importance were the percentage of ICU medicaid patients (Medicaid), and whether or not a facility uses polymerase chain reactions to identify MRSA in blood (PCR Blood). The next group included percent admissions to skilled nursing facility (DC SNF), and the percent of admissions with Center for Disease Control and Prevention surveillance surgery (Surgery). The final group included whether the ICU had specialty units for oncology, bone marrow transplant, or transplant units (Onc_BMT_Trp), and if the ICU has bone marrow transplant or transplant units (BMT_Trp). More information on each variable is available in Appendix 1. 
 
-Prior to randomization baseline data was collected for 20 months on the 137 hospitals. With this data, investigators met to prioritize baseline variables into several categories: primary, secondary, tertiary, quaternary, quinary, and not relevant to randomization. For this trial, the investigators decided that average monthly attributable days, Staphylococcus aureus Intensive Care Unit (ICU)-attributable cultures per 1,000 days, MRSA ICU-attributable cultures per 1,000 days, all pathogen ICU-attributable bacteremia cultures per 1,000 days, regional mupirocin resistance estimate, percent of admissions with MRSA diagnosis within a year, percent of mupirocin use admission to day 5, survey Chlorhexidine Glucominate were all of primary importance. Of secondary importance were median ICU length of stay, and mean Elixhauser total score. Of tertiary importance were the percentage of ICU medicaid patients, and whether or not a facility uses polymerase chain reactions to identify MRSA in blood. Next, percent admissions to skilled nursing facility (SNF), and the percent of admissions with Center for Disease Control and Prevention surveillance surgery. Lastly, if the ICU has specialty units for oncology, bone marrow transplant, or transplant units, and if the ICU has bone marrow transplant or transplant units. More information on each variable is available in appendix 1 and their abbreviations, in the same order, can be found in table 1. To ease understanding, our initial discussion will involve the first 3 variables above: Patient days, Staphylococcus aureus rate, and MRSA rate. 
+ 
+Prior to randomization, investigators spent time using a web app built using the \texttt{Shiny} package in \texttt{R} that implements the strategy described in section 2. This enabled the investigators to quickly and easily change the weights applied to each potential matching variable.  The web app allows the investigators to set the bounds for each axis as well as the weights. We recommend deciding on tolerable maximum differences between study arms as well as desirable ranges of differences for each variables and using many combinations of strengths of matching until one is found which ensures randomization is likely to satisfy. In the well-known children's fable The Three Bears, Goldilocks tries three bowls of porridge, one is too hot, the other too cold, and the third is just right [@3Bears]. We recommend a similar procedure applied to strengths of matching, with perhaps more attempts.
+
+
 
 ```{r IntroGraph, echo=FALSE, fig.align='center', fig.show='asis', message=FALSE, warning=FALSE, cache.lazy=TRUE}
 ## install.packages("designmatch")
@@ -803,7 +813,7 @@ D = as.data.frame(D)
 
 ## Final weighting for randomization
 V = list(list("Attrib_Days_Month", 1, "Pt Days", 0, 80),
-         list("Outcome_Saureus", 4, "S auer Rate", 0, 0.15),
+         list("Outcome_Saureus", 4, "S aur Rate", 0, 0.15),
          list("Outcome_MRSA", 2, "MRSA Rate", 0, 0.15),
          list("All_Blood", 4, "All Blood", 0, 0.15),
          list("Mup-R", 2, "Mup-R", 0, 0.02),
@@ -822,7 +832,7 @@ V = list(list("Attrib_Days_Month", 1, "Pt Days", 0, 80),
 
 ## First 3 weights zeroed
 V1 = list(list("Attrib_Days_Month", 0, "Pt Days", 0, 80),
-         list("Outcome_Saureus", 0, "S auer Rate", 0, 0.15),
+         list("Outcome_Saureus", 0, "S aur Rate", 0, 0.15),
          list("Outcome_MRSA", 0, "MRSA Rate", 0, 0.15),
          list("All_Blood", 4, "All Blood", 0, 0.15),
          list("Mup-R", 2, "Mup-R", 0, 0.02),
@@ -841,7 +851,7 @@ V1 = list(list("Attrib_Days_Month", 0, "Pt Days", 0, 80),
 
 ## Primary outcome weighted highly others zeroed
 V2 = list(list("Attrib_Days_Month", 0, "Pt Days", 0, 80),
-         list("Outcome_Saureus", 8, "S auer Rate", 0, 0.15),
+         list("Outcome_Saureus", 8, "S aur Rate", 0, 0.15),
          list("Outcome_MRSA", 0, "MRSA Rate", 0, 0.15),
          list("All_Blood", 4, "All Blood", 0, 0.15),
          list("Mup-R", 2, "Mup-R", 0, 0.02),
@@ -897,15 +907,16 @@ upViewport()
 
 ```
 
-Prior to randomization, investigators spent time using a web application built using the \texttt{Shiny} package in \texttt{R}. The purpose of this is to help investigators explore the strengths of matching on multiple variables to see what gives advantageous balance across relevant baseline variables. We recommend deciding on ideal and achievable maximum differences in study arms and using many combinations of strengths of matching until one is found which ensures randomization is likely to be within those bounds. In the well-known children's fable The Three Bears, Goldilocks tries three bowls of porridge, one is too hot, the other too cold, and the third is just right [@3Bears]. We recommend a similar procedure applied to strengths of matching, with perhaps more attempts.
 
-Figure 1 demonstrates this process using three variables: attributable patient days per month, Staphylococcus aureus rate, and MRSA rate. After initial explorations on the web application, investigators agreed that an ideal maximum mean differences in treatment and control arms for these variables were: 80 attributable patient days per month, 15% difference in Staphylococcus aureus infection rates, and 15% difference in MRSA rate. The graph on the top left shows no strength of matching on any of these variables, the values exceed the maximums in the second and third axis: there is a reasonable chance that if randomization occurred with this weighting the Staphylococcus aureus and MRSA rate would be above the desired maximum mean differences in treatment and control arms. To rectify this, positive strengths must be added. In the top-right graph a strength of 8 has been applied to the Staphylococcus aureus rate. In this graph, the matching of hospitals is strongly adjusted so that hospitals with similar Staphylococcus aureus rates are paired. This results in low mean difference between the treatment and control arms in that variable. The values on the middle axis are below the maximum value: if randomization occurred using these strengths we are likely to get suitable balance in this variable. Unfortunately, there is a penalty. Hospitals with similar Staphylococcus aureus rates do not have similar attributable patient days per month and MRSA rates, which results in these values exceeding the maximum. In particular, our investigators felt that the chance of attaining MRSA rates above 15% were too high for these strengths. The bottom plot shows the possible mean balances used in the actual randomization for these three variables, the strengths of matching for each variable were 1, 4, and 2, respectively. In all graphs, the black line indicates the mean value of all points on each axis. 
+Figure 1 demonstrates this process using three variables: attributable patient days per month, Staphylococcus aureus rate, and MRSA rate. After initial explorations on the web application, investigators agreed that a tolerable maximum mean difference between treatment and control arms for these variables were: 80 attributable patient days per month, 0.15 difference in Staphylococcus aureus infection rates, and 0.15 difference in MRSA rate. The graph on the top left shows the results of 300 (SGS!!?) re-randomizations when all the weights are equal, equivalent to using the raw values of each variables.  To read a parallel coordinates plot, trace a single gray line from "Pt Days" to "S aur rate" to "MRSA rate"; this shows the between- arm differences obtained from a single randomization.  The values in the upper left show that several randomizations exceeded the maximums in the second and third axis: there is a reasonable chance that if randomization occurred with this weighting the Staphylococcus aureus and MRSA rates would be imbalanced between the treatment and control arms. To rectify this, positive strengths must be added. In the top-right graph a strength of 8 has been applied to the Staphylococcus aureus rate. In this graph, the matching of hospitals is strongly adjusted so that hospitals with similar Staphylococcus aureus rates are paired. This results in low mean difference between the treatment and control arms in that variable. The values on the middle axis are all well below the maximum value: if randomization occurred using these strengths we are likely to get suitable balance in this variable. Unfortunately, there is a penalty. Hospitals with similar Staphylococcus aureus rates do not have similar attributable patient days per month and MRSA rates, which results in a few of these values exceeding the maximum. In particular, our investigators felt that the chance of attaining MRSA rates above 0.15 were too high for these strengths. The bottom plot shows the possible mean balances used in the actual randomization for these three variables, the strengths of matching for each variable were 1, 4, and 2, respectively. In all graphs, the black line indicates the mean value of all points on each axis.  We also use this value to help decide whether the matchine is acceptable.
 
-Our investigators used this approach with 16 variables. After trying many strengths of matching they found one with the best balance between treatment and control arms for the variables of importance. When the trial was randomized we used these strength to match hospitals in the study, then randomized the first member of each match to either treatment control. The results can be seen in Figure 2. 
+Our investigators used this approach with all 16 variables shown in table 1. After trying many weights they chose one with an agreeable balance between treatment and control arms for the variables of most importance.  The results can be seen in Figure 2.   For all the variables, none of the randomizations resulted in intolerable between-arm differences, and for most, the mean difference was much closer to 0 than the maximum tolerable.  When the trial was randomized we used these strength to match hospitals in the study, then randomized one member of each match to treatment and the other to control. 
 
-One variable in Figure 2, median length of stay, is fixed on one value. For this variable, all computed randomizations had the same mean difference in median length of stay in the control and treatment arm. When randomization occurs we can be almost certain that we will attain this mean difference in median length of stay in the treatment and control arms.
+One variable in Figure 2, median length of stay, has the same value for all the re-randomizations. That is, for this variable, ever assignment of treatment and control within the pairs results in the same mean difference in median length of stay between the control and treatment arms.  This is likely due to the very small variability on this variable-- the vast majority of the hospitals' had the same median length of stay. 
 
 ```{r FullGraph, echo=FALSE, fig.align='center', fig.show='asis', message=FALSE, warning=FALSE, cache.lazy=TRUE}
+set.seed(11081966)
+
 ## install.packages("designmatch")
 library(designmatch)
 
@@ -1621,7 +1632,7 @@ D = as.data.frame(D)
 
 ## Final weighting for randomization
 V = list(list("Attrib_Days_Month", 1, "Pt Days", 0, 80),
-         list("Outcome_Saureus", 4, "S auer Rate", 0, 0.15),
+         list("Outcome_Saureus", 4, "S aur Rate", 0, 0.15),
          list("Outcome_MRSA", 2, "MRSA Rate", 0, 0.15),
          list("All_Blood", 4, "All Blood", 0, 0.15),
          list("Mup-R", 2, "Mup-R", 0, 0.02),
@@ -1648,22 +1659,28 @@ makePlot(V = V, P = P, D = D, Tm = 300, NVs = 2, cols = 1:length(V))
 ```
 
 
-## Discussion
-While the Goldilocks approach to randomizing does not ensure balance in the treatment and control arms, it is a tool that provides investigators with a method to explore strengths of matching that impact matching and balance. We encourage investigators that utilize CRTs to use this method prior to randomizing to find more balance in treatment and control arms.
+# Discussion
+While the Goldilocks approach to randomizing does not ensure balance in the treatment and control arms, it is a tool that provides investigators with a method to explore strengths of matching that impact matching and balance. Investigators that use CRTs and plan to match can use this method prior to randomizing to help ensure balance between treatment and control arms.
 
 In matching for SWAPOUT, we standardized all $16$ variables by subtracting the mean from each value, then dividing by the standard deviation. To simplify notation, we reduced the algorithm as this impacts the initial plot, but the process remains the same. In SWAPOUT, the $d_{ij}$ is derived from the nonstandardized data, the standardized data was solely used for matching.
 
-If investigators would like to use this method on studies with more than $2$ arms, $d_{ij}$ can be found for multiple combinations of arms and multiple plots can be assessed. 
+SGS-- On the whole, I think we can omit the previous paragraph with a clear conscience.  If you like, you can check to make sure that omitting the standardization does not change the results.
 
-Future work in this area includes publishing a \texttt{Shiny} web application for investigators to use. This application will eventually be an interactive plot that enables users to click on each axis and view where low and high draws of that variable fall for other variables. In some cases, our investigators find that matching on 1 variable seems to give suitable balance throughout. 
+If investigators would like to use this method on studies with more than $2$ arms, $d^*_i$ can be redefined as, for example, the standard deviation between among the arms. 
+
+We plan to publish the \texttt{Shiny} web app described above for investigators to use. This application will eventually be an interactive plot that enables users to click on each axis and view where low and high draws of that variable fall for other variables.  
 
 ## Appendix
+
+Not sure this is needed!!  --Ken
+
+
 A more formal explanation of the variables here, in table format, to be checked with Susan.
 
 Variable  | Description
 ----------| ---------------- 
 Pt Days | 
-S auer Rate | 
+S aur Rate | 
 MRSA Rate |
 All Blood |
 Mup-R |
