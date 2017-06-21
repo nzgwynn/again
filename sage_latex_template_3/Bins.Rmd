@@ -9,6 +9,7 @@ output:
       latex_engine: pdflatex
       number_sections: true
 bibliography: bibliography.bib
+csl: test.csl
 abstract: "Matching in cluster-randomized trials (CRTs) is important, but there is no best practice describing how to make matches. When baseline data is available, we suggest a strategy that can be used to achieve the desired balance between treatment and control groups across numerous potential confounding variables. This strategy involves iteratively: 1) computing the Mahalanobis distance, 2) finding the pairs that minimize the overall within-pair distance; 3) rerandomizing multiple times to generate the potential between-arm imbalance; then 4) reweighting the potential confounders.  To aid in the evaluation of step 3, we plot the between-arm differences for each variable with a parallel-coordinates plot. Investigators can compare plots of different weighting schemes to determine the one that best suits their needs.  We demonstrate application of the approach with the Swap-Out trial."
 keywords: "cluster-randomized trials, matching"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
