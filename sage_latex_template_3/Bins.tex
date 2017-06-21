@@ -96,7 +96,7 @@ no best practice. When baseline data is available, we suggest a strategy
 that can be used to identify a preferred weighting of pertinent
 variables to achieve the desired balance between treatment and control
 groups across numerous potential confounding variables. This strategy
-involves iteratively: 1)computing the Mahalanobis distance, 2) finding
+involves iteratively: 1) computing the Mahalanobis distance, 2) finding
 the pairs that minimize the overall within-pair distance; 3)
 rerandomizing multiple times to generate the potential between-arm
 imbalance; then 4) reweighting the potential confounder. To aid in the
@@ -110,32 +110,31 @@ Swap-Out trial.
 \section{Introduction}\label{introduction}
 
 Individually randomized trials (IRTs) with blinding are the ``strongest
-study design available'' \citep{gatsonis2017methods} to efficacy of a
-treatment or an intervention. Unfortunately, cost and study design
-amongst other things mean some interventions can not be randomized on an
-individual level.
+study design available'' \citep{gatsonis2017methods} to test the
+efficacy of a treatment or an intervention. Unfortunately, cost and
+study design amongst other things mean some interventions can not be
+randomized on an individual level.
 
-However, for design reasons, some interventions must be delivered to
-groups of subjects. In these cases, it is at least cost-efficient and
-possibly scientifically necessary to gather data on subjects that are
-correlated with one another. For example, suppose education researchers
-need to evaluate teacher training for elementary school teachers with
-respect to it's effect on literacy skills in third graders. Randomizing
-third graders to treatment or control conditions would not be
-practical-- it would imply training many, many teachers, and ignoring
-the majority of students as well as the variability of student within
-class. In addition, some rural schools may have only one teacher,
-further complicating matters. Instead, researchers would randomize
-teachers, schools, or counties to the training or to the control
-condition and evaluate the effect on many students in each classroom.
-Trials where groups are randomized are called group-randomized or
-cluster-randomized trials (CRTs). Three reasons for conducting a CRTs
-are: (i) implementation occurs at the cluster level, (ii) to avoid
-contamination, and (iii) to measure intervention effects among cluster
-members who do not receive treatment
-\citep{balzer2012match, CRTrials2009}. CRTs are ``the gold standard when
-allocation of identifiable groups is necessary''
-\citep{murray2004design}.
+For design reasons some interventions must be delivered to groups of
+subjects. In these cases, it is at least cost-efficient and possibly
+scientifically necessary to gather data on subjects that are correlated
+with one another. For example, suppose education researchers need to
+evaluate teacher training for elementary school teachers with respect to
+it's effect on literacy skills in third graders. Randomizing third
+graders to treatment or control conditions would not be practical-- it
+would imply training many, many teachers, and ignoring the majority of
+students as well as the variability of student within class. In
+addition, some rural schools may have only one teacher, further
+complicating matters. Instead, researchers would randomize teachers,
+schools, or counties to the training or to the control condition and
+evaluate the effect on many students in each classroom. Trials where
+groups are randomized are called group-randomized or cluster-randomized
+trials (CRTs). Three reasons for conducting a CRTs are: (i)
+implementation occurs at the cluster level, (ii) to avoid contamination,
+and (iii) to measure intervention effects among cluster members who do
+not receive treatment \citep{balzer2012match, CRTrials2009}. CRTs are
+``the gold standard when allocation of identifiable groups is
+necessary'' \citep{murray2004design}.
 
 One challenge in CRTs is their limited sample size. Most CRTs have less
 than 30 independent units to randomize, though each unit may have
@@ -172,7 +171,7 @@ debate few authors discuss how to match the clusters
 Our article is an extension of methods introduced previously
 \citep{gatsonis2017methods}. We suggest a method suitable for
 \(a \; priori\) matching using baseline data. In section 2 we outline
-our method, section 3 applies it to data for the SWAPOUT trial, and
+our method, section 3 applies it to data for the Swap-Out trial, and
 section 4 is a brief discussion.
 
 \section{Methods }\label{methods}
@@ -218,8 +217,8 @@ match in each pair will be randomized to either treatment or control,
 the second to the remainder. If cluster \(C_{11}\) is randomized to
 treatment, we denote this as \(C_{11}^T\), and this implies
 \(C_{12}^C\), where the superscript indicates either treatment (\(T\))
-or control(\(C\)). Next, we find the per variable difference between the
-two groups:
+or control (\(C\)). Next, we find the per variable difference between
+the two groups:
 
 \begin{eqnarray*}
  d_i = \frac{| \sum_{j = 1}^{\frac{m}{2}}C_{ij}^T - \sum_{j = 1}^{\frac{m}{2}}C_{ij}^C |}{\frac{m}{2}} 
@@ -253,7 +252,7 @@ which we combine to form
 \end{eqnarray*}
 
 If \(s_a > s_b\), this has the effect of making clusters ``further
-apart'' with respect to variable \(a\), so that the when we re-run the
+apart'' with respect to variable \(b\), so that the when we re-run the
 matching algorithm, we will get closer matches for variable \(a\) than
 variable \(b\). After selecting \(S\) We again find \(d^*_r\) and plot
 them. The penalty in this process is that closer matches for variable
@@ -264,14 +263,14 @@ compromises must be made.
 
 To demonstrate the usefulness of this technique we present a brief
 summary of our randomization process using baseline data from the
-SWAPOUT trial (Cluster-randomized Non-inferiority Trial Comparing
+Swap-Out trial (Cluster-randomized Non-inferiority Trial Comparing
 Mupirocin vs.~Iodophor for Nasal Decolonization of ICU Patients to
 Assess Impact on Staphylococcus aureus Clinical Cultures and All-cause
 Bloodstream Infection During Routine Chlorhexidine Bathing)
 \citep{SOTrial}. In this non-inferiority trial, the investigators are
 studying whether bathing with chlorhexidine gluconate and swabbing with
 iodophor nasal swabs are an acceptable substitute for bathing with
-chlorhexidine but swabbing with the antibiotic mupirocin. In the REDUCE
+chlorhexidine but swabbing with the antibiotic mupirocin. In the Reduce
 trial \citep{huang2013targeted} mupirocin nasal swabs and bathing with
 chlorhexidine reduced methycillin resistant Staphylococcus aureus in
 Hospital Corporation of America intensive care units (ICU). However,
@@ -309,7 +308,7 @@ variables into several categories, as shown in Table 1: primary,
 secondary, tertiary, quaternary, quinary, and not relevant to
 randomization. For this trial, the investigators decided that average
 monthly attributable days (pt\_days), Staphylococcus aureus Intensive
-Care Unit (ICU)-attributable cultures per 1,000 days (S aur rate), MRSA
+Care Unit -attributable cultures per 1,000 days (S aur rate), MRSA
 ICU-attributable cultures per 1,000 days (MRSA rate), all pathogen
 ICU-attributable bacteremia cultures per 1,000 days (All Blood),
 regional mupirocin resistance estimate (Mup-R), percent of admissions
@@ -341,7 +340,14 @@ tries three bowls of porridge, one is too hot, the other too cold, and
 the third is just right \citep{3Bears}. We recommend a similar procedure
 applied to strengths of matching, with perhaps more attempts.
 
-\begin{center}\includegraphics{Bins_files/figure-latex/IntroGraph-1} \end{center}
+\begin{figure}
+
+{\centering \includegraphics{Bins_files/figure-latex/IntroGraph-1} 
+
+}
+
+\caption{Possible randomizations for 3 different weights. The top left has no weighting and two axises exceed maximum values. The top right is matched strongly on the middle axis and the first and third exceed. The bottom was used in Swap-Out.}\label{fig:IntroGraph}
+\end{figure}
 
 Figure 1 demonstrates this process using three variables: attributable
 patient days per month, Staphylococcus aureus rate, and MRSA rate. After
@@ -396,7 +402,14 @@ arms. This is likely due to the very small variability on this
 variable-- the vast majority of the hospitals' had the same median
 length of stay.
 
-\begin{center}\includegraphics{Bins_files/figure-latex/FullGraph-1} \end{center}
+\begin{figure}
+
+{\centering \includegraphics{Bins_files/figure-latex/FullGraph-1} 
+
+}
+
+\caption{Swap-Out investigators found weights used to make this possible randomization schema suitable.}\label{fig:FullGraph}
+\end{figure}
 
 \section{Discussion}\label{discussion}
 
@@ -411,7 +424,7 @@ If investigators would like to use this method on studies with more than
 \(2\) arms, \(d^*_{i}\) can be redefined as, for example, the standard
 deviation between among the arms.
 
-In SWAPOUT the number of units to randomize was odd. To address this,
+In Swap-Out the number of units to randomize was odd. To address this,
 our \texttt{Shiny} web application allowed our investigators to choose
 if the unmatched unit was in the treatment or control arm. The \(d_{i}\)
 was adjusted accordingly.
