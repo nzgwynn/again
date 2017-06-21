@@ -1,6 +1,6 @@
 ---
 title: "Matching in Cluster Randomized Trials Using the Goldilocks Approach"
-author: S. Gwynn Sturdevant, Susan Huang, Ken Kleinman
+author: S. Gwynn Sturdevant, Susan Huang, Richard Platt, Ken Kleinman
 output: 
     pdf_document:
       citation_package: natbib
