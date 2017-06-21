@@ -48,7 +48,7 @@ Once the matching is completed, we have pairs $(C_{11}, C_{12}), (C_{21}, C_{22}
 \begin{eqnarray*}
  d_j = \frac{| \sum_{i = 1}^{\frac{m}{2}}C_{ij}^T - \sum_{i = 1}^{\frac{m}{2}}C_{ij}^C |}{\frac{m}{2}} 
 \end{eqnarray*}
- for $j = 1, 2, ..., n.$  This generates the vector $D = (d_1, \ldots, d_n)$ of the average pairwise difference between the arms for each variable.  We repeat this process of randomization $R$ times and find $D_r$, the vector of average differences between the two arms for the $r$th re-randomization. To visualize we draw a parallel coordinates plot where the $j^{th}$ axis plots all $D_r$ for $r = 1, 2, ..., R$, as shown in the Figures below. 
+ for $j = 1, 2, ..., n.$  This generates the vector $D = (d_1, \ldots, d_n)$ of the average pairwise difference between the arms for each variable.  When the trial is complete, these differences are likely to be reported as evidence of the balance acieved in the randomization.  We repeat this process of randomization $R$ times and find $D_r$, the vector of average differences between the two arms for the $r$th re-randomization. To visualize we draw a parallel coordinates plot where the $j^{th}$ axis plots all $D_r$ for $r = 1, 2, ..., R$, as shown in the Figures below. 
 
 The investigators may find the distribution of possible randomizations unacceptable, for example because the mean distance between the arms is too large, or the maximum distance is too large. In that case, we introduce "weights" $S = (s_{1}, s_{2},..., s_{n})$, which control the strength of matching on each variable. We have
 \begin{eqnarray*}

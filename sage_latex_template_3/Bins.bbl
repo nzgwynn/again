@@ -26,7 +26,7 @@ Paula Diehr, Donald~C Martin, Thomas Koepsell, and Allen Cheadle.
   1995.
 
 \bibitem[Donner and Klar(2000)]{donner2000design}
-A.~Donner and N.~Klar.
+Allan Donner and Neil Klar.
 \newblock \emph{Design and Analysis of Cluster Randomization Trials in Health
   Research}.
 \newblock Wiley, 2000.
@@ -39,12 +39,14 @@ Allan Donner, Monica Taljaard, and Neil Klar.
 \newblock \emph{Statistics in medicine}, 26\penalty0 (9):\penalty0 2036--2051,
   2007.
 
-\bibitem[Gatsonis and Morton(2017)]{gatsonis2017methods}
-Constantine Gatsonis and Sally~C Morton.
-\newblock Methods in comparative effectiveness research, 2017.
+\bibitem[Hassall(1904)]{3Bears}
+John Hassall.
+\newblock \emph{The Old Nursery Stories and Rhymes ... Illustrated by John
+  Hassall}.
+\newblock Blackie \& Son, London, 1904.
 
-\bibitem[Hayes(2009)]{CRTrials2009}
-Moulton Hayes.
+\bibitem[Hayes and H.(2009)]{CRTrials2009}
+Richard~J Hayes and Moulton~Lawrence H.
 \newblock \emph{Cluster Randomised Trials}.
 \newblock Chapman and Hall\/CRC, 2009.
 
@@ -57,8 +59,8 @@ Susan~S Huang, Edward Septimus, Ken Kleinman, Julia Moody, Jason Hickok,
 \newblock \emph{New England Journal of Medicine}, 368\penalty0 (24):\penalty0
   2255--2265, 2013.
 
-\bibitem[Imai et~al.(2009)Imai, King, Nall, et~al.]{imai2009essential}
-Kosuke Imai, Gary King, Clayton Nall, et~al.
+\bibitem[Imai et~al.(2009)Imai, King, and Nall]{imai2009essential}
+Kosuke Imai, Gary King, and Clayton Nall.
 \newblock The essential role of pair matching in cluster-randomized
   experiments, with application to the mexican universal health insurance
   evaluation.
@@ -70,6 +72,12 @@ Neil Klar and Allan Donner.
   tale.
 \newblock \emph{Statistics in medicine}, 16\penalty0 (15):\penalty0 1753--1764,
   1997.
+
+\bibitem[Kleinman(2017)]{gatsonis2017methods}
+Ken Kleinman.
+\newblock Cluster-randomized trials.
+\newblock In Constantine Gatsonis and Sally~C Morton, editors, \emph{Methods in
+  Comparative Effectiveness Research}. CRC Press, 2017.
 
 \bibitem[Manun'ebo et~al.(1994)Manun'ebo, Haggerty, Gaie, Ashworth, and
   Kirkwood]{manun1994influence}
@@ -119,12 +127,6 @@ Gillian~M Raab and Izzy Butcher.
 \newblock Balance in cluster randomized trials.
 \newblock \emph{Statistics in medicine}, 20\penalty0 (3):\penalty0 351--365,
   2001.
-
-\bibitem[STORIES and HASSALL(1904)]{3Bears}
-NURSERY STORIES and John HASSALL.
-\newblock \emph{The Old Nursery Stories and Rhymes ... Illustrated by John
-  Hassall}.
-\newblock Blackie \& Son, London, 1904.
 
 \bibitem[Zubizarreta and Kilcioglu()]{nmatch}
 J.~R. Zubizarreta and C.~Kilcioglu.
