@@ -1,0 +1,1721 @@
+---
+title: "Matching in Cluster Randomized Trials Using the Goldilocks Approach"
+author: "S. Gwynn Sturdevant, Susan S. Huang, Richard Platt, Ken Kleinman"
+bibliography: bibliography.bib
+output:
+  pdf_document:
+    citation_package: natbib
+    fig_caption: yes
+    keep_tex: yes
+    latex_engine: pdflatex
+    number_sections: yes
+  word_document: default
+keywords: cluster-randomized trials, matching
+abstract: 'Matching in cluster-randomized trials (CRTs) is important for improving
+  covariate balance in cluster characteristics across groups, but there is no best
+  practice describing how to make matches. When baseline data are available, we suggest
+  a strategy that can be used to achieve the desired balance between treatment and
+  control groups across numerous potential confounding variables. This strategy minimizes
+  the overall within-pair distance; and involves iteratively: 1) computing the Mahalanobis
+  distance;  2) finding the pairs; 3) rerandomizing multiple times to generate the
+  potential between-arm imbalance; then 4) reweighting the potential confounders.  To
+  aid in the evaluation of step 3, we plot the between-arm differences for each variable
+  with a parallel-coordinates plot. Investigators can compare plots of different weighting
+  schemes to determine the one that best suits their needs prior to the actual, final,
+  randomization.  We demonstrate application of the approach with the Mupirocin-Iodophor
+  Swap Out trial.'
+---
+
+```{r, eval=FALSE, echo=FALSE}
+## Removed the following from the YAML, and the abstract worked.
+## documentclass: sagej
+```
+
+
+
+# Introduction
+Individually randomized trials (IRTs) with blinding are the most rigorous way of determining whether a cause-effect relation exists between an intervention and an outcome  [e.g., @Sibbald1998]. However, for scientific and practical design reasons some interventions must be delivered to groups of subjects.  For example, suppose education researchers need to evaluate training for elementary school teachers with respect to its effect on literacy skills in third graders. Randomizing third graders to treatment or control conditions would not be practical-- it would require training many, many, teachers, and ignoring the majority of students as well as the variability of students within each class.  Instead, researchers would randomize teachers, schools, or counties to the training or to the control condition and evaluate the effect on multiple students in each classroom. Trials where groups are randomized are called group-randomized or cluster-randomized trials (CRTs). Three reasons for conducting a CRT are: (i) because implementation occurs at the cluster level, (ii) to avoid contamination, and (iii) to measure intervention effects among cluster members who do not themselves receive treatment [@balzer2012match; @CRTrials2009]. CRTs are "the gold standard when allocation of identifiable groups is necessary" [@murray2004design].
+
+One challenge in CRTs is their limited sample size of randomizable units. Most CRTs have fewer than 30 independent units to randomize, though each unit may have thousands of individuals [@balzer2012match]. In large IRTs, investigators expect randomization to balance confounders across each arm of the trial.  The smaller number of randomizable units in CRTs makes imbalance a threat to the causal interpretation of any observed treatment effect. Stratified randomization, in which similar units are grouped together prior to randomization, is one solution to this. Scholars debate the sizes of these groups.  In particular, there is disagreement about the merits of matching, which involves grouping 2 units together, vs. stratification, where many more than 2 units are grouped[@PMVsStrat]. This article discusses matching. 
+
+Many authors debate the value of matching in CRTs [@balzer2012match; @CRTrials2009; @gatsonis2017methods; @diehr1995breaking; @murray1998design; @imai2009essential;
+@PMVsStrat; @donner2007merits; @klar1997merits; @donner2000design; @martin1993effect]. Murray argues that "the choice of matching or stratification [of] factors is critical to the success of the procedure" [@murray1998design]. Others suggest that caution must be used when matching a small number of clusters due to the decrease in power [@donner2000design; @klar1997merits; @balzer2012match; @martin1993effect]. Breaking the matches, i.e., ignoring the matching during data analysis, addresses this [@diehr1995breaking], but perhaps only when there are a small number of large clusters [@donner2007merits].  Imai et al. argue that not matching, in small or large samples, is "equivalent to discarding a considerable fraction of one's data" [@imai2009essential]. However, in one trial "matching actually led to a loss in statistical efficiency" [@manun1994influence, @donner2000design]. Despite this ongoing debate, few authors discuss how to match the clusters [@raab2001balance]. 
+
+Our article is an extension of methods introduced previously [@gatsonis2017methods]. We suggest a method suitable for $a \; priori$ matching using baseline data. In section 2, we outline our method.  In section 3, we show how it was applied in a large cluster-randomized trial, the Mupirocin-Iodophor Swap Out trial [@SOTrial]. In section 4 we discuss the implications of our approach.
+
+
+# Methods
+
+We suggest a new approach to the complex topic of balancing randomization in CRTs. We match the clusters on many variables, using a "weighting" scheme to suggest which variables are most important.  Then we perform many "false" or practice randomizations to obtain a distribution of the possible arm assignments that might be obtained when official randomization occurs. Investigators assess these distributions to determine if potential randomizations would result in sufficiently balanced treatment assignments.  If not, the weighting scheme is adjusted and the process begins again. The details follow.
+
+The initial step involves prioritizing variables $(1, 2,..., n)$ from units $(1, 2, ..., m)$ to be randomized. We have
+\begin{eqnarray*}
+ V_1 & = & (v_{11}, v_{12},..., v_{1n})\\
+ V_2 & = & (v_{21}, v_{22},..., v_{2n})\\
+ \vdots & = & \vdots\\    
+ V_m & = & (v_{m1}, v_{m2},..., v_{mn})\\
+\end{eqnarray*}
+where $v_{ij}$ is the $j^{th}$ variable from unit $i$: each $V_i$ contains pertinent variables from unit $i$. From here, we compute the Mahalanobois distance between two units.  This is the generalized $n$-dimensional distance across the variables; for two units $a$ and $b$ it is calculated as $d(V_a, V_b) = \sum_{k=1}^n \frac{(v_{ak} - v_{bk})^2}{s_k^2}$ where $s_k^2 = \frac{1}{m} \sum_{l=1}^m(v_{lk} - v_{\cdot k})$ and $v_{\cdot k} = \frac{1}{n} \sum_{i = 1}^m v_{ik}$.  Then we find the way of pairing the clusters that minimizes the global Mahalanobis distance across all of the possible pairs of clusters.  This is a short way of describing a lengthy process: we pair cluster 1 with cluster 2 and cluster 3 with cluster 4, and so forth.  Then we calculate the Mahalanobis distance between each of these pairs, and sum it.  Then we pair cluster 1 with cluster 3 and cluster 2 with cluster 4, and we continue until we have the summed Mahalanobis distance for all of the possible ways to pair the clusters.  The set with the minimum sum is the best way to match the clusters.   This process can be done in the R statistical programming environment [@R] using the \texttt{nmatch} function in the \texttt{designmatch} package [@nmatch]. 
+ 
+Once the matching is completed, we have pairs $(C_{11}, C_{12}), (C_{21}, C_{22}), ..., (C_{\frac{m}{2}1}, C_{\frac{m}{2}2}),$ where $C_{ij}$ is the $j$th cluster in the $i$th pair.  The first match in each pair will be randomized to either treatment or control, the second to the other arm. If cluster $C_{11}$ is randomized to treatment, we denote this as $C_{11}^T$, and this implies $C_{12}^C$, where the superscript indicates either treatment ($T$) or control ($C$). Next, we find the per variable difference between the two groups: 
+\begin{eqnarray*}
+ d_j = \frac{| \sum_{i = 1}^{\frac{m}{2}}C_{ij}^T - \sum_{i = 1}^{\frac{m}{2}}C_{ij}^C |}{\frac{m}{2}} 
+\end{eqnarray*}
+ for $j = 1, 2, ..., n.$  This generates the vector $D = (d_1, \ldots, d_n)$ of the average pairwise difference between the arms for each variable.  When the trial is complete, these differences are likely to be reported as evidence of the balance acieved in the randomization.  We repeat this process of randomization $R$ times and find $D_r$, the vector of average differences between the two arms for the $r$th re-randomization.  For study designs with more than $2$ arms, $D_{r}$ can be redefined as, for example, the standard deviation between the arms.  To visualize we draw a parallel coordinates plot where the $j^{th}$ axis plots all $D_r$ for $r = 1, 2, ..., R$, as shown in the Figures below. 
+
+The investigators may find the distribution of possible randomizations unacceptable, for example because the mean distance between the arms is too large, or the maximum distance is too large. In that case, we introduce "weights" $S = (s_{1}, s_{2},..., s_{n})$, which control the strength of matching on each variable. We have
+\begin{eqnarray*}
+ v_{ij}^* = \prod_{i=1}^{m} v_{ij} \times s_j
+\end{eqnarray*} 
+which we combine to form
+\begin{eqnarray*}
+ V_1^* & = & (v_{11}^*, v_{12}^*,..., v_{1n}^*) \\
+ V_2^* & = & (v_{21}^*, v_{22}^*,..., v_{2n}^*) \\
+ \vdots & = & \vdots\\    
+ V_m^* & = & (v_{m1}^*, v_{m2}^*,..., v_{mn}^*) .\\
+\end{eqnarray*} 
+If $s_a > s_b$, we are multiplying variable $a$ by a larger value than variable $b$, and this has the effect of increasing the distance between clusters for variable $a$, relative to variable $b$.  Then, counter-intuitively, when we re-run the matching algorithm, we will get closer matches for variable $a$ than variable $b$, because the Mahalanobis distance minimization will minimize this larger distance on variable $a$.  Similarly, as the weight $s_r$ for some variable $r$ approaches 0, the distance between any two clusters with respect to variable $r$ becomes very small, relative to the other variables.  If $s_r =0$, $r$ is effectively not included in the matching at all-- all clusters are perfectly matched on that variable.
+
+After selecting $S$, we again find the between-arm differences for each variable, $D_r$ and plot them. The cost of a high weight for variable $a$ in this process is that closer matches for variable $a$ are likely to imply reduced closeness in another variable, so compromises must be made.  Investigators can perform iterative selections of S to select the final set of weights that generate a distribution of randomizations that best reflect the most desired and tolerable differences in specific characteristics between arms. 
+
+# Results
+To demonstrate the usefulness of this technique we present a brief summary of our randomization process using baseline data from the Mupirocin-Iodophor Swap Out trial (www.clinicaltrials.gov, NCT03140423) [@SOTrial].  This trial follows the REDUCE MRSA trial [@Huang2013targeted] in which universal use of mupirocin nasal swabs and daily bathing with chlorhexidine was shown to markedly reduce methicillin resistant _Staphylococcus aureus_ and bloodstream infection in adult intensive care units (ICU) of hospitals belonging to Hospital Corporation of America. One concern about this regimen is that _S. aureus_ resistance to mupirocin is relatively common in some communities. Another is that routine use of mupirocin, an antibiotic, may provide selective pressure for resistant strains, thus rendering this and other uses of mupirocin ineffective. It would thus be desirable to be able to substitute a nasal component of the decolonizing regimen for which resistance is less likely to be present or to develop as a result of treatment.  The Swap Out trial is a cluster-randomized non-inferiority trial, comparing the antibiotic mupirocin to the antiseptic iodophor for nasal decolonization of ICU patients to assess impact on _Staphylococcus aureus_ clinical cultures and all-cause bloodstream infection during routine chlorhexidine bathing [@SOTrial]. 
+
+
+
+Baseline data collected from HCA’s centralized data warehouse were available for matching prior to randomization.  We used data from 20 months from 137 participating hospitals. Investigators prioritized 16 baseline variables into several categories. For this trial, the investigators put the highest priority on baseline values of the primary outcome measures, _Staphylococcus aureus_ ICU-attributable cultures per 1,000 days, MRSA ICU-attributable cultures per 1,000 days, and all pathogen ICU-attributable bloodstream infections per 1,000 days, as well as average monthly attributable days, regional mupirocin resistance estimates, percent of ICU admissions with a prior history of MRSA,  current usage of mupirocin (percent of mupirocin use in the first 5 days of ICU admission), and current usage of chlorhexidine (percent adherence to daily chlorhexidine gluconate for bathing).  Of secondary importance were median ICU length of stay, and mean Elixhauser total score. Of tertiary importance were the percentage of ICU Medicaid patients, and whether or not a facility uses polymerase chain reactions to identify MRSA in blood. The next group included percent admissions to skilled nursing facility, and the percent of surgical admissions. The final group included whether the ICU had specialty units for oncology, bone marrow transplant, or transplant units, and if the ICU has bone marrow transplant or transplant units. <!--More information on each variable is available in Appendix 1.  -->  
+ 
+Prior to randomization, investigators used an interactive web-based application built using the \texttt{Shiny} package in \texttt{R} that implements the strategy described in section 2. This enabled the investigators to quickly and easily change the weights applied to each potential matching variable.  The application allowed the investigators to set the desirable maximum between-arm differences for each variable as well as the relative weights.  We input tolerable maximum differences between study arms as well as desirable ranges of differences for each variable and compared many sets of variable weights until one was found that minimized the probability of undesirable variation in the actual randomization draw.
+
+In the Swap Out Trial, the number of units to randomize was odd. To address this, our \texttt{Shiny} web application allowed our investigators to choose if the unmatched unit was in the treatment or control arm. The $D_{r}$ was adjusted accordingly.
+
+```{r IntroGraph, echo=FALSE, fig.align='center', fig.show='asis', message=FALSE, warning=FALSE, cache.lazy=TRUE, fig.cap="Possible randomizations for 3 different weights for three attributes: patient days (Pt days). ICU attributable S. aureus culture rate (S. aur rate), and MRSA rate.  Each light gray line represents a single rerandomization and the black line is the mean difference between arms.  The top left image has no weighting and two axes exceed maximum values. The top right is matched well on the middle axis, but the first and third have some randomization draws that would exceed the desired maximum values for the mean difference between the groups. The bottom scheme was selected to be used in the Mupirocin-Iodophor Swap Out Trial."}
+## install.packages("designmatch")
+library(designmatch)
+
+## The first is used for its parallelplot() function
+## The second to add limits to all y-axises, and helps
+## us make the final plot.
+library(lattice)
+library(grid)
+
+## Used to read in the data
+## install.packages("readxl")
+library(readxl)
+library(shiny)
+
+## Used to get the right colors in
+library("RColorBrewer")
+mypalette<-brewer.pal(11, "RdBu")
+
+## Functions that are used to copy and paste the parallelplot
+## into soemthing that talks to viewports.
+latticeGrob <- function(p){
+  grob(p=p, cl="lattice")
+}
+
+drawDetails.lattice <- function(x, recording=FALSE){
+  lattice:::plot.trellis(x$p, newpage=FALSE)
+} 
+
+nmatch <- function (dist_mat, subset_weight = NULL, total_pairs = NULL, 
+    mom = NULL, exact = NULL, near_exact = NULL, fine = NULL, 
+    near_fine = NULL, near = NULL, far = NULL, solver = NULL) 
+{
+    if (is.null(mom)) {
+        mom_covs = NULL
+        mom_tols = NULL
+        mom_targets = NULL
+    }
+    else {
+        mom_covs = mom$covs
+        mom_tols = mom$tols
+        mom_targets = mom$targets
+    }
+    if (is.null(exact)) {
+        exact_covs = NULL
+    }
+    else {
+        exact_covs = exact$covs
+    }
+    if (is.null(near_exact)) {
+        near_exact_covs = NULL
+        near_exact_devs = NULL
+    }
+    else {
+        near_exact_covs = near_exact$covs
+        near_exact_devs = near_exact$devs
+    }
+    if (is.null(fine)) {
+        fine_covs = NULL
+    }
+    else {
+        fine_covs = fine$covs
+    }
+    if (is.null(near_fine)) {
+        near_fine_covs = NULL
+        near_fine_devs = NULL
+    }
+    else {
+        near_fine_covs = near_fine$covs
+        near_fine_devs = near_fine$devs
+    }
+    if (is.null(near)) {
+        near_covs = NULL
+        near_pairs = NULL
+        near_groups = NULL
+    }
+    else {
+        near_covs = near$covs
+        near_pairs = near$pairs
+        near_groups = near$groups
+    }
+    if (is.null(far)) {
+        far_covs = NULL
+        far_pairs = NULL
+        far_groups = NULL
+    }
+    else {
+        far_covs = far$covs
+        far_pairs = far$pairs
+        far_groups = far$groups
+    }
+    if (is.null(solver)) {
+        solver = "glpk"
+        t_max = 60 * 15
+        approximate = 1
+    }
+    else {
+        t_max = solver$t_max
+        approximate = solver$approximate
+        trace = solver$trace
+        round_cplex = solver$round_cplex
+        solver = solver$name
+    }
+    n_tot = nrow(dist_mat)
+    n_dec = (n_tot * (n_tot - 1)) - sum(1:(n_tot - 1))
+    if (is.null(subset_weight)) {
+        subset_weight = 0
+    }
+    cvec = t(dist_mat)[lower.tri(dist_mat)] - (subset_weight * 
+        rep(1, n_dec))
+    rows_far = NULL
+    cols_far = NULL
+    vals_far = NULL
+    rows_near = NULL
+    cols_near = NULL
+    vals_near = NULL
+    rows_mom = NULL
+    cols_mom = NULL
+    vals_mom = NULL
+    rows_exact = NULL
+    cols_exact = NULL
+    vals_exact = NULL
+    rows_near_exact = NULL
+    cols_near_exact = NULL
+    vals_near_exact = NULL
+    rows_fine = NULL
+    cols_fine = NULL
+    vals_fine = NULL
+    rows_near_fine = NULL
+    cols_near_fine = NULL
+    vals_near_fine = NULL
+    rows_n = NULL
+    cols_n = NULL
+    vals_n = NULL
+    rows_target = NULL
+    cols_target = NULL
+    vals_target = NULL
+    rows_nbm = sort(rep(1:n_tot, n_tot - 1))
+    temp = matrix(0, nrow = n_tot, ncol = n_tot)
+    temp[lower.tri(temp)] = 1:n_dec
+    temp = temp + t(temp)
+    diag(temp) = NA
+    cols_nbm = as.vector(t(temp))
+    cols_nbm = cols_nbm[!is.na(cols_nbm)]
+    vals_nbm = rep(1, (n_tot - 1) * n_tot)
+    row_count = max(rows_nbm)
+    rows_ind_far_pairs = list()
+    if (!is.null(far_covs)) {
+        rows_far = NULL
+        cols_far = NULL
+        vals_far = NULL
+        n_far_covs = ncol(far_covs)
+        for (j in 1:n_far_covs) {
+            far_cov = far_covs[, j]
+            if (!is.null(far_groups)) {
+                far_group = far_groups[j]
+                row_ind_far_all = rep(row_count + 1, n_dec)
+                col_ind_far_all = rep(1:n_dec, 1)
+                i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+                aux = matrix(rep(1:n_tot, n_tot), nrow = n_tot, 
+                  byrow = F)
+                j_ind = aux[lower.tri(aux)]
+                vals_far_all = far_cov[i_ind] - far_cov[j_ind] - 
+                  (far_group * rep(1, n_dec))
+                row_count = max(row_ind_far_all)
+            }
+            if (!is.null(far_pairs)) {
+                far_pair = far_pairs[j]
+                aux = abs(outer(far_cov, far_cov, FUN = "-"))
+                temp = as.vector(matrix(t(aux)[lower.tri(aux)], 
+                  nrow = 1, byrow = TRUE))
+                cols_ind_far_pairs = which(temp < far_pair)
+                if (length(cols_ind_far_pairs) > 0) {
+                  rows_ind_far_pairs[[j]] = row_count + (1:length(cols_ind_far_pairs))
+                  vals_far_pairs = rep(1, length(cols_ind_far_pairs))
+                  row_count = max(rows_ind_far_pairs[[j]])
+                }
+                if (length(cols_ind_far_pairs) == 0) {
+                  cols_ind_far_pairs = NULL
+                  rows_ind_far_pairs[[j]] = -1
+                  vals_far_pairs = NULL
+                }
+            }
+            if (!is.null(far_groups) && is.null(far_pairs)) {
+                rows_far = c(rows_far, row_ind_far_all)
+                cols_far = c(cols_far, col_ind_far_all)
+                vals_far = c(vals_far, vals_far_all)
+            }
+            if (is.null(far_groups) && !is.null(far_pairs) && 
+                rows_ind_far_pairs[[j]] != -1) {
+                rows_far = c(rows_far, rows_ind_far_pairs[[j]])
+                cols_far = c(cols_far, cols_ind_far_pairs)
+                vals_far = c(vals_far, vals_far_pairs)
+            }
+            if (!is.null(far_groups) && !is.null(far_pairs) && 
+                rows_ind_far_pairs[[j]] != -1) {
+                rows_far = c(rows_far, row_ind_far_all, rows_ind_far_pairs[[j]])
+                cols_far = c(cols_far, col_ind_far_all, cols_ind_far_pairs)
+                vals_far = c(vals_far, vals_far_all, vals_far_pairs)
+            }
+            if (!is.null(far_groups) && !is.null(far_pairs) && 
+                rows_ind_far_pairs[[j]] == -1) {
+                rows_far = c(rows_far, row_ind_far_all)
+                cols_far = c(cols_far, col_ind_far_all)
+                vals_far = c(vals_far, vals_far_all)
+            }
+        }
+    }
+    rows_ind_near_pairs = list()
+    if (!is.null(near_covs)) {
+        rows_near = NULL
+        cols_near = NULL
+        vals_near = NULL
+        n_near_covs = ncol(near_covs)
+        for (j in 1:n_near_covs) {
+            near_cov = near_covs[, j]
+            if (!is.null(near_groups)) {
+                near_group = near_groups[j]
+                row_ind_near_all = rep(row_count + 1, n_dec)
+                col_ind_near_all = rep(1:n_dec, 1)
+                i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+                aux = matrix(rep(1:n_tot, n_tot), nrow = n_tot, 
+                  byrow = F)
+                j_ind = aux[lower.tri(aux)]
+                vals_near_all = near_cov[i_ind] - near_cov[j_ind] - 
+                  (near_group * rep(1, n_dec))
+                row_count = max(row_ind_near_all)
+            }
+            if (!is.null(near_pairs)) {
+                near_pair = near_pairs[j]
+                aux = abs(outer(near_cov, near_cov, FUN = "-"))
+                temp = as.vector(matrix(t(aux)[lower.tri(aux)], 
+                  nrow = 1, byrow = TRUE))
+                cols_ind_near_pairs = which(temp > near_pair)
+                if (length(cols_ind_near_pairs) > 0) {
+                  rows_ind_near_pairs[[j]] = row_count + (1:length(cols_ind_near_pairs))
+                  vals_near_pairs = rep(1, length(cols_ind_near_pairs))
+                  row_count = max(rows_ind_near_pairs[[j]])
+                }
+                if (length(cols_ind_near_pairs) == 0) {
+                  cols_ind_near_pairs = NULL
+                  rows_ind_near_pairs[[j]] = -1
+                  vals_near_pairs = NULL
+                }
+            }
+            if (!is.null(near_groups) && is.null(near_pairs)) {
+                rows_near = c(rows_near, row_ind_near_all)
+                cols_near = c(cols_near, col_ind_near_all)
+                vals_near = c(vals_near, vals_near_all)
+            }
+            if (is.null(near_groups) && !is.null(near_pairs) && 
+                rows_ind_near_pairs[[j]] != -1) {
+                rows_near = c(rows_near, rows_ind_near_pairs[[j]])
+                cols_near = c(cols_near, cols_ind_near_pairs)
+                vals_near = c(vals_near, vals_near_pairs)
+            }
+            if (!is.null(near_groups) && !is.null(near_pairs) && 
+                rows_ind_near_pairs[[j]] != -1) {
+                rows_near = c(rows_near, row_ind_near_all, rows_ind_near_pairs[[j]])
+                cols_near = c(cols_near, col_ind_near_all, cols_ind_near_pairs)
+                vals_near = c(vals_near, vals_near_all, vals_near_pairs)
+            }
+            if (!is.null(near_groups) && !is.null(near_pairs) && 
+                rows_ind_near_pairs[[j]] == -1) {
+                rows_near = c(rows_near, row_ind_near_all)
+                cols_near = c(cols_near, col_ind_near_all)
+                vals_near = c(vals_near, vals_near_all)
+            }
+        }
+    }
+    if (!is.null(mom_covs) & is.null(mom_targets)) {
+        rows_mom_1 = NA
+        cols_mom_1 = NA
+        vals_mom_1 = NA
+        rows_mom_2 = NA
+        cols_mom_2 = NA
+        vals_mom_2 = NA
+        n_covs_m = ncol(mom_covs)
+        for (i in 1:n_covs_m) {
+            cov_m = mom_covs[, i]
+            rows_mom_1 = c(rows_mom_1, rep(row_count + i, n_dec))
+            cols_mom_1 = c(cols_mom_1, 1:n_dec)
+            i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+            aux = matrix(rep(1:n_tot, n_tot), nrow = n_tot, byrow = F)
+            j_ind = aux[lower.tri(aux)]
+            vals_mom_1 = c(vals_mom_1, cov_m[i_ind] - cov_m[j_ind] - 
+                (mom_tols[i] * rep(1, n_dec)))
+        }
+        rows_mom_1 = rows_mom_1[-1]
+        cols_mom_1 = cols_mom_1[-1]
+        vals_mom_1 = vals_mom_1[-1]
+        row_count = max(rows_mom_1)
+        for (i in 1:n_covs_m) {
+            cov_m = mom_covs[, i]
+            rows_mom_2 = c(rows_mom_2, rep(row_count + i, n_dec))
+            cols_mom_2 = c(cols_mom_2, 1:n_dec)
+            i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+            aux = matrix(rep(1:n_tot, n_tot), nrow = n_tot, byrow = F)
+            j_ind = aux[lower.tri(aux)]
+            vals_mom_2 = c(vals_mom_2, cov_m[j_ind] - cov_m[i_ind] - 
+                (mom_tols[i] * rep(1, n_dec)))
+        }
+        rows_mom_2 = rows_mom_2[-1]
+        cols_mom_2 = cols_mom_2[-1]
+        vals_mom_2 = vals_mom_2[-1]
+        rows_mom = c(rows_mom_1, rows_mom_2)
+        cols_mom = c(cols_mom_1, cols_mom_2)
+        vals_mom = c(vals_mom_1, vals_mom_2)
+        row_count = max(rows_mom)
+    }
+    if (!is.null(mom_covs) & !is.null(mom_targets)) {
+        n_covs_m = ncol(mom_covs)
+        rows_target = sort(rep(1:(4 * n_covs_m) + row_count, 
+            n_dec))
+        for (i in 1:n_covs_m) {
+            cov_m = mom_covs[, i]
+            cols_target = c(cols_target, rep(1:n_dec, 4))
+            i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+            aux = matrix(rep(1:n_tot, n_tot), nrow = n_tot, byrow = F)
+            j_ind = aux[lower.tri(aux)]
+            vals_target = c(vals_target, cov_m[i_ind] - (mom_targets[i] + 
+                mom_tols[i]), -1 * cov_m[i_ind] + (mom_targets[i] - 
+                mom_tols[i]), cov_m[j_ind] - (mom_targets[i] + 
+                mom_tols[i]), -1 * cov_m[j_ind] + (mom_targets[i] - 
+                mom_tols[i]))
+        }
+        row_count = max(rows_target)
+    }
+    rows_exact = numeric()
+    cols_exact = numeric()
+    vals_exact = numeric()
+    if (!is.null(exact_covs)) {
+        n_exact_cats = ncol(exact_covs)
+        for (i in 1:n_exact_cats) {
+            rows_exact = c(rows_exact, rep(row_count + i, n_dec))
+            cols_exact = c(cols_exact, 1:n_dec)
+            dist_exact_cov = abs(outer(exact_covs[, i], exact_covs[, 
+                i], "-"))
+            vals_exact = c(vals_exact, dist_exact_cov[lower.tri(dist_exact_cov)])
+        }
+        row_count = max(rows_exact)
+    }
+    rows_near_exact = numeric()
+    cols_near_exact = numeric()
+    vals_near_exact = numeric()
+    if (!is.null(near_exact_covs)) {
+        n_near_exact_cats = ncol(near_exact_covs)
+        for (i in 1:n_near_exact_cats) {
+            rows_near_exact = c(rows_near_exact, rep(row_count + 
+                j, n_dec))
+            cols_near_exact = c(cols_near_exact, 1:n_dec)
+            dist_near_exact_cov = abs(outer(near_exact_covs[, 
+                i], near_exact_covs[, i], "-"))
+            vals_near_exact = c(vals_near_exact, dist_near_exact_cov[lower.tri(dist_near_exact_cov)])
+        }
+        row_count = max(rows_near_exact)
+    }
+    if (!is.null(fine_covs)) {
+        fine_covs_2 = rep(NA, nrow(fine_covs))
+        n_fine_covs = ncol(fine_covs)
+        j = 1
+        for (i in 1:n_fine_covs) {
+            aux = factor(fine_covs[, i])
+            fine_covs_2 = cbind(fine_covs_2, diag(nlevels(aux))[aux, 
+                ])
+            if (j == 1) {
+                fine_covs_2 = fine_covs_2[, -1]
+            }
+            j = j + 1
+        }
+        n_fine_cats = ncol(fine_covs_2)
+        j = 1
+        for (i in 1:n_fine_cats) {
+            rows_fine = c(rows_fine, rep(row_count + j, n_dec))
+            cols_fine = c(cols_fine, 1:n_dec)
+            dist_fine_cov = outer(fine_covs_2[, i], fine_covs_2[, 
+                i], "-")
+            dist_fine_cov = t(dist_fine_cov)
+            vals_fine = c(vals_fine, dist_fine_cov[lower.tri(dist_fine_cov)])
+            if (j == 1) {
+                rows_fine = rows_fine[-1]
+                cols_fine = cols_fine[-1]
+                vals_fine = vals_fine[-1]
+            }
+            j = j + 1
+        }
+        row_count = max(rows_fine)
+    }
+    if (!is.null(near_fine_covs)) {
+        near_fine_covs_2 = rep(NA, nrow(near_fine_covs))
+        n_near_fine_covs = ncol(near_fine_covs)
+        j = 1
+        for (i in 1:n_near_fine_covs) {
+            aux = factor(near_fine_covs[, i])
+            near_fine_covs_2 = cbind(near_fine_covs_2, diag(nlevels(aux))[aux, 
+                ])
+            if (j == 1) {
+                near_fine_covs_2 = near_fine_covs_2[, -1]
+            }
+            j = j + 1
+        }
+        n_near_fine_cats = ncol(near_fine_covs_2)
+        j = 1
+        for (i in 1:n_near_fine_cats) {
+            for (h in 1:2) {
+                rows_near_fine = c(rows_near_fine, rep(row_count + 
+                  j, n_dec))
+                cols_near_fine = c(cols_near_fine, 1:n_dec)
+                dist_near_fine_cov = outer(near_fine_covs_2[, 
+                  i], near_fine_covs_2[, i], "-")
+                dist_near_fine_cov = t(dist_near_fine_cov)
+                vals_near_fine = c(vals_near_fine, dist_near_fine_cov[lower.tri(dist_near_fine_cov)])
+                if (j == 1) {
+                  rows_near_fine = rows_near_fine[-1]
+                  cols_near_fine = cols_near_fine[-1]
+                  vals_near_fine = vals_near_fine[-1]
+                }
+                j = j + 1
+            }
+        }
+        row_count = max(rows_near_fine)
+    }
+    if (!is.null(total_pairs)) {
+        rows_n = rep(row_count + 1, n_dec)
+        cols_n = 1:n_dec
+        vals_n = rep(1, n_dec)
+        row_count = max(rows_n)
+    }
+    rows = c(rows_nbm, rows_far, rows_near, rows_mom, rows_target, 
+        rows_exact, rows_near_exact, rows_fine, rows_near_fine, 
+        rows_n)
+    cols = c(cols_nbm, cols_far, cols_near, cols_mom, cols_target, 
+        cols_exact, cols_near_exact, cols_fine, cols_near_fine, 
+        cols_n)
+    vals = c(vals_nbm, vals_far, vals_near, vals_mom, vals_target, 
+        vals_exact, vals_near_exact, vals_fine, vals_near_fine, 
+        vals_n)
+    aux = cbind(rows, cols, vals)[order(cols), ]
+    cnstrn_mat = simple_triplet_matrix(i = aux[, 1], j = aux[, 
+        2], v = aux[, 3])
+    Amat = cnstrn_mat
+    bvec = rep(1, length(table(rows_nbm)))
+    if (!is.null(far_covs)) {
+        n_far_covs = ncol(far_covs)
+        for (j in 1:n_far_covs) {
+            if (!is.null(far_groups)) {
+                bvec = c(bvec, rep(0, 1))
+            }
+            if (!is.null(far_pairs) && rows_ind_far_pairs[[j]] != 
+                -1) {
+                bvec = c(bvec, rep(0, length(table(rows_ind_far_pairs[[j]]))))
+            }
+        }
+    }
+    if (!is.null(near_covs)) {
+        n_near_covs = ncol(near_covs)
+        for (j in 1:n_near_covs) {
+            if (!is.null(near_groups)) {
+                bvec = c(bvec, rep(0, 1))
+            }
+            if (!is.null(near_pairs) && rows_ind_near_pairs[[j]] != 
+                -1) {
+                bvec = c(bvec, rep(0, length(table(rows_ind_near_pairs[[j]]))))
+            }
+        }
+    }
+    bvec = c(bvec, rep(0, length(table(rows_mom))))
+    bvec = c(bvec, rep(0, length(table(rows_target))))
+    if (!is.null(exact_covs)) {
+        bvec = c(bvec, rep(0, ncol(exact_covs)))
+    }
+    if (!is.null(near_exact_covs)) {
+        bvec = c(bvec, near_exact_devs)
+    }
+    bvec = c(bvec, rep(0, length(table(rows_fine))))
+    if (!is.null(near_fine_covs)) {
+        bvec_8_aux = rep(NA, length(rows_near_fine))
+        bvec_8_aux[seq(1, length(rows_near_fine), 2)] = -near_fine_devs
+        bvec_8_aux[seq(2, length(rows_near_fine), 2)] = near_fine_devs
+        bvec = c(bvec, bvec_8_aux)
+    }
+    if (!is.null(total_pairs)) {
+        bvec = c(bvec, total_pairs)
+    }
+    ub = rep(1, n_dec)
+    sense = rep("L", length(table(rows_nbm)))
+    if (!is.null(far_covs)) {
+        n_far_covs = ncol(far_covs)
+        for (j in 1:n_far_covs) {
+            if (!is.null(far_groups)) {
+                sense = c(sense, rep("G", 1))
+            }
+            if (!is.null(far_pairs) && rows_ind_far_pairs[[j]] != 
+                -1) {
+                sense = c(sense, rep("E", length(table(rows_ind_far_pairs[[j]]))))
+            }
+        }
+    }
+    if (!is.null(near_covs)) {
+        n_near_covs = ncol(near_covs)
+        for (j in 1:n_near_covs) {
+            if (!is.null(near_groups)) {
+                sense = c(sense, rep("L", 1))
+            }
+            if (!is.null(near_pairs) && rows_ind_near_pairs[[j]] != 
+                -1) {
+                sense = c(sense, rep("E", length(table(rows_ind_near_pairs[[j]]))))
+            }
+        }
+    }
+    sense = c(sense, rep("L", length(table(rows_mom))))
+    sense = c(sense, rep("L", length(table(rows_target))))
+    if (!is.null(exact_covs)) {
+        sense = c(sense, rep("E", ncol(exact_covs)))
+    }
+    if (!is.null(near_exact_covs)) {
+        sense = c(sense, rep("L", ncol(near_exact_covs)))
+    }
+    sense = c(sense, rep("E", length(table(rows_fine))))
+    sense = c(sense, rep(c("G", "L"), length(table(rows_near_fine))/2))
+    sense = c(sense, rep("E", length(total_pairs)))
+    if (approximate == 1) {
+        var_type = rep("C", n_dec)
+    }
+    else {
+        var_type = rep("B", n_dec)
+    }
+    if (solver == "glpk") {
+        dir = rep(NA, length(sense))
+        dir[sense == "E"] = "=="
+        dir[sense == "L"] = "<="
+        dir[sense == "G"] = ">="
+        bound = list(lower = list(ind = c(1:length(ub)), val = rep(0, 
+            length(ub))), upper = list(ind = c(1:length(ub)), 
+            val = ub))
+        ptm = proc.time()
+        out = Rglpk_solve_LP(cvec, Amat, dir, bvec, bounds = bound, 
+            types = var_type, max = FALSE)
+        time = (proc.time() - ptm)[3]
+        if (out$status != 0) {
+            cat(format("  Error: problem infeasible!"), "\n")
+            obj_val = NA
+            obj_dist_mat = NA
+            id_1 = NA
+            id_2 = NA
+            group_id = NA
+            time = NA
+        }
+        if (out$status == 0) {
+            if (approximate == 1) {
+                rel = .relaxation_n(n_tot, out$solution, dist_mat, 
+                  subset_weight, "glpk", round_cplex, trace)
+                out$solution = rel$sol
+                out$optimum = rel$obj
+                time = time + rel$time
+            }
+            i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+            aux = matrix(1:n_tot, nrow = n_tot, ncol = n_tot)
+            j_ind = aux[lower.tri(aux)]
+            group_1 = i_ind[out$solution == 1]
+            group_2 = j_ind[out$solution == 1]
+            max_groups = apply(cbind(group_1, group_2), 1, max)
+            id_1 = group_1[max_groups <= n_tot]
+            id_2 = group_2[max_groups <= n_tot]
+            group_id_1 = 1:(length(id_1))
+            group_id_2 = 1:(length(id_2))
+            group_id = c(group_id_1, group_id_2)
+            obj_val = out$optimum
+            obj_dist_mat = sum(t(dist_mat)[lower.tri(dist_mat)] * 
+                out$solution)
+        }
+    }
+    return = list(obj_total = obj_val, obj_dist_mat = obj_dist_mat, 
+        id_1 = id_1, id_2 = id_2, group_id = group_id, time = time)
+}
+
+makePlot = function(V, P, D, Tm, NVs, cols){
+  ## Including means of columns and indicator that tells
+  ## whether or not it is to be included in plot as mean (light blue)
+  ## or regular data point
+  CM = colMeans(P[[3]])
+  G = c(rep("A", Tm), "B")
+  P[[3]] = cbind(rbind(P[[3]], CM), G)
+  
+  ## Setting the upper values for the parallelplot
+  upper <- as.numeric(P[[2]][,"Maxs"])
+  
+  ## Naming the columns
+  CNs <- c(P[[2]][,'L'], "G")
+  colnames(P[[3]]) = CNs
+  
+  ## add draw = FALSE, to get rid of x axis labels for hists
+  p1 = parallelplot(~P[[3]][cols], P[[3]], groups = G, horizontal.axis = FALSE,
+                    scales = list(x = list(rot = 90, cex = 0.5, col = "black"),  ## draw = FALSE,
+                                  y = list(draw = FALSE)),
+                    col = c("grey50", "black"), lwd = c(1,3),
+                    lower = 0, upper = upper,
+                    par.settings = list(axis.line = list(col = 0)),
+                    panel = function(...) {
+                      panel.parallel(...)
+                      ## If plotting with histograms underneath take out
+                      ## first grid.text
+                      grid.text(0,
+                                 x=unit(1:length(cols), "native"),
+                                 y=unit(2, "mm"), just="bottom",
+                                 gp=gpar(col="grey", cex=.7))
+                      grid.text(upper[cols],
+                                x=unit(c(1.01, 2, 2.97), "native"),
+                                y=unit(1, "npc") - unit(2, "mm"), 
+                                just="top",
+                                gp=gpar(col="grey", cex=.7))
+                      
+                    })
+  
+  A  = list()
+  A[[2]] = latticeGrob(p1)
+  
+  A 
+}
+
+# Function that does the randomizations
+# M is the number of randomizations
+# vars is a list of parameters which includes
+# D is the data set from which the columns to be matched on are drawn
+# names is the file name
+# S is the optimisation method
+
+make.Ks = function(M, vars, D, Plot, S, ToC){
+  r.I = length(vars)
+  No.cols = length(vars[[1]])
+  I = matrix(NA, nrow = r.I, ncol = No.cols)
+  for(i in 1:r.I) I[i,] = unlist(vars[[i]])
+  
+  dimnames(I) = list(rep(NULL, r.I), c("cols", "w", "L", "Mins", "Maxs"))
+  
+  ## No. of participant hospitals
+  N = dim(D)[1]
+  
+  mymat = sdmat = matrix(NA, nrow = N, ncol = r.I)
+  
+  ## Combining columns
+  for(i in 1:r.I) mymat[,i] = D[,I[i,"cols"]]
+  
+  ## Standardising and adding weights
+  col.means = colMeans(mymat)
+  col.sds = apply(mymat, 2, sd)
+  w = as.numeric(I[,"w"])
+  for(i in 1:r.I) sdmat[,i] = 
+    w[i]*(mymat[,i] - col.means[i])/col.sds[i]
+  
+  ## Making the distance matrix
+  dist_mat_obj = dist(sdmat, diag = TRUE, upper = TRUE)
+  dist_mat = as.matrix(dist_mat_obj)
+  
+  ## Telling the computer wich method to use to solve
+  t_max = 60*5
+  solver = S
+  approximate = 0
+  solver = list(name = solver, t_max = t_max, approximate = approximate, 
+                round_cplex = 0, trace_cplex = 0)
+  
+  ## Solving
+  out = nmatch(dist_mat = dist_mat, total_pairs = floor(N/2), 
+               solver = solver, subset_weight = NULL)
+  
+  # These guys have the row numbers of the matched pairs
+  id_1 = out$id_1  
+  id_2 = out$id_2 
+  
+  ## If there are any leftovers they get assigned where
+  ## the user wants them assigned
+  X = dim(D)[1] %% 2 == 0
+  if(X == FALSE) {LO = sum(1:dim(D)[1]) - sum(id_1, id_2)}
+  
+  ## Will be used in the loop below - a place to put Ks, 
+  ## filled below, then graphed after using parallel coordinate plot
+  Ks = matrix(NA, nrow = M, ncol = r.I)
+  
+  ## Used to run the loop below
+  M.seq = seq_along(1:M)
+  
+  for(i in M.seq){
+    ## Randomising once - 0 ctl, 1 trt, (subtract one because when 
+    ## making Trt below the middle step has to identify the length of 
+    ## Trt or it gets fussy and won't add on the last value)
+    R = replicate(length(id_1), rbinom(1, size = 1, prob = 0.5))
+    S = 1 - R
+    
+    ## The 1 is for the leftover row that goes to the trt arm
+    Trt = c(R, S)
+    
+    ## Making the data, TA is included and goes to the trt arm
+    if (X == TRUE) {
+      Dt = data.frame(mymat[c(id_1, id_2),], Trt)
+    } else {
+      Dt = data.frame(mymat[c(id_1, id_2, LO),], c(Trt, (ToC - 1)))
+    }
+    
+    ## Picking out trt and ctl covariates
+    Trt.CV = Dt[which(Trt == 1), 1:r.I]
+    Ctl.CV = Dt[-which(Trt == 1), 1:r.I]
+    
+    Ks[i,] = abs((apply(Trt.CV, 2, sum) - 
+                    apply(Ctl.CV, 2, sum))/N)
+  }## ending for i in M.seq
+  
+  ## So the labels in parcoord come out nicely
+  ## NEW colnames here
+  colnames(Ks) = I[,'L']
+  
+  P = list()
+  P[[1]] = cbind(id_1, id_2)
+  P[[2]] = I
+  P[[3]] = as.data.frame(Ks)
+  P[[4]] = Trt.CV
+  P[[5]] = Ctl.CV
+  
+  P
+} ## closing the function make.Ks
+
+D = read_excel("ArtData.xlsx",  sheet=2)[1:137,]
+D = as.data.frame(D)
+
+## Final weighting for randomization
+V = list(list("Attrib_Days_Month", 1, "Pt Days", 0, 80),
+         list("Outcome_Saureus", 4, "S aur Rate", 0, 0.15),
+         list("Outcome_MRSA", 2, "MRSA Rate", 0, 0.15),
+         list("All_Blood", 4, "All Blood", 0, 0.15),
+         list("Mup-R", 2, "Mup-R", 0, 0.02),
+         list("Hx_MRSA", 1,"Hx MRSA", 0, 0.01),
+         list("Mup_Adherence", 1, "Mup Adherence", 0, 0.05),
+         list("CHG_Adherence", 1,"CHG Adherence", 0, 0.05),
+         list("Median_LOS", 3,"Median LOS", 0, 0.05),
+         list("Elix_Score", 1,"Comorbidity Score", 0, 0.15),
+         list("Medicaid", 0,"Medicaid", 0, 0.02),
+         list("PCR_Blood", 0,"PCR_Blood", 0, 0.1),
+         list("DC_SNF", 0,"DC SNF", 0, 0.02),
+         list("Surgery", 1,"Surgery", 0, 0.02),
+         list("Onc_BMT_Trp", 2,"Onc_BMT_Trp", 0, 0.1),
+         list("BMT_Trp", 0,"BMT_Trp", 0, 0.1)
+         )
+
+## First 3 weights zeroed
+V1 = list(list("Attrib_Days_Month", 0, "Pt Days", 0, 80),
+         list("Outcome_Saureus", 0, "S aur Rate", 0, 0.15),
+         list("Outcome_MRSA", 0, "MRSA Rate", 0, 0.15),
+         list("All_Blood", 4, "All Blood", 0, 0.15),
+         list("Mup-R", 2, "Mup-R", 0, 0.02),
+         list("Hx_MRSA", 1,"Hx MRSA", 0, 0.01),
+         list("Mup_Adherence", 1, "Mup Adherence", 0, 0.05),
+         list("CHG_Adherence", 1,"CHG Adherence", 0, 0.05),
+         list("Median_LOS", 3,"Median LOS", 0, 0.05),
+         list("Elix_Score", 1,"Comorbidity Score", 0, 0.15),
+         list("Medicaid", 0,"Medicaid", 0, 0.02),
+         list("PCR_Blood", 0,"PCR_Blood", 0, 0.1),
+         list("DC_SNF", 0,"DC SNF", 0, 0.02),
+         list("Surgery", 1,"Surgery", 0, 0.02),
+         list("Onc_BMT_Trp", 2,"Onc_BMT_Trp", 0, 0.1),
+         list("BMT_Trp", 0,"BMT_Trp", 0, 0.1)
+         )
+
+## Primary outcome weighted highly others zeroed
+V2 = list(list("Attrib_Days_Month", 0, "Pt Days", 0, 80),
+         list("Outcome_Saureus", 8, "S aur Rate", 0, 0.15),
+         list("Outcome_MRSA", 0, "MRSA Rate", 0, 0.15),
+         list("All_Blood", 4, "All Blood", 0, 0.15),
+         list("Mup-R", 2, "Mup-R", 0, 0.02),
+         list("Hx_MRSA", 1,"Hx MRSA", 0, 0.01),
+         list("Mup_Adherence", 1, "Mup Adherence", 0, 0.05),
+         list("CHG_Adherence", 1,"CHG Adherence", 0, 0.05),
+         list("Median_LOS", 3,"Median LOS", 0, 0.05),
+         list("Elix_Score", 1,"Comorbidity Score", 0, 0.15),
+         list("Medicaid", 0,"Medicaid", 0, 0.02),
+         list("PCR_Blood", 0,"PCR_Blood", 0, 0.1),
+         list("DC_SNF", 0,"DC SNF", 0, 0.02),
+         list("Surgery", 1,"Surgery", 0, 0.02),
+         list("Onc_BMT_Trp", 2,"Onc_BMT_Trp", 0, 0.1),
+         list("BMT_Trp", 0,"BMT_Trp", 0, 0.1)
+         )
+
+## Making data 
+## The leftover is sent to the treatment arm (ToC = 2)
+P = make.Ks(M = 300, D = D, Plot = "noscreen", vars = V, S = "glpk", ToC = 2)
+P1 = make.Ks(M = 300, D = D, Plot = "noscreen", vars = V1, S = "glpk", ToC = 2)
+P2 = make.Ks(M = 300, D = D, Plot = "noscreen", vars = V2, S = "glpk", ToC = 2)
+
+## Making the things to plot - cols 1, 5 only
+## Half the screen on bottom
+A = makePlot(V = V, P = P, D = D, Tm = 300, NVs = 2, cols = 1:3)
+
+## Top Left
+A1 = makePlot(V = V1, P = P1, D = D, Tm = 300, NVs = 2, cols = 1:3)
+
+## Top Right
+A2 = makePlot(V = V2, P = P2, D = D, Tm = 300, NVs = 2, cols = 1:3)
+
+grid.newpage()
+
+# KK playing
+
+## The bottom one
+pushViewport(viewport(x=0, y=0, width=.3, height=.6, clip = "off", just=c("left", "bottom")))
+drawDetails.lattice(A[[2]])
+upViewport()
+
+## Top Left
+pushViewport(viewport(x=0.33, y=0, width=.3, height=.6, clip="on", just=c("left", "bottom")))
+drawDetails.lattice(A1[[2]])
+upViewport()
+
+## Top Right
+pushViewport(viewport(x=0.66, y=0, width=.3, height=.6, just=c("left", "bottom")))
+drawDetails.lattice(A2[[2]])
+upViewport()
+
+
+# ## The bottom one
+# pushViewport(viewport(x=0, y=0, width=1, height=.5, just=c("left", "bottom")))
+# drawDetails.lattice(A[[2]])
+# upViewport()
+# 
+# ## Top Left
+# pushViewport(viewport(x=0.01, y=0.40, width=.49, height=.6, just=c("left", "bottom")))
+# drawDetails.lattice(A1[[2]])
+# upViewport()
+# 
+# ## Top Right
+# pushViewport(viewport(x=0.49, y=0.40, width=.49, height=.6, just=c("left", "bottom")))
+# drawDetails.lattice(A2[[2]])
+# upViewport()
+
+
+```
+
+To begin, we show a version of this process using just three of the 16 variables; the actual randomization preparation is described below.  Figure 1 demonstrates how preparation for randomization would proceed using 1) attributable patient days per month, 2) _Staphylococcus aureus_ rate, and 3) MRSA rate.  After initial explorations on the web application, investigators agreed that the tolerable maximum mean difference between treatment and control arms for these variables were: 80 attributable patient days per month, 0.15 difference in _Staphylococcus aureus_ infection rates, and 0.15 difference in MRSA rate. The graph on the top left is a parallel coordinates plot displaying the results of 300 randomizations when all the weights are equal, equivalent to using the raw values of each variable.  To read a parallel coordinates plot, trace a single gray line from "Pt Days" to "S aur rate" to "MRSA rate"; this shows the between- arm differences obtained from a single randomization.  In all graphs, the black line indicates the mean value of all points on each axis.  We also used this value to help decide whether the matching was acceptable.  To be completely clear, this process begins in the knowledge that none of these randomizations will be used to assign arms in the actual trial: these are hypothetical randomizations that might be applied to the hospitals.
+
+The values in the upper left of Figure 1 show that several randomizations exceeded the desired maximum between-arm difference in the second and third axis: there is a reasonable chance that if randomization occurred with this weighting, the _Staphylococcus aureus_ and MRSA rates would be imbalanced between the treatment and control arms. To rectify this, we should increase the weights $s_r$ for those variables. In the top-right graph a weight of 8 has been applied to the _Staphylococcus aureus_ rate. In this graph, the matching of hospitals is strongly adjusted so that hospitals with similar _Staphylococcus aureus_ rates are paired. This results in smaller mean difference between the treatment and control arms for that variable. The values on the middle axis are all well below the desired maximum value: if randomization occurred using these strengths we are likely to get suitable balance in this variable. Unfortunately, there is a penalty. Hospitals with similar _Staphylococcus aureus_ rates do not have similar attributable patient days per month and MRSA rates, which results in a few of these values exceeding the maximum tolerable difference between arms. In particular, the chance of a trial randomization with a difference in MRSA rates greater than 0.15 is too high with these weights. The bottom plot shows the randomizations when the matching weights for each variable were 1, 4, and 2, respectively. 
+
+In the actual study, our investigators used this approach with all 16 variables listed above. After trying many weights they chose a set of weights that balanced the covariates between the two arms, as seen in Figure 2.   For all the variables, none of these randomizations resulted in intolerable between-arm differences, and for most, the mean difference was much closer to 0 than the maximum tolerable.  When it was time to assign the hospitals to their interventions, we used these weights to match hospitals in the study into pairs, then formally randomized one member of each match to treatment and the other to control.  Note that some weights were 0; these variables were not used in the matching, but the figure still helps to visualize the between-arm differences obtained in the planning randomizations.
+
+
+```{r FullGraph, echo=FALSE, fig.align='center', fig.show='asis', message=FALSE, warning=FALSE, cache.lazy=TRUE, fig.cap='Weighting scheme used in the Mupirocin-Iodophor Swap Out Trial.  The variables are: average monthly attributable days (Pt days, weight=1), Staphylococcus aureus ICU-attributable cultures per 1,000 days (S aur rate, weight=4), MRSA ICU-attributable cultures per 1,000 days (MRSA rate, weight=2), all pathogen ICU-attributable bloodstream infections per 1,000 days (All Blood, weight=4), regional mupirocin resistance estimates (Mup R, weight=2), percent of ICU admissions with a prior history of MRSA (Hx MRSA, weight=1), current usage of mupirocin (percent of mupirocin use in the first 5 days of ICU admission (Mup Adherence, weight=1), current usage of chlorhexidine (percent adherence to daily chlorhexidine gluconate for bathing (CHG Adherence, weight=1), median ICU length of stay (Median LOS, weight=3), mean Elixhauser total score (Comorbidity Score, weight=1), percent ICU patients insured by Medicaid (Medicaid, weight=0), whether or not a facility uses polymerase chain reactions to identify MRSA in blood (PCR Blood, weight=0), percent admissions to skilled nursing facility (DC SNF), percent surgical admissions (Surgery, weight=1), whether the ICU had specialty units for oncology, bone marrow transplant, or transplant units (OncBMTTrp, weight=2), if the ICU has bone marrow transplant or transplant units (BMTTrp, weight=0). Note that Median LOS has the same value for all the re-randomizations. That is, for this variable, every assignment of treatment and control within the pairs results in the same mean difference in median length of stay between the control and treatment arms.  This is likely due to the very small variability on this variable.  The vast majority of the hospitals had the same median length of stay.'}
+set.seed(11081966)
+
+## install.packages("designmatch")
+library(designmatch)
+
+## The first is used for its parallelplot() function
+## The second to add limits to all y-axises, and helps
+## us make the final plot.
+library(lattice)
+library(grid)
+
+## Used to read in the data
+## install.packages("readxl")
+library(readxl)
+library(shiny)
+
+## Used to get the right colors in
+library("RColorBrewer")
+mypalette<-brewer.pal(11, "RdBu")
+
+## Functions that are used to copy and paste the parallelplot
+## into soemthing that talks to viewports.
+latticeGrob <- function(p){
+  grob(p=p, cl="lattice")
+}
+
+drawDetails.lattice <- function(x, recording=FALSE){
+  lattice:::plot.trellis(x$p, newpage=FALSE)
+} 
+
+nmatch <- function (dist_mat, subset_weight = NULL, total_pairs = NULL, 
+    mom = NULL, exact = NULL, near_exact = NULL, fine = NULL, 
+    near_fine = NULL, near = NULL, far = NULL, solver = NULL) 
+{
+    if (is.null(mom)) {
+        mom_covs = NULL
+        mom_tols = NULL
+        mom_targets = NULL
+    }
+    else {
+        mom_covs = mom$covs
+        mom_tols = mom$tols
+        mom_targets = mom$targets
+    }
+    if (is.null(exact)) {
+        exact_covs = NULL
+    }
+    else {
+        exact_covs = exact$covs
+    }
+    if (is.null(near_exact)) {
+        near_exact_covs = NULL
+        near_exact_devs = NULL
+    }
+    else {
+        near_exact_covs = near_exact$covs
+        near_exact_devs = near_exact$devs
+    }
+    if (is.null(fine)) {
+        fine_covs = NULL
+    }
+    else {
+        fine_covs = fine$covs
+    }
+    if (is.null(near_fine)) {
+        near_fine_covs = NULL
+        near_fine_devs = NULL
+    }
+    else {
+        near_fine_covs = near_fine$covs
+        near_fine_devs = near_fine$devs
+    }
+    if (is.null(near)) {
+        near_covs = NULL
+        near_pairs = NULL
+        near_groups = NULL
+    }
+    else {
+        near_covs = near$covs
+        near_pairs = near$pairs
+        near_groups = near$groups
+    }
+    if (is.null(far)) {
+        far_covs = NULL
+        far_pairs = NULL
+        far_groups = NULL
+    }
+    else {
+        far_covs = far$covs
+        far_pairs = far$pairs
+        far_groups = far$groups
+    }
+    if (is.null(solver)) {
+        solver = "glpk"
+        t_max = 60 * 15
+        approximate = 1
+    }
+    else {
+        t_max = solver$t_max
+        approximate = solver$approximate
+        trace = solver$trace
+        round_cplex = solver$round_cplex
+        solver = solver$name
+    }
+    n_tot = nrow(dist_mat)
+    n_dec = (n_tot * (n_tot - 1)) - sum(1:(n_tot - 1))
+    if (is.null(subset_weight)) {
+        subset_weight = 0
+    }
+    cvec = t(dist_mat)[lower.tri(dist_mat)] - (subset_weight * 
+        rep(1, n_dec))
+    rows_far = NULL
+    cols_far = NULL
+    vals_far = NULL
+    rows_near = NULL
+    cols_near = NULL
+    vals_near = NULL
+    rows_mom = NULL
+    cols_mom = NULL
+    vals_mom = NULL
+    rows_exact = NULL
+    cols_exact = NULL
+    vals_exact = NULL
+    rows_near_exact = NULL
+    cols_near_exact = NULL
+    vals_near_exact = NULL
+    rows_fine = NULL
+    cols_fine = NULL
+    vals_fine = NULL
+    rows_near_fine = NULL
+    cols_near_fine = NULL
+    vals_near_fine = NULL
+    rows_n = NULL
+    cols_n = NULL
+    vals_n = NULL
+    rows_target = NULL
+    cols_target = NULL
+    vals_target = NULL
+    rows_nbm = sort(rep(1:n_tot, n_tot - 1))
+    temp = matrix(0, nrow = n_tot, ncol = n_tot)
+    temp[lower.tri(temp)] = 1:n_dec
+    temp = temp + t(temp)
+    diag(temp) = NA
+    cols_nbm = as.vector(t(temp))
+    cols_nbm = cols_nbm[!is.na(cols_nbm)]
+    vals_nbm = rep(1, (n_tot - 1) * n_tot)
+    row_count = max(rows_nbm)
+    rows_ind_far_pairs = list()
+    if (!is.null(far_covs)) {
+        rows_far = NULL
+        cols_far = NULL
+        vals_far = NULL
+        n_far_covs = ncol(far_covs)
+        for (j in 1:n_far_covs) {
+            far_cov = far_covs[, j]
+            if (!is.null(far_groups)) {
+                far_group = far_groups[j]
+                row_ind_far_all = rep(row_count + 1, n_dec)
+                col_ind_far_all = rep(1:n_dec, 1)
+                i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+                aux = matrix(rep(1:n_tot, n_tot), nrow = n_tot, 
+                  byrow = F)
+                j_ind = aux[lower.tri(aux)]
+                vals_far_all = far_cov[i_ind] - far_cov[j_ind] - 
+                  (far_group * rep(1, n_dec))
+                row_count = max(row_ind_far_all)
+            }
+            if (!is.null(far_pairs)) {
+                far_pair = far_pairs[j]
+                aux = abs(outer(far_cov, far_cov, FUN = "-"))
+                temp = as.vector(matrix(t(aux)[lower.tri(aux)], 
+                  nrow = 1, byrow = TRUE))
+                cols_ind_far_pairs = which(temp < far_pair)
+                if (length(cols_ind_far_pairs) > 0) {
+                  rows_ind_far_pairs[[j]] = row_count + (1:length(cols_ind_far_pairs))
+                  vals_far_pairs = rep(1, length(cols_ind_far_pairs))
+                  row_count = max(rows_ind_far_pairs[[j]])
+                }
+                if (length(cols_ind_far_pairs) == 0) {
+                  cols_ind_far_pairs = NULL
+                  rows_ind_far_pairs[[j]] = -1
+                  vals_far_pairs = NULL
+                }
+            }
+            if (!is.null(far_groups) && is.null(far_pairs)) {
+                rows_far = c(rows_far, row_ind_far_all)
+                cols_far = c(cols_far, col_ind_far_all)
+                vals_far = c(vals_far, vals_far_all)
+            }
+            if (is.null(far_groups) && !is.null(far_pairs) && 
+                rows_ind_far_pairs[[j]] != -1) {
+                rows_far = c(rows_far, rows_ind_far_pairs[[j]])
+                cols_far = c(cols_far, cols_ind_far_pairs)
+                vals_far = c(vals_far, vals_far_pairs)
+            }
+            if (!is.null(far_groups) && !is.null(far_pairs) && 
+                rows_ind_far_pairs[[j]] != -1) {
+                rows_far = c(rows_far, row_ind_far_all, rows_ind_far_pairs[[j]])
+                cols_far = c(cols_far, col_ind_far_all, cols_ind_far_pairs)
+                vals_far = c(vals_far, vals_far_all, vals_far_pairs)
+            }
+            if (!is.null(far_groups) && !is.null(far_pairs) && 
+                rows_ind_far_pairs[[j]] == -1) {
+                rows_far = c(rows_far, row_ind_far_all)
+                cols_far = c(cols_far, col_ind_far_all)
+                vals_far = c(vals_far, vals_far_all)
+            }
+        }
+    }
+    rows_ind_near_pairs = list()
+    if (!is.null(near_covs)) {
+        rows_near = NULL
+        cols_near = NULL
+        vals_near = NULL
+        n_near_covs = ncol(near_covs)
+        for (j in 1:n_near_covs) {
+            near_cov = near_covs[, j]
+            if (!is.null(near_groups)) {
+                near_group = near_groups[j]
+                row_ind_near_all = rep(row_count + 1, n_dec)
+                col_ind_near_all = rep(1:n_dec, 1)
+                i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+                aux = matrix(rep(1:n_tot, n_tot), nrow = n_tot, 
+                  byrow = F)
+                j_ind = aux[lower.tri(aux)]
+                vals_near_all = near_cov[i_ind] - near_cov[j_ind] - 
+                  (near_group * rep(1, n_dec))
+                row_count = max(row_ind_near_all)
+            }
+            if (!is.null(near_pairs)) {
+                near_pair = near_pairs[j]
+                aux = abs(outer(near_cov, near_cov, FUN = "-"))
+                temp = as.vector(matrix(t(aux)[lower.tri(aux)], 
+                  nrow = 1, byrow = TRUE))
+                cols_ind_near_pairs = which(temp > near_pair)
+                if (length(cols_ind_near_pairs) > 0) {
+                  rows_ind_near_pairs[[j]] = row_count + (1:length(cols_ind_near_pairs))
+                  vals_near_pairs = rep(1, length(cols_ind_near_pairs))
+                  row_count = max(rows_ind_near_pairs[[j]])
+                }
+                if (length(cols_ind_near_pairs) == 0) {
+                  cols_ind_near_pairs = NULL
+                  rows_ind_near_pairs[[j]] = -1
+                  vals_near_pairs = NULL
+                }
+            }
+            if (!is.null(near_groups) && is.null(near_pairs)) {
+                rows_near = c(rows_near, row_ind_near_all)
+                cols_near = c(cols_near, col_ind_near_all)
+                vals_near = c(vals_near, vals_near_all)
+            }
+            if (is.null(near_groups) && !is.null(near_pairs) && 
+                rows_ind_near_pairs[[j]] != -1) {
+                rows_near = c(rows_near, rows_ind_near_pairs[[j]])
+                cols_near = c(cols_near, cols_ind_near_pairs)
+                vals_near = c(vals_near, vals_near_pairs)
+            }
+            if (!is.null(near_groups) && !is.null(near_pairs) && 
+                rows_ind_near_pairs[[j]] != -1) {
+                rows_near = c(rows_near, row_ind_near_all, rows_ind_near_pairs[[j]])
+                cols_near = c(cols_near, col_ind_near_all, cols_ind_near_pairs)
+                vals_near = c(vals_near, vals_near_all, vals_near_pairs)
+            }
+            if (!is.null(near_groups) && !is.null(near_pairs) && 
+                rows_ind_near_pairs[[j]] == -1) {
+                rows_near = c(rows_near, row_ind_near_all)
+                cols_near = c(cols_near, col_ind_near_all)
+                vals_near = c(vals_near, vals_near_all)
+            }
+        }
+    }
+    if (!is.null(mom_covs) & is.null(mom_targets)) {
+        rows_mom_1 = NA
+        cols_mom_1 = NA
+        vals_mom_1 = NA
+        rows_mom_2 = NA
+        cols_mom_2 = NA
+        vals_mom_2 = NA
+        n_covs_m = ncol(mom_covs)
+        for (i in 1:n_covs_m) {
+            cov_m = mom_covs[, i]
+            rows_mom_1 = c(rows_mom_1, rep(row_count + i, n_dec))
+            cols_mom_1 = c(cols_mom_1, 1:n_dec)
+            i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+            aux = matrix(rep(1:n_tot, n_tot), nrow = n_tot, byrow = F)
+            j_ind = aux[lower.tri(aux)]
+            vals_mom_1 = c(vals_mom_1, cov_m[i_ind] - cov_m[j_ind] - 
+                (mom_tols[i] * rep(1, n_dec)))
+        }
+        rows_mom_1 = rows_mom_1[-1]
+        cols_mom_1 = cols_mom_1[-1]
+        vals_mom_1 = vals_mom_1[-1]
+        row_count = max(rows_mom_1)
+        for (i in 1:n_covs_m) {
+            cov_m = mom_covs[, i]
+            rows_mom_2 = c(rows_mom_2, rep(row_count + i, n_dec))
+            cols_mom_2 = c(cols_mom_2, 1:n_dec)
+            i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+            aux = matrix(rep(1:n_tot, n_tot), nrow = n_tot, byrow = F)
+            j_ind = aux[lower.tri(aux)]
+            vals_mom_2 = c(vals_mom_2, cov_m[j_ind] - cov_m[i_ind] - 
+                (mom_tols[i] * rep(1, n_dec)))
+        }
+        rows_mom_2 = rows_mom_2[-1]
+        cols_mom_2 = cols_mom_2[-1]
+        vals_mom_2 = vals_mom_2[-1]
+        rows_mom = c(rows_mom_1, rows_mom_2)
+        cols_mom = c(cols_mom_1, cols_mom_2)
+        vals_mom = c(vals_mom_1, vals_mom_2)
+        row_count = max(rows_mom)
+    }
+    if (!is.null(mom_covs) & !is.null(mom_targets)) {
+        n_covs_m = ncol(mom_covs)
+        rows_target = sort(rep(1:(4 * n_covs_m) + row_count, 
+            n_dec))
+        for (i in 1:n_covs_m) {
+            cov_m = mom_covs[, i]
+            cols_target = c(cols_target, rep(1:n_dec, 4))
+            i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+            aux = matrix(rep(1:n_tot, n_tot), nrow = n_tot, byrow = F)
+            j_ind = aux[lower.tri(aux)]
+            vals_target = c(vals_target, cov_m[i_ind] - (mom_targets[i] + 
+                mom_tols[i]), -1 * cov_m[i_ind] + (mom_targets[i] - 
+                mom_tols[i]), cov_m[j_ind] - (mom_targets[i] + 
+                mom_tols[i]), -1 * cov_m[j_ind] + (mom_targets[i] - 
+                mom_tols[i]))
+        }
+        row_count = max(rows_target)
+    }
+    rows_exact = numeric()
+    cols_exact = numeric()
+    vals_exact = numeric()
+    if (!is.null(exact_covs)) {
+        n_exact_cats = ncol(exact_covs)
+        for (i in 1:n_exact_cats) {
+            rows_exact = c(rows_exact, rep(row_count + i, n_dec))
+            cols_exact = c(cols_exact, 1:n_dec)
+            dist_exact_cov = abs(outer(exact_covs[, i], exact_covs[, 
+                i], "-"))
+            vals_exact = c(vals_exact, dist_exact_cov[lower.tri(dist_exact_cov)])
+        }
+        row_count = max(rows_exact)
+    }
+    rows_near_exact = numeric()
+    cols_near_exact = numeric()
+    vals_near_exact = numeric()
+    if (!is.null(near_exact_covs)) {
+        n_near_exact_cats = ncol(near_exact_covs)
+        for (i in 1:n_near_exact_cats) {
+            rows_near_exact = c(rows_near_exact, rep(row_count + 
+                j, n_dec))
+            cols_near_exact = c(cols_near_exact, 1:n_dec)
+            dist_near_exact_cov = abs(outer(near_exact_covs[, 
+                i], near_exact_covs[, i], "-"))
+            vals_near_exact = c(vals_near_exact, dist_near_exact_cov[lower.tri(dist_near_exact_cov)])
+        }
+        row_count = max(rows_near_exact)
+    }
+    if (!is.null(fine_covs)) {
+        fine_covs_2 = rep(NA, nrow(fine_covs))
+        n_fine_covs = ncol(fine_covs)
+        j = 1
+        for (i in 1:n_fine_covs) {
+            aux = factor(fine_covs[, i])
+            fine_covs_2 = cbind(fine_covs_2, diag(nlevels(aux))[aux, 
+                ])
+            if (j == 1) {
+                fine_covs_2 = fine_covs_2[, -1]
+            }
+            j = j + 1
+        }
+        n_fine_cats = ncol(fine_covs_2)
+        j = 1
+        for (i in 1:n_fine_cats) {
+            rows_fine = c(rows_fine, rep(row_count + j, n_dec))
+            cols_fine = c(cols_fine, 1:n_dec)
+            dist_fine_cov = outer(fine_covs_2[, i], fine_covs_2[, 
+                i], "-")
+            dist_fine_cov = t(dist_fine_cov)
+            vals_fine = c(vals_fine, dist_fine_cov[lower.tri(dist_fine_cov)])
+            if (j == 1) {
+                rows_fine = rows_fine[-1]
+                cols_fine = cols_fine[-1]
+                vals_fine = vals_fine[-1]
+            }
+            j = j + 1
+        }
+        row_count = max(rows_fine)
+    }
+    if (!is.null(near_fine_covs)) {
+        near_fine_covs_2 = rep(NA, nrow(near_fine_covs))
+        n_near_fine_covs = ncol(near_fine_covs)
+        j = 1
+        for (i in 1:n_near_fine_covs) {
+            aux = factor(near_fine_covs[, i])
+            near_fine_covs_2 = cbind(near_fine_covs_2, diag(nlevels(aux))[aux, 
+                ])
+            if (j == 1) {
+                near_fine_covs_2 = near_fine_covs_2[, -1]
+            }
+            j = j + 1
+        }
+        n_near_fine_cats = ncol(near_fine_covs_2)
+        j = 1
+        for (i in 1:n_near_fine_cats) {
+            for (h in 1:2) {
+                rows_near_fine = c(rows_near_fine, rep(row_count + 
+                  j, n_dec))
+                cols_near_fine = c(cols_near_fine, 1:n_dec)
+                dist_near_fine_cov = outer(near_fine_covs_2[, 
+                  i], near_fine_covs_2[, i], "-")
+                dist_near_fine_cov = t(dist_near_fine_cov)
+                vals_near_fine = c(vals_near_fine, dist_near_fine_cov[lower.tri(dist_near_fine_cov)])
+                if (j == 1) {
+                  rows_near_fine = rows_near_fine[-1]
+                  cols_near_fine = cols_near_fine[-1]
+                  vals_near_fine = vals_near_fine[-1]
+                }
+                j = j + 1
+            }
+        }
+        row_count = max(rows_near_fine)
+    }
+    if (!is.null(total_pairs)) {
+        rows_n = rep(row_count + 1, n_dec)
+        cols_n = 1:n_dec
+        vals_n = rep(1, n_dec)
+        row_count = max(rows_n)
+    }
+    rows = c(rows_nbm, rows_far, rows_near, rows_mom, rows_target, 
+        rows_exact, rows_near_exact, rows_fine, rows_near_fine, 
+        rows_n)
+    cols = c(cols_nbm, cols_far, cols_near, cols_mom, cols_target, 
+        cols_exact, cols_near_exact, cols_fine, cols_near_fine, 
+        cols_n)
+    vals = c(vals_nbm, vals_far, vals_near, vals_mom, vals_target, 
+        vals_exact, vals_near_exact, vals_fine, vals_near_fine, 
+        vals_n)
+    aux = cbind(rows, cols, vals)[order(cols), ]
+    cnstrn_mat = simple_triplet_matrix(i = aux[, 1], j = aux[, 
+        2], v = aux[, 3])
+    Amat = cnstrn_mat
+    bvec = rep(1, length(table(rows_nbm)))
+    if (!is.null(far_covs)) {
+        n_far_covs = ncol(far_covs)
+        for (j in 1:n_far_covs) {
+            if (!is.null(far_groups)) {
+                bvec = c(bvec, rep(0, 1))
+            }
+            if (!is.null(far_pairs) && rows_ind_far_pairs[[j]] != 
+                -1) {
+                bvec = c(bvec, rep(0, length(table(rows_ind_far_pairs[[j]]))))
+            }
+        }
+    }
+    if (!is.null(near_covs)) {
+        n_near_covs = ncol(near_covs)
+        for (j in 1:n_near_covs) {
+            if (!is.null(near_groups)) {
+                bvec = c(bvec, rep(0, 1))
+            }
+            if (!is.null(near_pairs) && rows_ind_near_pairs[[j]] != 
+                -1) {
+                bvec = c(bvec, rep(0, length(table(rows_ind_near_pairs[[j]]))))
+            }
+        }
+    }
+    bvec = c(bvec, rep(0, length(table(rows_mom))))
+    bvec = c(bvec, rep(0, length(table(rows_target))))
+    if (!is.null(exact_covs)) {
+        bvec = c(bvec, rep(0, ncol(exact_covs)))
+    }
+    if (!is.null(near_exact_covs)) {
+        bvec = c(bvec, near_exact_devs)
+    }
+    bvec = c(bvec, rep(0, length(table(rows_fine))))
+    if (!is.null(near_fine_covs)) {
+        bvec_8_aux = rep(NA, length(rows_near_fine))
+        bvec_8_aux[seq(1, length(rows_near_fine), 2)] = -near_fine_devs
+        bvec_8_aux[seq(2, length(rows_near_fine), 2)] = near_fine_devs
+        bvec = c(bvec, bvec_8_aux)
+    }
+    if (!is.null(total_pairs)) {
+        bvec = c(bvec, total_pairs)
+    }
+    ub = rep(1, n_dec)
+    sense = rep("L", length(table(rows_nbm)))
+    if (!is.null(far_covs)) {
+        n_far_covs = ncol(far_covs)
+        for (j in 1:n_far_covs) {
+            if (!is.null(far_groups)) {
+                sense = c(sense, rep("G", 1))
+            }
+            if (!is.null(far_pairs) && rows_ind_far_pairs[[j]] != 
+                -1) {
+                sense = c(sense, rep("E", length(table(rows_ind_far_pairs[[j]]))))
+            }
+        }
+    }
+    if (!is.null(near_covs)) {
+        n_near_covs = ncol(near_covs)
+        for (j in 1:n_near_covs) {
+            if (!is.null(near_groups)) {
+                sense = c(sense, rep("L", 1))
+            }
+            if (!is.null(near_pairs) && rows_ind_near_pairs[[j]] != 
+                -1) {
+                sense = c(sense, rep("E", length(table(rows_ind_near_pairs[[j]]))))
+            }
+        }
+    }
+    sense = c(sense, rep("L", length(table(rows_mom))))
+    sense = c(sense, rep("L", length(table(rows_target))))
+    if (!is.null(exact_covs)) {
+        sense = c(sense, rep("E", ncol(exact_covs)))
+    }
+    if (!is.null(near_exact_covs)) {
+        sense = c(sense, rep("L", ncol(near_exact_covs)))
+    }
+    sense = c(sense, rep("E", length(table(rows_fine))))
+    sense = c(sense, rep(c("G", "L"), length(table(rows_near_fine))/2))
+    sense = c(sense, rep("E", length(total_pairs)))
+    if (approximate == 1) {
+        var_type = rep("C", n_dec)
+    }
+    else {
+        var_type = rep("B", n_dec)
+    }
+    if (solver == "glpk") {
+        dir = rep(NA, length(sense))
+        dir[sense == "E"] = "=="
+        dir[sense == "L"] = "<="
+        dir[sense == "G"] = ">="
+        bound = list(lower = list(ind = c(1:length(ub)), val = rep(0, 
+            length(ub))), upper = list(ind = c(1:length(ub)), 
+            val = ub))
+        ptm = proc.time()
+        out = Rglpk_solve_LP(cvec, Amat, dir, bvec, bounds = bound, 
+            types = var_type, max = FALSE)
+        time = (proc.time() - ptm)[3]
+        if (out$status != 0) {
+            cat(format("  Error: problem infeasible!"), "\n")
+            obj_val = NA
+            obj_dist_mat = NA
+            id_1 = NA
+            id_2 = NA
+            group_id = NA
+            time = NA
+        }
+        if (out$status == 0) {
+            if (approximate == 1) {
+                rel = .relaxation_n(n_tot, out$solution, dist_mat, 
+                  subset_weight, "glpk", round_cplex, trace)
+                out$solution = rel$sol
+                out$optimum = rel$obj
+                time = time + rel$time
+            }
+            i_ind = rep(1:(n_tot - 1), (n_tot - 1):1)
+            aux = matrix(1:n_tot, nrow = n_tot, ncol = n_tot)
+            j_ind = aux[lower.tri(aux)]
+            group_1 = i_ind[out$solution == 1]
+            group_2 = j_ind[out$solution == 1]
+            max_groups = apply(cbind(group_1, group_2), 1, max)
+            id_1 = group_1[max_groups <= n_tot]
+            id_2 = group_2[max_groups <= n_tot]
+            group_id_1 = 1:(length(id_1))
+            group_id_2 = 1:(length(id_2))
+            group_id = c(group_id_1, group_id_2)
+            obj_val = out$optimum
+            obj_dist_mat = sum(t(dist_mat)[lower.tri(dist_mat)] * 
+                out$solution)
+        }
+    }
+    return = list(obj_total = obj_val, obj_dist_mat = obj_dist_mat, 
+        id_1 = id_1, id_2 = id_2, group_id = group_id, time = time)
+}
+
+
+makePlot = function(V, P, D, Tm, NVs, cols){
+  ## Including means of columns and indicator that tells
+  ## whether or not it is to be included in plot as mean (light blue)
+  ## or regular data point
+  CM = colMeans(P[[3]])
+  G = c(rep("A", Tm), "B")
+  P[[3]] = cbind(rbind(P[[3]], CM), G)
+  
+  ## Setting the upper values for the parallelplot
+  upper <- as.numeric(P[[2]][,"Maxs"])
+  
+  ## draw = FALSE, to get rid of x axis labels for hists
+  print(parallelplot(~P[[3]][cols], P[[3]], groups = G, horizontal.axis = FALSE,
+                    scales = list(x = list(rot = 90, cex = 0.5), ## draw = FALSE, 
+                                  y = list(draw = FALSE)),
+                    col = c("grey50", "black"), lwd = c(1,3),
+                    lower = 0, upper = upper, main = "Possible Randomizations",
+                    par.settings = list(axis.line = list(col = 0)),
+                    panel = function(...) {
+                      panel.parallel(...)
+                      ## If plotting with histograms underneath take out
+                      ## first grid.text
+                      grid.text(0,
+                                 x=unit(1:length(cols), "native"),
+                                 y=unit(2, "mm"), just="bottom",
+                                 gp=gpar(col="grey", cex=.7))
+                      grid.text(upper,
+                                x=unit(1:length(cols), "native"),
+                                y=unit(1, "npc") - unit(2, "mm"), 
+                                just="top",
+                                gp=gpar(col="grey", cex=.7))
+                      
+                    }))
+}
+
+# Function that does the randomizations
+# M is the number of randomizations
+# vars is a list of parameters which includes
+# D is the data set from which the columns to be matched on are drawn
+# names is the file name
+# S is the optimisation method
+
+
+make.Ks = function(M, vars, D, Plot, S, ToC){
+  r.I = length(vars)
+  No.cols = length(vars[[1]])
+  I = matrix(NA, nrow = r.I, ncol = No.cols)
+  for(i in 1:r.I) I[i,] = unlist(vars[[i]])
+  
+  dimnames(I) = list(rep(NULL, r.I), c("cols", "w", "L", "Mins", "Maxs"))
+  
+  ## No. of participant hospitals
+  N = dim(D)[1]
+  
+  mymat = sdmat = matrix(NA, nrow = N, ncol = r.I)
+  
+  ## Combining columns
+  for(i in 1:r.I) mymat[,i] = D[,I[i,"cols"]]
+  
+  ## Standardising and adding weights
+  col.means = colMeans(mymat)
+  col.sds = apply(mymat, 2, sd)
+  w = as.numeric(I[,"w"])
+  for(i in 1:r.I) sdmat[,i] = 
+    w[i]*(mymat[,i] - col.means[i])/col.sds[i]
+  
+  ## Making the distance matrix
+  dist_mat_obj = dist(sdmat, diag = TRUE, upper = TRUE)
+  dist_mat = as.matrix(dist_mat_obj)
+  
+  ## Telling the computer wich method to use to solve
+  t_max = 60*5
+  solver = S
+  approximate = 0
+  solver = list(name = solver, t_max = t_max, approximate = approximate, 
+                round_cplex = 0, trace_cplex = 0)
+  
+  ## Solving
+  out = nmatch(dist_mat = dist_mat, total_pairs = floor(N/2), 
+               solver = solver, subset_weight = NULL)
+  
+  # These guys have the row numbers of the matched pairs
+  id_1 = out$id_1  
+  id_2 = out$id_2 
+  
+  ## If there are any leftovers they get assigned where
+  ## the user wants them assigned
+  X = dim(D)[1] %% 2 == 0
+  if(X == FALSE) {LO = sum(1:dim(D)[1]) - sum(id_1, id_2)}
+  
+  ## Will be used in the loop below - a place to put Ks, 
+  ## filled below, then graphed after using parallel coordinate plot
+  Ks = matrix(NA, nrow = M, ncol = r.I)
+  
+  ## Used to run the loop below
+  M.seq = seq_along(1:M)
+  
+  for(i in M.seq){
+    ## Randomising once - 0 ctl, 1 trt, (subtract one because when 
+    ## making Trt below the middle step has to identify the length of 
+    ## Trt or it gets fussy and won't add on the last value)
+    R = replicate(length(id_1), rbinom(1, size = 1, prob = 0.5))
+    S = 1 - R
+    
+    ## The 1 is for the leftover row that goes to the trt arm
+    Trt = c(R, S)
+    
+    ## Making the data, TA is included and goes to the trt arm
+    if (X == TRUE) {
+      Dt = data.frame(mymat[c(id_1, id_2),], Trt)
+    } else {
+      Dt = data.frame(mymat[c(id_1, id_2, LO),], c(Trt, (ToC - 1)))
+    }
+    
+    ## Picking out trt and ctl covariates
+    Trt.CV = Dt[which(Trt == 1), 1:r.I]
+    Ctl.CV = Dt[-which(Trt == 1), 1:r.I]
+    
+    Ks[i,] = abs((apply(Trt.CV, 2, sum) - 
+                    apply(Ctl.CV, 2, sum))/N)
+  }## ending for i in M.seq
+  
+  ## So the labels in parcoord come out nicely
+  ## NEW colnames here
+  colnames(Ks) = I[,'L']
+  
+  P = list()
+  P[[1]] = cbind(id_1, id_2)
+  P[[2]] = I
+  P[[3]] = as.data.frame(Ks)
+  
+  P
+} ## closing the function make.Ks
+
+D = read_excel("ArtData.xlsx",  sheet=2)[1:137,]
+D = as.data.frame(D)
+
+## Final weighting for randomization
+V = list(list("Attrib_Days_Month", 1, "Pt Days", 0, 80),
+         list("Outcome_Saureus", 4, "S aur Rate", 0, 0.15),
+         list("Outcome_MRSA", 2, "MRSA Rate", 0, 0.15),
+         list("All_Blood", 4, "All Blood", 0, 0.15),
+         list("Mup-R", 2, "Mup-R", 0, 0.02),
+         list("Hx_MRSA", 1,"Hx MRSA", 0, 0.01),
+         list("Mup_Adherence", 1, "Mup Adherence", 0, 0.05),
+         list("CHG_Adherence", 1,"CHG Adherence", 0, 0.05),
+         list("Median_LOS", 3,"Median LOS", 0, 0.05),
+         list("Elix_Score", 1,"Comorbidity Score", 0, 0.15),
+         list("Medicaid", 0,"Medicaid", 0, 0.02),
+         list("PCR_Blood", 0,"PCR Blood", 0, 0.1),
+         list("DC_SNF", 0,"DC SNF", 0, 0.02),
+         list("Surgery", 1,"Surgery", 0, 0.02),
+         list("Onc_BMT_Trp", 2,"OncBMTTrp", 0, 0.1),
+         list("BMT_Trp", 0,"BMTTrp", 0, 0.1)
+         )
+
+## Making data 
+## The leftover is sent to the treatment arm (ToC = 2)
+P = make.Ks(M = 300, D = D, Plot = "noscreen", vars = V, S = "glpk", ToC = 2)
+
+## Plotting
+makePlot(V = V, P = P, D = D, Tm = 300, NVs = 2, cols = 1:length(V))
+
+```
+
+
+# Discussion
+For general use, we recommend deciding on tolerable maximum differences between study arms _a priori_ and testing many combinations of variable weights ($S$) until one is found which ensures that the eventual randomization is likely to satisfy.  We call this the Goldilocks Approach, after the well-known children's fable, The Three Bears, in which Goldilocks tries three bowls of porridge-- one is too hot, another too cold, and the third is just right [@3Bears]. More than three attempts to find a suitable combination of variable weights may be needed.  
+
+It may bear reinforcement at this point that the many randomizations performed in the Goldilocks Approach do not constitute a search for the study randomization and treatment assignment with the optimal covariate balance.  The treatment assignments used in Goldilocks Approach are purely hypothetical.  We should think of them in the sense of "If we were to match with these weights, what sort of covariate balance would we be likely to obtain in our actual randomization?".  After we have found the set of weights that are just right, we formally randomly assign the members of each matched set to a study arm.  We expect a covariate balance that is similar to the ones seen in the parallel coordinates plot, but it is unlikely to be identical to any of the ones seen.
+
+While it is often possible to obtain satisfactory balance on many covariates at the same time using the Goldilocks approach, there are limits, of course.  For example, we can effectively require perfect matches on categorical variables by using large weights for them.  If some categories have few members, the matches on the remaining variables are unlikely to be very close.  For example if we place a large weight on suburban vs. urban hospital location, and have only 8 urban hospitals, we will be unlikely to find good matches on the other characterstics among those 8 hospitals.
+
+The web-based application described above can be found at URL TO BE COMPLETED.  We invite the community to use this resource, which is still under development.
+
+While the Goldilocks approach to trial randomization cannot ensure balance between the treatment and control arms, it allows investigators to explore weighting schemes that impact matching and balance. Investigators who conduct CRTs and plan to match can use this method prior to randomizing to help ensure balance between treatment and control arms.
+
+
+
+
+
+<!-- ## Appendix
+
+Not sure this is needed!!  --Ken
+
+
+A more formal explanation of the variables here, in table format, to be checked with Susan.
+
+Variable  | Description
+----------| ---------------- 
+Pt Days | 
+S aur Rate | 
+MRSA Rate |
+All Blood |
+Mup-R |
+Hx MRSA |
+Mup Adherence |
+CHG Adherence |
+Median LOS |
+Medicaid |
+Comorbidity Score |
+Medicaid |
+PCR Blood |
+DC SNF |
+Surgery |
+Onc_BMT_Trp |
+BMT_Trp |
+
+Table 2: Thorough description of baseline variables used in this paper.  -->
+
