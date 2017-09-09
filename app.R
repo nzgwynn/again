@@ -533,6 +533,28 @@ server <- function(input, output, session){
     input$NoVars
   })
   
+  M = reactive({
+    inFile <- input$file1
+    M = tagList()
+    
+    if(is.null(inFile))
+      return(NULL)
+    file.rename(inFile$datapath,
+                paste(inFile$datapath, ".xlsx", sep=""))
+    D = read_excel(paste(inFile$datapath, ".xlsx", sep=""), 1)
+    D = as.data.frame(D)
+    
+    ## Upating file names
+    colnames(D) <- labs <- gsub("\r\n"," ", colnames(D))
+    nums = labs[which(sapply(D, is.numeric) == TRUE)]
+    
+    M[[1]] = D
+    M[[2]] = nums
+    
+    M
+  })
+  
+  
   output$VarsInput <- renderUI({
     C = sapply(1:K(), function(i){paste0("cols",i)})
     L = sapply(1:K(), function(i){paste0("label",i)})
@@ -547,7 +569,7 @@ server <- function(input, output, session){
       output[[i]][[2]] = hr(style="height:5px;background-color:blue")
       output[[i]][[3]] = helpText("Input information for a variable below:")
       output[[i]][[4]] = selectInput(C[i], "Variable to randomize:",
-                                     labs, selected = nums[i])
+                                     colnames(M()[[1]]), selected = M()[[2]][i])
       output[[i]][[5]] = textInput(L[i], "Label for variable:", 
                                    value = "Label for variable here")
       output[[i]][[6]] = textInput(W[i], "Weight for variable:",
