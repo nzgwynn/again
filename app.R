@@ -307,16 +307,16 @@ makePlot <- function(Mt, I, Ks) {
 # }
 
 
-## reading the data
-D = read_excel("SwapOut_Randomization_2017_4_27_FINAL.xlsx", 
-               sheet=2)[1:137,]
-D = as.data.frame(D)
-
-## Removing all the \r\n so that selectInput will work
-colnames(D) <- labs <- gsub("\r\n"," ", colnames(D))
-
-## Numeric variables for default inputs
-nums = labs[which(sapply(D, is.numeric) == TRUE)]
+# ## reading the data
+# D = read_excel("SwapOut_Randomization_2017_4_27_FINAL.xlsx", 
+#                sheet=2)[1:137,]
+# D = as.data.frame(D)
+# 
+# ## Removing all the \r\n so that selectInput will work
+# colnames(D) <- labs <- gsub("\r\n"," ", colnames(D))
+# 
+# ## Numeric variables for default inputs
+# nums = labs[which(sapply(D, is.numeric) == TRUE)]
 
 # Function that does the randomizations
 # M is the number of randomizations
@@ -430,8 +430,9 @@ ui <- fluidPage(
               
               tabPanel("Upload Data",
                        sidebarPanel(
-                         helpText("Input an excel file here. We assume the data are in the 
-                                  first sheet with titles in the first row."),
+                         helpText("Input an excel file here (.xlsx). We assume the data are in the 
+                                  first sheet with titles in the first row. This method does
+                                  not work with missing data in any of the matching variables."),
                          br(),
                          
                          fileInput("file1", "Choose Excel File",
@@ -441,6 +442,8 @@ ui <- fluidPage(
                          ),
                          br(),
                          
+                         helpText("In the next tab we will input more information to build
+                                  the graph."),
                          actionButton("Tab2", "Go on to the next tab")
                          )),
               
@@ -449,10 +452,9 @@ ui <- fluidPage(
                        
                        sidebarPanel(
                          
-                         helpText("Input the main title for our plot, the number of 
+                         helpText("Input the number of times we will randomize, the number of 
                                   variables to be considered in this randomization scheme,
-                                  the number of times we will randomize, and if leftover
-                                  units should be in treatment or control arm.
+                                  and if leftover units should be in treatment or control arm.
                                   The next tab will be used to build the rest of the plot."),
                          
                          sliderInput("Times",
@@ -554,7 +556,6 @@ server <- function(input, output, session){
     M
   })
   
-  
   output$VarsInput <- renderUI({
     C = sapply(1:K(), function(i){paste0("cols",i)})
     L = sapply(1:K(), function(i){paste0("label",i)})
@@ -569,7 +570,7 @@ server <- function(input, output, session){
       output[[i]][[2]] = hr(style="height:5px;background-color:blue")
       output[[i]][[3]] = helpText("Input information for a variable below:")
       output[[i]][[4]] = selectInput(C[i], "Variable to randomize:",
-                                     colnames(M()[[1]]), selected = M()[[2]][i])
+                                     M()[[2]], selected = M()[[2]][i])
       output[[i]][[5]] = textInput(L[i], "Label for variable:", 
                                    value = "Label for variable here")
       output[[i]][[6]] = textInput(W[i], "Weight for variable:",
@@ -598,7 +599,7 @@ server <- function(input, output, session){
       V[[i]][[5]] = as.numeric(S[i])
     }
     
-    make.Ks(M = input$Times, D = D, vars = V, name = "",
+    make.Ks(M = input$Times, D = M()[[1]], vars = V, name = "",
             ToC = as.numeric(isolate({input$ToC})), S = "glpk")
   }) ## eventReactive
   
