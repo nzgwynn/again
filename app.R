@@ -199,8 +199,7 @@ ui <- fluidPage(
                                      min = 50,  max = 500, value = 300),
                          
                          helpText("This controls the number of inputs on the next tab."),
-                         numericInput("NoVars","No. of matching variables", 
-                                      value = 3, min = 2, max = 2000),
+                         uiOutput("NVs"),
                          
                          helpText("If there are an odd number of units to randomize 
                                   the remainder can be in either treatment or control."),
@@ -317,6 +316,11 @@ server <- function(input, output, session){
     } ## for loop
     
     output
+  })
+  
+  output$NVs <- renderUI({
+    numericInput("NoVars","No. of matching variables", 
+                 value = 3, min = 2, max = length(M()[[2]]))
   })
   
   Dat <- eventReactive(input$go, {
