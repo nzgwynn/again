@@ -200,7 +200,7 @@ ui <- fluidPage(
                          
                          helpText("This controls the number of inputs on the next tab."),
                          numericInput("NoVars","No. of matching variables", 
-                                      value = 3, min = 2, max = 20   ),
+                                      value = 3, min = 2, max = 2000),
                          
                          helpText("If there are an odd number of units to randomize 
                                   the remainder can be in either treatment or control."),
