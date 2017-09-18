@@ -319,7 +319,7 @@ server <- function(input, output, session){
   })
   
   output$NVs <- renderUI({
-    numericInput("NoVars","No. of matching variables", 
+    numericInput("NoVars","No. of matching variables",
                  value = 3, min = 2, max = length(M()[[2]]))
   })
   
@@ -359,15 +359,11 @@ server <- function(input, output, session){
     makePlot(Mt = Dat()[[1]], I = Dat()[[2]], Ks = Dat()[[3]])
   }) ## renderPlot
   
-  
-  
   ## Summary of data
   output$summary <- renderPrint({
     C <- sapply(1:K(), function(i) {input[[paste0("cols",i)]]})
-    summary(D[, C])
+    summary(M()[[1]][, C])
   })
-  
-  
   
   observeEvent(input$bookmark1, {
     session$doBookmark()
