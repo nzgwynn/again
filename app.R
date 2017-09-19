@@ -103,6 +103,8 @@ make.Ks = function(M, vars, D, name, Plot, S, ToC){
   # These guys have the row numbers of the matched pairs
   id_1 = out$id_1  
   id_2 = out$id_2 
+  Ms = data.frame(cbind(id_1, id_2))
+  colnames(Ms) = c("Row number","Match")
   
   ## If there are any leftovers they get assigned where
   ## the user wants them assigned
@@ -152,6 +154,7 @@ make.Ks = function(M, vars, D, name, Plot, S, ToC){
   P[[1]] = name
   P[[2]] = I
   P[[3]] = as.data.frame(Ks)
+  P[[4]] = Ms
   
   P
 } ## closing the function make.Ks
@@ -241,7 +244,11 @@ ui <- fluidPage(
                        sidebarPanel(
                          helpText("Below are summaries of the raw data of the columns choosen 
                                   in the randomization tab."), 
-                         verbatimTextOutput("summary")
+                         verbatimTextOutput("summary"),
+                         br(),
+                         
+                         helpText("This is the number of pairs used to make the graph."),
+                         verbatimTextOutput("NM")
                          )),
               
               tabPanel("Download",
@@ -257,6 +264,37 @@ ui <- fluidPage(
                          downloadButton('downloadReport',"Generate report")
                          )),
               
+              tabPanel("Matches",
+                       sidebarPanel(
+                         helpText("Below find the row numbers of the matches. Note
+                                  that the first one will be in the second row of 
+                                  the excel file. Also, if there are an odd number
+                                  of matching units, the leftover will not be 
+                                  listed as it has no match."), 
+                         br(),
+                         
+                         helpText("Check the box below and choose the 
+                                  column with labels if you prefer information
+                                  that way."),
+                         
+                         checkboxInput("labs", "Label of your choice"),
+                         
+                         conditionalPanel(
+                           condition = "input.labs == true",
+                           uiOutput("ID")
+                         ),
+                         
+                         conditionalPanel(
+                           condition = "input.labs == false",
+                           verbatimTextOutput("MA")
+                         ),
+                         
+                         conditionalPanel(
+                           condition = "input.labs == true",
+                           verbatimTextOutput("MAL")
+                         )
+                         )),
+              
               # Show a plot of the generated distribution
               mainPanel(
                 plotOutput("plot")
@@ -269,6 +307,10 @@ server <- function(input, output, session){
   
   K <- reactive({
     input$NoVars
+  })
+  
+  LID <- reactive({
+    input$LID
   })
   
   M = reactive({
@@ -323,6 +365,11 @@ server <- function(input, output, session){
                  value = 3, min = 2, max = length(M()[[2]]))
   })
   
+  output$ID <- renderUI({
+    selectInput("LID", "Label:",
+                colnames(M()[[1]]), selected = 1)
+  })
+  
   Dat <- eventReactive(input$go, {
     
     C = sapply(1:K(), function(i){input[[paste0("cols",i)]]})
@@ -351,8 +398,7 @@ server <- function(input, output, session){
   
   observeEvent(input$Tab3, {
     updateTabsetPanel(session, "inTabset",
-                      selected = "panel3"
-    )
+                      selected = "panel3")
   })
   
   output$plot <- renderPlot({
@@ -363,6 +409,20 @@ server <- function(input, output, session){
   output$summary <- renderPrint({
     C <- sapply(1:K(), function(i) {input[[paste0("cols",i)]]})
     summary(M()[[1]][, C])
+  })
+  
+  output$NM <- renderPrint({
+    paste0("There were ", floor(dim(M()[[1]])[1]/2), 
+           " matched pairs")
+  })
+  
+  output$MA <- renderPrint({
+    Dat()[[4]]
+  })
+  
+  output$MAL <- renderPrint({
+    cbind(M()[[1]][Dat()[[4]][,1], LID()], 
+          M()[[1]][Dat()[[4]][,2], LID()])
   })
   
   observeEvent(input$bookmark1, {
