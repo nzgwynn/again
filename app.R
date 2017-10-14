@@ -155,6 +155,9 @@ make.Ks = function(M, vars, D, name, Plot, S, ToC){
   P[[2]] = I
   P[[3]] = as.data.frame(Ks)
   P[[4]] = Ms
+  P[[5]] = LO
+  P[[6]] = X
+  P[[7]] = Dt
   
   P
 } ## closing the function make.Ks
@@ -163,7 +166,7 @@ make.Ks = function(M, vars, D, name, Plot, S, ToC){
 ui <- fluidPage(
   
   # Application title
-  titlePanel("Universe of Randomizations: Graphic"),
+  titlePanel("Goldilocks randomization: Graphic"),
   
   # Sidebar with a slider input for number of bins 
   tabsetPanel(id = "inTabset",
@@ -223,12 +226,6 @@ ui <- fluidPage(
                          
                          br(),
                          
-                         helpText("The tables in the lower plot are the minimum, maximum, mean,
-                                  and standard deviations of the raw data from selected columns. 
-                                  The last row in the table is the mean difference in the two 
-                                  arms after randomization has been completed (ie the mean from 
-                                  the above plot for the corresponding arm)."),
-                         
                          actionButton("go", "Go", width = "150px", style = "background-color:red"),
                          br(),
                          
@@ -261,16 +258,14 @@ ui <- fluidPage(
                                    value = "Your name"),
                          radioButtons('format', 'Document format', c('PDF', 'Word'),
                                       inline = TRUE),
-                         downloadButton('downloadReport',"Generate report")
+                         downloadButton('downloadReport',"Share matching graph")
                          )),
               
               tabPanel("Matches",
                        sidebarPanel(
-                         helpText("Below find the row numbers of the matches. Note
-                                  that the first one will be in the second row of 
-                                  the excel file. Also, if there are an odd number
-                                  of matching units, the leftover will not be 
-                                  listed as it has no match."), 
+                         helpText("Below find the row numbers of the matches. If there 
+                                  are an odd number of matching units, the leftover 
+                                  is listed first."), 
                          br(),
                          
                          helpText("Check the box below and choose the 
@@ -293,6 +288,21 @@ ui <- fluidPage(
                            condition = "input.labs == true",
                            verbatimTextOutput("MAL")
                          )
+                         )),
+              
+              tabPanel("Download Final Plot",
+                       sidebarPanel(
+                         helpText("This page downloads the final graph to be used 
+                                  in publications. Use matches in previous tab to 
+                                  randomize. After, input results below. If there 
+                                  are any leftovers they are first."), 
+                         textInput("FN1", label = h3("File name:"), 
+                                   value = "File name"),
+                         helpText("Use this button when finished inputting.
+                                  A label must be choosen in the 'Matches' tab
+                                  for this to work."),
+                         downloadButton('downloadReport1',"Final randomization graph"),
+                         uiOutput("RanInput")
                          )),
               
               # Show a plot of the generated distribution
@@ -334,6 +344,10 @@ server <- function(input, output, session){
     M
   })
   
+  j <- reactive({
+    ceiling(dim(M()[[1]])[1]/2)
+  })
+  
   output$VarsInput <- renderUI({
     C = sapply(1:K(), function(i){paste0("cols",i)})
     L = sapply(1:K(), function(i){paste0("label",i)})
@@ -364,6 +378,33 @@ server <- function(input, output, session){
     numericInput("NoVars","No. of matching variables",
                  value = 3, min = 2, max = length(M()[[2]]))
   })
+  
+  R <- reactive({
+    sapply(1:j(), function(i){paste0("input$Rand",i)})
+  })
+  
+  output$RanInput <- renderUI({
+    if(Dat()[[6]] == TRUE){
+      G = M()[[1]][Dat()[[4]][,1], LID()]
+    }else{
+      G = c(M()[[1]][Dat()[[5]], LID()], M()[[1]][Dat()[[4]][,1], LID()])
+    }
+    
+    output = tagList()
+    
+    for(i in seq_along(1:j())){
+      output[[i]] = tagList()
+      output[[i]][[1]] = hr(style="height:5px;background-color:blue")
+      output[[i]][[2]] = G[i]
+      output[[i]][[3]] = br()
+      output[[i]][[4]] = selectInput(R()[i], "Treatment or control:",
+                                     c("Treatment" = "1", "Control" = "0"))
+      
+    } ## for loop
+    
+    output
+  })
+  
   
   output$ID <- renderUI({
     selectInput("LID", "Label:",
@@ -412,8 +453,14 @@ server <- function(input, output, session){
   })
   
   output$NM <- renderPrint({
-    paste0("There were ", floor(dim(M()[[1]])[1]/2), 
-           " matched pairs")
+    
+    if(Dat()[[6]] == TRUE){
+      paste0("There were ", floor(dim(M()[[1]])[1]/2), 
+             " matched pairs")
+    }else{
+      paste0("There were ", floor(dim(M()[[1]])[1]/2), 
+             " matched pairs and one unit leftover.")
+    }
   })
   
   output$MA <- renderPrint({
@@ -421,13 +468,56 @@ server <- function(input, output, session){
   })
   
   output$MAL <- renderPrint({
-    cbind(M()[[1]][Dat()[[4]][,1], LID()], 
-          M()[[1]][Dat()[[4]][,2], LID()])
+    if(Dat()[[6]] == TRUE){
+      cbind(M()[[1]][Dat()[[4]][,1], LID()], 
+            M()[[1]][Dat()[[4]][,2], LID()])
+    }else{
+      rbind(c(M()[[1]][Dat()[[5]], LID()], "NA"),
+            cbind(M()[[1]][Dat()[[4]][,1], LID()], 
+                  M()[[1]][Dat()[[4]][,2], LID()]))
+    }
   })
   
   observeEvent(input$bookmark1, {
     session$doBookmark()
   })
+  
+  output$downloadReport1 <-  downloadHandler(
+    ## Making the filename for the report here. Using two different 
+    ## extensions for the file
+    filename = function() {
+      paste(input$FN1, sep = '.', switch(input$format, PDF = 'pdf', 
+                                        Word = 'docx'))
+    },
+    
+    content = function(file) {
+      ## Copy the report file to a temporary directory before processing it, in
+      ## case we don't have write permissions to the current working dir (which
+      ## can happen when deployed).
+      tempReport1 <- file.path(tempdir(), "report1.Rmd")
+      file.copy("report1.Rmd", tempReport1, overwrite = TRUE)
+      
+      # Set up parameters to pass to Rmd document
+      params <- list(I1 = Dat()[[1]], # name
+                     I2 = Dat()[[2]], # Labels and maxs for plot
+                     I3 = Dat()[[3]], # Ks things to plot
+                     j = j(), # even or odd no. of units
+                     R = sapply(R(), function(x) input[[x]]), # trt or ctrl
+                     M = M()[[1]], # Orig data
+                     Dt = Dat()[[7]]) #Data for each 
+      
+      # Knit the document, passing in the `params` list, and eval it in a
+      # child of the global environment (this isolates the code in the document
+      # from the code in this app).
+      library(rmarkdown)
+      rmarkdown::render(tempReport1, 
+                        switch(input$format,
+                               PDF = pdf_document(), Word = word_document()),
+                        output_file = file, params = params,
+                        envir = new.env(parent = globalenv())
+      )
+    }
+  )
   
   output$downloadReport <-  downloadHandler(
     ## Making the filename for the report here. Using two different 
