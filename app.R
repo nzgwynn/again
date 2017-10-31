@@ -11,6 +11,8 @@ library(designmatch)
 ## The second to add limits to all y-axises
 library(lattice)
 library(grid)
+library(ggplot2)
+library(GGally)
 
 ## To add a table to the plot
 library(plotrix)
@@ -24,42 +26,69 @@ library(shiny)
 library("RColorBrewer")
 mypalette<-brewer.pal(11, "RdBu")
 
-
 ## Function that draws the plot and saves it in a file
 ## Graphing Ks
-makePlot <- function(Mt, I, Ks) {
+make.order = function(column, data){
+  data = data[order(data[, column]),] 
+  ## Grouping for color
+  G = factor(rep(1:M, each = (dim(data)[1]%/%M + 1))[1:dim(data)[1]])
+  data = cbind(data, G)
+}
+
+make.plot = function(data, I){
   upper <- as.numeric(I[,"Maxs"])
   lower <- as.numeric(I[,"Mins"])
-  No.Vars <- length(upper)
-  G <- c(rep("A", dim(Ks)[1]), "B")
-  CKs <- dim(Ks)[2]
-  RKs <- dim(Ks)[1]
-  CNs <- c(I[,'L'], "G")
+  N <- length(upper)
   
-  CM <- colMeans(Ks)
-  Ks <- cbind(rbind(Ks, CM), G)
-  colnames(Ks) = CNs
-  print(parallelplot(~Ks[1:No.Vars], Ks, groups = G,
-                     horizontal.axis = FALSE,
-                     scales = list(x = list(rot = 90), 
-                                   y = list(draw = FALSE)),
-                     col = c("grey50", "black"), lwd = c(1,3),
-                     lower = lower, upper = upper, 
-                     main = Mt,
-                     panel = function(...) {
-                       panel.parallel(...)
-                       grid.text(lower,
-                                 x=unit(1:No.Vars, "native"),
-                                 y=unit(2, "mm"), just="bottom",
-                                 gp=gpar(col="grey", cex=.7))
-                       grid.text(upper,
-                                 x=unit(1:No.Vars, "native"),
-                                 y=unit(1, "npc") - unit(2, "mm"), 
-                                 just="top",
-                                 gp=gpar(col="grey", cex=.7))
-                     }))
-} ## closing function
-
+  for(i in 1:N){
+    data[[i]] <- data[[i]]/upper[i]
+  }
+  
+  # Basic plot to update
+  p = ggparcoord(data, columns = 1:N, groupColumn = (N + 1), scale = "globalminmax", 
+                 shadeBox = NULL) + coord_cartesian(ylim = c(0,1))
+  
+  p <- p + scale_colour_brewer(palette = "YlGnBu")
+  
+  # Start with a basic theme
+  p <- p + theme_minimal()
+  
+  # Decrease amount of margin around x, y values
+  p <- p + scale_y_continuous(expand = c(0.02, 0.02))
+  p <- p + scale_x_discrete(expand = c(0.02, 0.02))
+  
+  # Remove axis ticks and labels
+  p <- p + theme(axis.ticks = element_blank())
+  p <- p + theme(axis.title = element_blank())
+  p <- p + theme(axis.text.y = element_blank())
+  
+  # Clear axis lines
+  p <- p + theme(panel.grid.minor = element_blank())
+  p <- p + theme(panel.grid.major.y = element_blank())
+  
+  # Removing the legend
+  p <- p + theme(legend.position="none")
+  
+  # Adding a border
+  p <- p + theme(panel.border = element_rect(colour = "darkgrey", 
+                                             fill=NA, size=0.5))
+  
+  # Calculate label positions for each veritcal bar
+  lab_x <- rep(1:(N), times = 2) # 2 times, 1 for min 1 for max
+  lab_y <- rep(c(0, 1), each = (N))
+  
+  # min and max values from original dataset
+  lab_z <- c(rep(0, N), upper)
+  
+  # Convert to character for use as labels
+  lab_z <- as.character(lab_z)
+  
+  # Add labels to plot
+  p <- p + annotate("text", x = lab_x, y = lab_y, label = lab_z, size = 3)
+  
+  # Display parallel coordinate plot
+  print(p)
+}
 
 
 make.Ks = function(M, vars, D, name, Plot, S, ToC){
@@ -307,7 +336,7 @@ ui <- fluidPage(
               
               # Show a plot of the generated distribution
               mainPanel(
-                plotOutput("plot")
+                plotOutput("plot", click = "plot_dblclick")
               )
               )
                        )
@@ -364,7 +393,7 @@ server <- function(input, output, session){
       output[[i]][[4]] = selectInput(C[i], "Variable to randomize:",
                                      M()[[2]], selected = M()[[2]][i])
       output[[i]][[5]] = textInput(L[i], "Label for variable:", 
-                                   value = "Label for variable here")
+                                   value = paste0("Lab", i))
       output[[i]][[6]] = textInput(W[i], "Weight for variable:",
                                    value = "1")
       output[[i]][[7]] = textInput(S[i], "Max for variable",
@@ -442,9 +471,21 @@ server <- function(input, output, session){
                       selected = "panel3")
   })
   
+  ## The first column is selected upon initiation
+  C <- reactiveVal(1)       # rv <- reactiveValues(value = 0)
+  
+  ## Updating to the column of choice.
+  observeEvent(input$plot_dblclick$x, {
+    newC <- round((K() - 1)*input$plot_dblclick$x + 1)
+    C(newC)
+  })
+  
+  ## Making the plot by ordering it and then drawing the plot.
   output$plot <- renderPlot({
-    makePlot(Mt = Dat()[[1]], I = Dat()[[2]], Ks = Dat()[[3]])
-  }) ## renderPlot
+    E = make.order(column = C(), data = Dat()[[3]])
+    make.plot(data = E, I = Dat()[[2]])
+  })
+  
   
   ## Summary of data
   output$summary <- renderPrint({
