@@ -24,7 +24,7 @@ library(shiny)
 
 ## Used to get the right colors in
 library("RColorBrewer")
-mypalette<-brewer.pal(11, "RdBu")
+M = 9 # Max number of colors allowed in pallete
 
 ## Function that draws the plot and saves it in a file
 ## Graphing Ks
