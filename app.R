@@ -2,6 +2,7 @@
 ## save the number of vars that you input on the second page. In addition, the setwd()
 ## thing to download a report is also not working, but reports download fine. 
 
+library(slam)
 library(designmatch)
 
 ## To deployApp
