@@ -27,6 +27,9 @@ library(shiny)
 library("RColorBrewer")
 M = 9 # Max number of colors allowed in pallete
 
+## To randomize
+library(random)
+
 ## Function that draws the plot and saves it in a file
 ## Graphing Ks
 make.order = function(column, data){
@@ -320,6 +323,45 @@ ui <- fluidPage(
                          )
                          )),
               
+              tabPanel("Randomization",
+                       sidebarPanel(
+                         helpText("A statistician should be consulted prior to randomization.
+                                  This app is no replacement, it only facilitates randomization."), 
+                         br(),
+                         br(),
+                         
+                         helpText("Seeds force computers to generate the same random numbers. 
+                                  Statisticians generate a random seed for each trial that is 
+                                  recorded for reproducibility. If your trial needs a seed
+                                  please click the box below. If this trial has a seed 
+                                  please input it."),
+                         
+                         checkboxInput("seed", "Generate a seed for this trial"),
+                         
+                         br(),
+                         
+                         conditionalPanel(
+                           condition = "input.seed == false",
+                           uiOutput("IS")
+                         ),
+                         
+                         conditionalPanel(
+                           condition = "input.seed == true",
+                           verbatimTextOutput("DS")
+                         ),
+                         
+                         br(),
+                         
+                         helpText("Input labels for each arm below."),
+                         textInput("Label for arm", label = h3("First Arm"), 
+                                   value = "Treatment"),
+                         textInput("Label for arm", label = h3("Second Arm"), 
+                                   value = "Control"),
+                         
+                         br()
+                         
+                         )),
+              
               tabPanel("Download Final Plot",
                        sidebarPanel(
                          helpText("This page downloads the final graph to be used 
@@ -435,10 +477,23 @@ server <- function(input, output, session){
     output
   })
   
-  
   output$ID <- renderUI({
     selectInput("LID", "Label:",
                 colnames(M()[[1]]), selected = 1)
+  })
+  
+  output$IS <- renderUI({
+    textInput("S","Seed for this trial",
+                 value = "Insert seed here")
+  })
+  
+  A <- reactive({
+    randomNumbers(1, col = 1, min = 1, max = 1000000000)
+  })
+  
+  output$DS <- renderPrint({
+    ifelse(!is.numeric(input$S), paste0("The seed is ", A()), 
+           paste0("The seed is ", input$S))
   })
   
   Dat <- eventReactive(input$go, {
@@ -487,7 +542,6 @@ server <- function(input, output, session){
     make.plot(data = E, I = Dat()[[2]])
   })
   
-  
   ## Summary of data
   output$summary <- renderPrint({
     C <- sapply(1:K(), function(i) {input[[paste0("cols",i)]]})
@@ -495,7 +549,6 @@ server <- function(input, output, session){
   })
   
   output$NM <- renderPrint({
-    
     if(Dat()[[6]] == TRUE){
       paste0("There were ", floor(dim(M()[[1]])[1]/2), 
              " matched pairs")
