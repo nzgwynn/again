@@ -184,13 +184,13 @@ make.Ks = function(M, vars, D, name, Plot, S, ToC){
   colnames(Ks) = I[,'L']
   
   P = list()
-  P[[1]] = name
-  P[[2]] = I
-  P[[3]] = as.data.frame(Ks)
-  P[[4]] = Ms
-  P[[5]] = LO
-  P[[6]] = X
-  P[[7]] = Dt
+  P[[1]] = name ## name of file, not used
+  P[[2]] = I ## matching things
+  P[[3]] = as.data.frame(Ks) ## means after randomization 
+  P[[4]] = Ms ## The row numbers of the matches are in here
+  P[[5]] = LO # leftover
+  P[[6]] = X # this is TRUE if there are any leftover
+  P[[7]] = Dt 
   
   P
 } ## closing the function make.Ks
@@ -353,12 +353,17 @@ ui <- fluidPage(
                          br(),
                          
                          helpText("Input labels for each arm below."),
-                         textInput("Label for arm", label = h3("First Arm"), 
+                         textInput("Arm1", label = h3("First Arm"), 
                                    value = "Treatment"),
-                         textInput("Label for arm", label = h3("Second Arm"), 
+                         textInput("Arm2", label = h3("Second Arm"), 
                                    value = "Control"),
                          
-                         br()
+                         br(),
+                         
+                         helpText("Push the button to randomize."),
+                         actionButton("rand", "Randomize", width = "150px"),
+                         br(),
+                         dataTableOutput("Rands")
                          
                          )),
               
@@ -496,8 +501,35 @@ server <- function(input, output, session){
            paste0("The seed is ", input$S))
   })
   
-  Dat <- eventReactive(input$go, {
+  Rs <- eventReactive(input$rand, {
+    ## Finding the seed
+    N = ifelse(!is.numeric(input$S), A(), input$S)
+    set.seed(N)
     
+    ## Collecting the data
+    D = Dat()[[4]]
+    npairs = nrow(D)
+    
+    ## KEN YOU WANTED rbinom EARLIER!!!
+    rand = runif(npairs)
+    Group = ifelse(rand > 0.5,  input$Arm1,  input$Arm2)
+    Trt2 = ifelse(Group == input$Arm1, input$Arm2, input$Arm1)
+    
+    if(Dat()[[6]] == TRUE){
+      ## Even number of units to randomize
+       rbind(cbind(M()[[1]][D[,1], 1], Group), cbind(M()[[1]][D[,2], 1], Trt2))
+     }else{
+       ## Odd number of units to randomize
+       
+       ## KEN RANDOMIZES TO WHATEVER THEY CALL THE FIRST ARM, IS THIS OKAY???
+       rbind(c(M()[[1]][Dat()[[5]], 1], input$Arm1),
+             (cbind(M()[[1]][D[,1], 1], Group)), cbind(M()[[1]][D[,2], 1], Trt2))
+     }
+  })
+  
+  output$Rands <- renderDataTable(Rs())
+  
+  Dat <- eventReactive(input$go, {
     C = sapply(1:K(), function(i){input[[paste0("cols",i)]]})
     L = sapply(1:K(), function(i){input[[paste0("label",i)]]})
     W = sapply(1:K(), function(i){input[[paste0("weight",i)]]})
