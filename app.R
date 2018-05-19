@@ -39,11 +39,20 @@ make.order = function(column, data){
   data = cbind(data, G)
 }
 
+## Because of the way that shiny returns values for the 
+## zoom function we have to fidget with the numbers
+## a bit to get to the appropriate 
+Round <- function(Min, Max, N){
+  SEQ = c(0, (1:N)*(1/(N-1)))
+  ## returns min and max
+  c(max(which(SEQ<=Min)), min(which(SEQ>=Max)))
+}
+
 make.plot = function(data, I){
   upper <- as.numeric(I[,"Maxs"])
   lower <- as.numeric(I[,"Mins"])
   N <- length(upper)
-  
+
   for(i in 1:N){
     data[[i]] <- data[[i]]/upper[i]
   }
@@ -83,6 +92,74 @@ make.plot = function(data, I){
   
   # min and max values from original dataset
   lab_z <- c(rep(0, N), upper)
+  
+  # Convert to character for use as labels
+  lab_z <- as.character(lab_z)
+  
+  # Add labels to plot
+  p <- p + annotate("text", x = lab_x, y = lab_y, label = lab_z, size = 3)
+  
+  # Display parallel coordinate plot
+  print(p)
+}
+
+make.zoom.plot = function(data, I, Min, Max){
+  upper <- as.numeric(I[,"Maxs"])
+  lower <- as.numeric(I[,"Mins"])
+  N <- length(upper)
+  
+  # The Lims makes it zoom!!!!!
+  Lims = Round(Min = Min, Max = Max, N = N)
+  
+  for(i in Lims[1]:Lims[2]){
+    data[[i - Lims[1] + 1]] <- data[[i]]/upper[i]
+  }
+
+  C = colnames(data)[c(Lims[1]:Lims[2], N+1)] 
+  data = data[,c(1:(Lims[2] - Lims[1] + 1), N+1)]
+  colnames(data) = C
+  
+  # Basic plot to update
+  p = ggparcoord(data, columns = 1:(Lims[2] - Lims[1] + 1), groupColumn = dim(data)[2], 
+                 scale = "globalminmax", shadeBox = NULL) + coord_cartesian(ylim = c(0,1))
+  
+  ## Using the colours that we like 
+  p <- p + scale_colour_brewer(palette = "YlGnBu")
+  
+  # Start with a basic theme
+  p <- p + theme_minimal()
+  
+  # Decrease amount of margin around x, y values
+  p <- p + scale_y_continuous(expand = c(0.02, 0.02))
+  p <- p + scale_x_discrete(expand = c(0.02, 0.02))
+  
+  # Remove axis ticks and labels
+  p <- p + theme(axis.ticks = element_blank())
+  p <- p + theme(axis.title = element_blank())
+  p <- p + theme(axis.text.y = element_blank())
+  
+  # Clear axis lines
+  p <- p + theme(panel.grid.minor = element_blank())
+  p <- p + theme(panel.grid.major.y = element_blank())
+  
+  # Removing the legend
+  p <- p + theme(legend.position="none")
+  
+  # Adding a border
+  p <- p + theme(panel.border = element_rect(colour = "darkgrey", 
+                                             fill=NA, size=0.5))
+  
+  ## Updating N for the number of columns in the zoom graph
+  ## So that the labels are right and don't force the graph
+  ## to make extra columns
+  N = (Lims[2] - Lims[1] + 1)
+  
+  # Calculate label positions for each veritcal bar
+  lab_x <- rep(1:(N), times = 2) # 2 times, 1 for min 1 for max
+  lab_y <- rep(c(0, 1), each = (N))
+  
+  # min and max values from original dataset
+  lab_z <- c(rep(0, N), upper[Lims[1]:Lims[2]])
   
   # Convert to character for use as labels
   lab_z <- as.character(lab_z)
@@ -221,7 +298,7 @@ ui <- fluidPage(
                          helpText("In the next tab we will input more information to build
                                   the graph."),
                          actionButton("Tab2", "Go on to the next tab")
-                         )),
+                       )),
               
               tabPanel("General Inputs",
                        value = "panel2",
@@ -246,7 +323,7 @@ ui <- fluidPage(
                                       choices = list("Treatment" = 2, "Control" = 1), 
                                       selected = 2),
                          actionButton("Tab3", "Go on to the next tab")
-                         )),
+                       )),
               
               tabPanel("Matching Variables Info",
                        value = "panel3",
@@ -268,7 +345,7 @@ ui <- fluidPage(
                          bookmarkButton(id = "bookmark1", width = "150px"),
                          
                          uiOutput("VarsInput")
-                         )),
+                       )),
               
               tabPanel("Summaries",
                        sidebarPanel(
@@ -279,7 +356,7 @@ ui <- fluidPage(
                          
                          helpText("This is the number of pairs used to make the graph."),
                          verbatimTextOutput("NM")
-                         )),
+                       )),
               
               tabPanel("Download",
                        sidebarPanel(
@@ -292,7 +369,7 @@ ui <- fluidPage(
                          radioButtons('format', 'Document format', c('PDF', 'Word'),
                                       inline = TRUE),
                          downloadButton('downloadReport',"Share matching graph")
-                         )),
+                       )),
               
               tabPanel("Matches",
                        sidebarPanel(
@@ -321,7 +398,7 @@ ui <- fluidPage(
                            condition = "input.labs == true",
                            verbatimTextOutput("MAL")
                          )
-                         )),
+                       )),
               
               tabPanel("Randomization",
                        sidebarPanel(
@@ -365,7 +442,7 @@ ui <- fluidPage(
                          br(),
                          dataTableOutput("Rands")
                          
-                         )),
+                       )),
               
               tabPanel("Download Final Plot",
                        sidebarPanel(
@@ -380,14 +457,16 @@ ui <- fluidPage(
                                   for this to work."),
                          downloadButton('downloadReport1',"Final randomization graph"),
                          uiOutput("RanInput")
-                         )),
+                       )),
               
               # Show a plot of the generated distribution
               mainPanel(
-                plotOutput("plot", click = "plot_dblclick")
+                plotOutput("zoom", height = "350px", click = "plot_dblclick"),
+                plotOutput("plot", height = "150px", 
+                           brush =  brushOpts(id = "brush", direction = "x"))
               )
-              )
-                       )
+  )
+)
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session){
@@ -427,7 +506,6 @@ server <- function(input, output, session){
   
   output$VarsInput <- renderUI({
     C = sapply(1:K(), function(i){paste0("cols",i)})
-    L = sapply(1:K(), function(i){paste0("label",i)})
     W = sapply(1:K(), function(i){paste0("weight",i)})
     S = sapply(1:K(), function(i){paste0("slider",i)})
     
@@ -440,8 +518,6 @@ server <- function(input, output, session){
       output[[i]][[3]] = helpText("Input information for a variable below:")
       output[[i]][[4]] = selectInput(C[i], "Variable to randomize:",
                                      M()[[2]], selected = M()[[2]][i])
-      output[[i]][[5]] = textInput(L[i], "Label for variable:", 
-                                   value = paste0("Lab", i))
       output[[i]][[6]] = textInput(W[i], "Weight for variable:",
                                    value = "1")
       output[[i]][[7]] = textInput(S[i], "Max for variable",
@@ -531,7 +607,6 @@ server <- function(input, output, session){
   
   Dat <- eventReactive(input$go, {
     C = sapply(1:K(), function(i){input[[paste0("cols",i)]]})
-    L = sapply(1:K(), function(i){input[[paste0("label",i)]]})
     W = sapply(1:K(), function(i){input[[paste0("weight",i)]]})
     S = sapply(1:K(), function(i){input[[paste0("slider",i)]]})
     
@@ -540,7 +615,7 @@ server <- function(input, output, session){
       V[[i]] = list()
       V[[i]][[1]] = C[i]
       V[[i]][[2]] = as.numeric(W[i])
-      V[[i]][[3]] = L[i]
+      V[[i]][[3]] = C[i] 
       V[[i]][[4]] = 0
       V[[i]][[5]] = as.numeric(S[i])
     }
@@ -559,8 +634,9 @@ server <- function(input, output, session){
                       selected = "panel3")
   })
   
-  ## The first column is selected upon initiation
-  C <- reactiveVal(1)       # rv <- reactiveValues(value = 0)
+  ## The first column is selected upon initiation for 
+  ## color of graph.
+  C <- reactiveVal(1)       
   
   ## Updating to the column of choice.
   observeEvent(input$plot_dblclick$x, {
@@ -570,8 +646,14 @@ server <- function(input, output, session){
   
   ## Making the plot by ordering it and then drawing the plot.
   output$plot <- renderPlot({
-    E = make.order(column = C(), data = Dat()[[3]])
     make.plot(data = E, I = Dat()[[2]])
+  })
+  
+  output$zoom <- renderPlot({
+    if (is.null(input$brush)) return()
+    E = make.order(column = C(), data = Dat()[[3]])
+    make.zoom.plot(data = E, I = Dat()[[2]], Min = input$brush$xmin, 
+                   Max = input$brush$xmax)
   })
   
   ## Summary of data
