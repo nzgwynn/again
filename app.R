@@ -23,6 +23,9 @@ library(plotrix)
 library(readxl)
 library(shiny)
 
+## Used to add the context map 
+library(shinyjs)
+
 ## Used to get the right colors in
 library("RColorBrewer")
 M = 9 # Max number of colors allowed in pallete
@@ -39,13 +42,33 @@ make.order = function(column, data){
   data = cbind(data, G)
 }
 
-## Because of the way that shiny returns values for the 
+## Because of the way that shiny returns values from interactive graphs
 ## zoom function we have to fidget with the numbers
 ## a bit to get to the appropriate 
 Round <- function(Min, Max, N){
-  SEQ = c(0, (1:N)*(1/(N-1)))
+  ## The x values returned from the graph
+  SEQ = c(0, (1:(N))*(1/(N-1)))
+  
   ## returns min and max
   c(max(which(SEQ<=Min)), min(which(SEQ>=Max)))
+}
+
+## This is used for the zoom graph
+## So that when we double click on the 
+## Zoom graph the one we click on is 
+## the one where the colours come from.
+Round1 <- function(Max, Min, DC, K){
+  ## Variables in the plot 
+  A = Round(Min, Max, K)
+  
+  ## Finds the placement of the variables on the zoom plot
+  SEQ = (A[1]:A[2] - A[1])*1/(A[2]-A[1])
+  
+  ## Chooses the one closest to the double click
+  B = abs(DC - SEQ)
+  
+  ## Outputs the min value transformed to the original plot, not the zoom plot
+  which(B == min(B)) + A[1] - 1
 }
 
 make.plot = function(data, I){
@@ -464,6 +487,7 @@ ui <- fluidPage(
                 plotOutput("zoom", height = "350px", click = "plot_dblclick"),
                 plotOutput("plot", height = "150px", 
                            brush =  brushOpts(id = "brush", direction = "x"))
+                
               )
   )
 )
@@ -640,18 +664,33 @@ server <- function(input, output, session){
   
   ## Updating to the column of choice.
   observeEvent(input$plot_dblclick$x, {
-    newC <- round((K() - 1)*input$plot_dblclick$x + 1)
+
+    ## Converting the double click output to the scale of No. of Variables
+    ## Unless the double click hasn't happened yet
+    newC = ifelse(is.null(input$plot_dblclick$x), 1,
+                     Round1(DC = input$plot_dblclick$x, K = K(), Min = input$brush$xmin,
+                  Max = input$brush$xmax))
+    ## Exporting to local environment
     C(newC)
   })
   
   ## Making the plot by ordering it and then drawing the plot.
   output$plot <- renderPlot({
+    ## Ordering it so the color comes out right
+    E = make.order(column = C(), data = Dat()[[3]])
+    
+    ## Plotting
     make.plot(data = E, I = Dat()[[2]])
   })
   
   output$zoom <- renderPlot({
+    ## If there's no brush done don't return a thing
     if (is.null(input$brush)) return()
+
+    ## If there is color it right
     E = make.order(column = C(), data = Dat()[[3]])
+    
+    ## Now zoom it baby!
     make.zoom.plot(data = E, I = Dat()[[2]], Min = input$brush$xmin, 
                    Max = input$brush$xmax)
   })
