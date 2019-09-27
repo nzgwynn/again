@@ -1,12 +1,8 @@
-## This app does not used the vertical histograms in the graph, it also does not 
-## save the number of vars that you input on the second page. In addition, the setwd()
-## thing to download a report is also not working, but reports download fine. 
-
 library(slam)
 library(designmatch)
 
 ## To deployApp
-## rsconnect::deployApp("/Users/gwynn/Documents/PostDocKleinmanLab/Bins/Shiny/Again")
+## rsconnect::deployApp("/Users/gwynn/Documents/PostDocKleinmanLab/Bins/Shiny/Again/Comp")
 
 ## The first is used for its parallelplot() function
 ## The second to add limits to all y-axises
@@ -478,8 +474,7 @@ ui <- fluidPage(
                          helpText("Use this button when finished inputting.
                                   A label must be choosen in the 'Matches' tab
                                   for this to work."),
-                         downloadButton('downloadReport1',"Final randomization graph"),
-                         uiOutput("RanInput")
+                         downloadButton('downloadReport1',"Final randomization graph")
                        )),
               
               # Show a plot of the generated distribution
@@ -554,10 +549,6 @@ server <- function(input, output, session){
   output$NVs <- renderUI({
     numericInput("NoVars","No. of matching variables",
                  value = 3, min = 2, max = length(M()[[2]]))
-  })
-  
-  R <- reactive({
-    sapply(1:j(), function(i){paste0("input$Rand",i)})
   })
   
   output$RanInput <- renderUI({
@@ -750,9 +741,10 @@ server <- function(input, output, session){
                      I2 = Dat()[[2]], # Labels and maxs for plot
                      I3 = Dat()[[3]], # Ks things to plot
                      j = j(), # even or odd no. of units
-                     R = sapply(R(), function(x) input[[x]]), # trt or ctrl
                      M = M()[[1]], # Orig data
-                     Dt = Dat()[[7]]) #Data for each 
+                     Dt = Dat()[[7]], # Data for each 
+                     Rs = Rs()) # Randomization
+      
       
       # Knit the document, passing in the `params` list, and eval it in a
       # child of the global environment (this isolates the code in the document
