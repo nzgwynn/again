@@ -260,7 +260,7 @@ make.Ks = function(M, vars, D, name, Plot, S, ToC){
       
       ## If nothing is leftover we don't need ToC
       Dt = data.frame(mymat[c(id_1, id_2),], Trt)
-    } else if (X == FALSE) {
+    } else {
       
       ## If anything is, then we do
       ## ToC is 2 for trt and 1 for control, added at end
@@ -284,7 +284,7 @@ make.Ks = function(M, vars, D, name, Plot, S, ToC){
   P[[2]] = I ## matching things
   P[[3]] = as.data.frame(Ks) ## means after randomization 
   P[[4]] = Ms ## The row numbers of the matches are in here
-  P[[5]] = ifelse(X,NA,LO) # leftover, if there is one.
+  P[[5]] = LO # leftover
   P[[6]] = X # this is TRUE if there are any leftover
   P[[7]] = Dt 
   
@@ -479,8 +479,8 @@ ui <- fluidPage(
               
               # Show a plot of the generated distribution
               mainPanel(
-                plotOutput("zoom", height = "35px", click = "plot_dblclick"),
-                plotOutput("plot", height = "350px", 
+                plotOutput("zoom", height = "350px", click = "plot_dblclick"),
+                plotOutput("plot", height = "150px", 
                            brush =  brushOpts(id = "brush", direction = "x"))
                 
               )
@@ -741,6 +741,7 @@ server <- function(input, output, session){
                      I2 = Dat()[[2]], # Labels and maxs for plot
                      I3 = Dat()[[3]], # Ks things to plot
                      j = j(), # even or odd no. of units
+                     #R = sapply(R(), function(x) input[[x]]), # trt or ctrl
                      M = M()[[1]], # Orig data
                      Dt = Dat()[[7]], # Data for each 
                      Rs = Rs()) # Randomization
