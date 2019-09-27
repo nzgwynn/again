@@ -741,7 +741,6 @@ server <- function(input, output, session){
                      I2 = Dat()[[2]], # Labels and maxs for plot
                      I3 = Dat()[[3]], # Ks things to plot
                      j = j(), # even or odd no. of units
-                     #R = sapply(R(), function(x) input[[x]]), # trt or ctrl
                      M = M()[[1]], # Orig data
                      Dt = Dat()[[7]], # Data for each 
                      Rs = Rs()) # Randomization
