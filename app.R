@@ -238,7 +238,11 @@ make.Ks = function(M, vars, D, name, Plot, S, ToC){
   ## If there are any leftovers they get assigned where
   ## the user wants them assigned
   X = dim(D)[1] %% 2 == 0
-  if(X == FALSE) {LO = sum(1:dim(D)[1]) - sum(id_1, id_2)}
+  if(X == FALSE){
+        LO = sum(1:dim(D)[1]) - sum(id_1, id_2)
+    }else{
+        LO = NA
+    }
   
   ## Will be used in the loop below - a place to put Ks, 
   ## filled below, then graphed after using parallel coordinate plot
