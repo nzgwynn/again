@@ -648,6 +648,10 @@ server <- function(input, output, session){
                       selected = "panel2")
   })
   
+  even_or_odd <- eventReactive(input$go, {
+        ifelse(dim(M()[[1]])[1]%%2 == 1, FALSE, TRUE)
+    })
+  
   observeEvent(input$Tab3, {
     updateTabsetPanel(session, "inTabset",
                       selected = "panel3")
@@ -744,7 +748,7 @@ server <- function(input, output, session){
       params <- list(I1 = Dat()[[1]], # name
                      I2 = Dat()[[2]], # Labels and maxs for plot
                      I3 = Dat()[[3]], # Ks things to plot
-                     j = j(), # even or odd no. of units
+                     j = even_or_odd(), # even or odd no. of units
                      M = M()[[1]], # Orig data
                      Dt = Dat()[[7]], # Data for each 
                      Rs = Rs()) # Randomization
